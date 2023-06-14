@@ -24,13 +24,13 @@ public:
 
     virtual GpDbQueryRes::SP    Execute                 (const GpDbQuery&   aQuery,
                                                          const size_t       aMinResultRowsCount);
-    virtual GpDbQueryRes::SP    Execute                 (std::string_view   aSQL,
+    virtual GpDbQueryRes::SP    Execute                 (std::u8string_view aSQL,
                                                          const size_t       aMinResultRowsCount);
 
 private:
     GpDbManager&                Manager                 (void) {return iManager;}
     GpDbConnection&             ConnectionAcquire       (void);
-    void                        ConnectionRelease       (void) noexcept;
+    void                        ConnectionRelease       (void);
 
 private:
     GpDbManager&                iManager;

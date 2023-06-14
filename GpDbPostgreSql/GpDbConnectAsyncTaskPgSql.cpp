@@ -1,10 +1,11 @@
 #include "GpDbConnectAsyncTaskPgSql.hpp"
+#include "../../GpNetwork/GpNetworkCore/IO/Sockets/GpSocketTCP.hpp"
 
 namespace GPlatform {
 
 GpDbConnectAsyncTaskPgSql::GpDbConnectAsyncTaskPgSql
 (
-    std::string         aName,
+    std::u8string       aName,
     GpIOEventPoller::SP aIOPoller,
     PGconn*             aPGconn
 ):
@@ -39,12 +40,16 @@ GpTaskDoRes GpDbConnectAsyncTaskPgSql::OnSockReadyToWrite (GpSocket& /*aSocket*/
 
 void    GpDbConnectAsyncTaskPgSql::OnSockClosed (GpSocket& /*aSocket*/)
 {
-    CompletePromise(MakeSP<GpItcResult>(GpDbConnectionStatus(GpDbConnectionStatus::CLOSED)));
+    CompletePromise(MakeSP<CompleteItcResultT>(size_t(0)));
+    //TODO: reimplement
+    //CompletePromise(MakeSP<GpItcResult>(GpDbConnectionStatus(GpDbConnectionStatus::CLOSED)));
 }
 
 void    GpDbConnectAsyncTaskPgSql::OnSockError (GpSocket& /*aSocket*/)
 {
-    CompletePromise(MakeSP<GpItcResult>(GpDbConnectionStatus(GpDbConnectionStatus::CLOSED)));
+    CompletePromise(MakeSP<CompleteItcResultT>(size_t(0)));
+    //TODO: reimplement
+    //CompletePromise(MakeSP<GpItcResult>(GpDbConnectionStatus(GpDbConnectionStatus::CLOSED)));
 }
 
 GpTaskDoRes GpDbConnectAsyncTaskPgSql::ProcessRW (void)
@@ -53,11 +58,15 @@ GpTaskDoRes GpDbConnectAsyncTaskPgSql::ProcessRW (void)
 
     if (pgPoolRes == PGRES_POLLING_FAILED)
     {
-        CompletePromise(MakeSP<GpItcResult>(GpDbConnectionStatus(GpDbConnectionStatus::CLOSED)));
+        CompletePromise(MakeSP<CompleteItcResultT>(size_t(0)));
+        //TODO: reimplement
+        //CompletePromise(MakeSP<GpItcResult>(GpDbConnectionStatus(GpDbConnectionStatus::CLOSED)));
         return GpTaskDoRes::DONE;
     } else if (pgPoolRes == PGRES_POLLING_OK)
     {
-        CompletePromise(MakeSP<GpItcResult>(GpDbConnectionStatus(GpDbConnectionStatus::CONNECTED)));
+        CompletePromise(MakeSP<CompleteItcResultT>(size_t(0)));
+        //TODO: reimplement
+        //CompletePromise(MakeSP<GpItcResult>(GpDbConnectionStatus(GpDbConnectionStatus::CONNECTED)));
         return GpTaskDoRes::DONE;
     }
 

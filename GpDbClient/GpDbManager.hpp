@@ -3,6 +3,8 @@
 #include "GpDbConnectionMode.hpp"
 #include "Query/GpDbQueryPrepared.hpp"
 #include "Query/GpDbQuery.hpp"
+#include "../../GpCore2/GpUtils/Types/Containers/GpElementsPool.hpp"
+#include "../../GpCore2/GpTasks/ITC/GpItcPromise.hpp"
 
 namespace GPlatform {
 
@@ -15,11 +17,15 @@ class GP_DB_CLIENT_API GpDbManager final: public GpElementsPool<GpSP<GpDbConnect
 public:
     CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbManager)
     CLASS_DD(GpDbManager)
-    CLASS_TAG(THREAD_SAFE)
+    TAG_SET(THREAD_SAFE)
+
+    using ConnectItcPromiseT    = GpItcPromise<value_type>;
+    using ConnectItcFutureT     = GpItcFuture<value_type>;
+    using ConnectItcResultT     = GpItcResult<value_type>;
 
 public:
                                         GpDbManager             (GpSP<GpDbDriver>                   aDriver,
-                                                                 std::string                        aConnectionStr,
+                                                                 std::u8string                      aConnectionStr,
                                                                  const GpDbConnectionMode::EnumT    aMode) noexcept;
     virtual                             ~GpDbManager            (void) noexcept override final;
 
@@ -39,9 +45,9 @@ protected:
 
 private:
     GpSP<GpDbDriver>                    iDriver;
-    const std::string                   iConnStr;
+    const std::u8string                 iConnStr;
     const GpDbConnectionMode::EnumT     iMode;
-    std::queue<GpItcPromise>            iConnWaitPromises;
+    std::queue<ConnectItcPromiseT>      iConnWaitPromises;
 };
 
 }//GPlatform

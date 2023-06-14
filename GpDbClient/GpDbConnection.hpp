@@ -6,6 +6,7 @@
 #include "Query/GpDbQuery.hpp"
 #include "Query/GpDbQueryRes.hpp"
 #include "Query/GpDbQueryPrepared.hpp"
+#include "../../GpNetwork/GpNetworkCore/IO/Events/GpIOEventPoller.hpp"
 
 namespace GPlatform {
 
@@ -44,7 +45,7 @@ public:
                                                              const GpDbQueryPrepared&   aQueryPrepared,
                                                              const size_t               aMinResultRowsCount) = 0;
 
-    virtual std::string             StrEscape               (std::string_view aStr) const = 0;
+    virtual std::u8string           StrEscape               (std::u8string_view aStr) const = 0;
 
     virtual bool                    Validate                (void) const noexcept = 0;
 
@@ -69,8 +70,8 @@ GpDbConnection::GpDbConnection
     const ModeTE        aMode,
     GpIOEventPoller::SP aEventPoller
 ) noexcept:
-iStatus(aStatus),
-iMode(aMode),
+iStatus     (aStatus),
+iMode       (aMode),
 iEventPoller(std::move(aEventPoller))
 {
 }
@@ -81,7 +82,7 @@ GpDbConnection::GpDbConnection
     const ModeTE    aMode
 ) noexcept:
 iStatus(aStatus),
-iMode(aMode)
+iMode  (aMode)
 {
 }
 

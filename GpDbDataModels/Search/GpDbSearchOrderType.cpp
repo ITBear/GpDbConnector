@@ -2,6 +2,6 @@
 
 namespace GPlatform {
 
-GP_ENUM_IMPL(GpDbSearchOrderType);
+GP_ENUM_IMPL(GpDbSearchOrderType)
 
 }//namespace GPlatform

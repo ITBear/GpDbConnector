@@ -2,7 +2,7 @@
 
 namespace GPlatform {
 
-GpDbQueryMapperCache    GpDbQueryMapperCache::sMapperCache;
+GpDbQueryMapperCache    GpDbQueryMapperCache::sInstance;
 
 GpDbQueryMapperCache::GpDbQueryMapperCache (void) noexcept
 {
@@ -18,7 +18,7 @@ const GpDbQueryMapperCacheValue&    GpDbQueryMapperCache::Get
     GenFnT          aGenFn
 )
 {
-    GpDbQueryMapperCacheValue::CSP& res = iCache.FindOrRegister
+    GpDbQueryMapperCacheValue::CSP& res = iCache.GetOrSet
     (
         aUID,
         aGenFn

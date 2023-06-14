@@ -9,7 +9,7 @@ GpDbDriverPgSql::~GpDbDriverPgSql (void) noexcept
 {
 }
 
-GpDbConnection::SP  GpDbDriverPgSql::NewConnection (std::string_view aConnStr) const
+GpDbConnection::SP  GpDbDriverPgSql::NewConnection (std::u8string_view aConnStr) const
 {
     GpDbConnection::SP connection;
 
@@ -25,7 +25,7 @@ GpDbConnection::SP  GpDbDriverPgSql::NewConnection (std::string_view aConnStr) c
         } break;
         default:
         {
-            THROW_GP("Unknown connection mode"_sv);
+            THROW_GP(u8"Unknown connection mode"_sv);
         }
     }
 
@@ -40,24 +40,24 @@ GpDbQueryPrepared::CSP  GpDbDriverPgSql::Prepare (const GpDbQuery& aQuery) const
     return queryPrepared;
 }
 
-PGconn* GpDbDriverPgSql::ConnectSync (std::string_view aConnStr) const
+PGconn* GpDbDriverPgSql::ConnectSync (std::u8string_view aConnStr) const
 {
-    const std::string connStr(aConnStr);
-    PGconn* pgConn = PQconnectdb(connStr.data());
+    const std::u8string connStr(aConnStr);
+    PGconn* pgConn = PQconnectdb(GpUTF::S_UTF8_To_STR(connStr).data());
 
     THROW_COND_GP(pgConn != nullptr, "PQconnectdb return null"_sv);
 
     if (PQstatus(pgConn) == CONNECTION_BAD)
     {
-        const std::string errMsg = PQerrorMessage(pgConn);
+        const std::u8string errMsg(GpUTF::S_STR_To_UTF8(PQerrorMessage(pgConn)));
         PQfinish(pgConn);
-        THROW_GP("PQconnectdb return: "_sv + errMsg);
+        THROW_GP(u8"PQconnectdb return: "_sv + errMsg);
     }
 
     return pgConn;
 }
 
-PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view aConnStr) const
+PGconn* GpDbDriverPgSql::ConnectAsync (std::u8string_view /*aConnStr*/) const
 {
     //https://gist.github.com/ictlyh/6a09e8b3847199c15986d476478072e0
 
@@ -67,7 +67,11 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view aConnStr) const
         "Async connection available only from inside fiber task"_sv
     );
 
-    const std::string connStr(aConnStr);
+    //TODO: reimplement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    /*
+    const std::u8string connStr(aConnStr);
 
     //Allocate
     PGconn* pgConn = PQconnectStart(connStr.data());
@@ -87,7 +91,7 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view aConnStr) const
     (
         PQstatus(pgConn) != CONNECTION_BAD,
         GpDbExceptionCode::CONNECTION_ERROR,
-        [&](){return "Failed to connect to DB: "_sv + std::string_view(PQerrorMessage(pgConn));}
+        [&](){return u8"Failed to connect to DB: "_sv + std::u8string_view(PQerrorMessage(pgConn));}
     );
 
     //Set non blocking
@@ -96,7 +100,7 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view aConnStr) const
     //Create connection task and wait
     GpDbConnectAsyncTaskPgSql::SP connectionTask = MakeSP<GpDbConnectAsyncTaskPgSql>
     (
-        Name() + ": async connection to DB"_sv,
+        Name() + u8": async connection to DB"_sv,
         EventPoller(),
         pgConn
     );
@@ -111,19 +115,29 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view aConnStr) const
     future.Vn().Wait();
     GpItcResult::SP futureRes = future.Vn().Result();
 
-    GpDbConnectionStatus connStatus = GpItcResult::SExtract<GpDbConnectionStatus, GpDbConnectionStatus>
+    GpDbConnectionStatus connStatus;
+
+    GpItcResult::SExtract<GpDbConnectionStatus>
     (
         futureRes,
-        [](GpDbConnectionStatus&& aStatus)
+        [&](GpDbConnectionStatus&& aStatus)
         {
-            return std::move(aStatus);
+            connStatus = std::move(aStatus);
         },
-        [&](std::string_view aError) -> GpDbConnectionStatus
+        [&](std::u8string_view aError) -> GpDbConnectionStatus
         {
             THROW_DB
             (
                 GpDbExceptionCode::QUERY_ERROR,
-                "Failed to connect to DB: "_sv + aError + "\nPG error message: " + std::string_view(PQerrorMessage(pgConn))
+                "Failed to connect to DB: "_sv + aError + u8"\nPG error message: " + std::u8string_view(PQerrorMessage(pgConn))
+            );
+        },
+        [&]()
+        {
+            THROW_DB
+            (
+                GpDbExceptionCode::QUERY_ERROR,
+                "Failed to connect to DB: result is null"_sv
             );
         }
     );
@@ -133,10 +147,11 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::string_view aConnStr) const
     (
         connStatus == GpDbConnectionStatus::CONNECTED,
         GpDbExceptionCode::CONNECTION_ERROR,
-        [&](){return "Failed to connect to DB: "_sv + std::string_view(PQerrorMessage(pgConn));}
+        [&](){return u8"Failed to connect to DB: "_sv + std::u8string_view(PQerrorMessage(pgConn));}
     );
 
     return pgConn;
+    */
 }
 
 }//namespace GPlatform

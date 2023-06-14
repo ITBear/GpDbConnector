@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GpDbPostgreSql_global.hpp"
+#include "../GpDbClient/GpDbDriverFactory.hpp"
+#include "../GpDbClient/GpDbDriver.hpp"
 
 namespace GPlatform {
 

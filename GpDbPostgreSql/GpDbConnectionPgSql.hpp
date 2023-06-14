@@ -2,6 +2,9 @@
 
 #include "GpDbPostgreSql_global.hpp"
 #include "GpDbQueryPreparedPgSql.hpp"
+#include "../../GpNetwork/GpNetworkCore/IO/Sockets/GpSocketAddr.hpp"
+#include "../GpDbClient/GpDbConnection.hpp"
+
 #include <postgresql/libpq-fe.h>
 
 namespace GPlatform {
@@ -18,7 +21,7 @@ public:
     CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbConnectionPgSql)
     CLASS_DD(GpDbConnectionPgSql)
 
-    using IsolationLevelNamesT = std::array<std::string_view, GpDbTransactionIsolation::SCount()>;
+    using IsolationLevelNamesT = std::array<std::u8string_view, GpDbTransactionIsolation::SCount()>;
 
 public:
     inline                      GpDbConnectionPgSql     (PGconn*                aPgConn,
@@ -35,7 +38,7 @@ public:
     virtual GpDbQueryRes::SP    Execute                 (const GpDbQuery&           aQuery,
                                                          const GpDbQueryPrepared&   aQueryPrepared,
                                                          const size_t               aMinResultRowsCount) override final;
-    virtual std::string         StrEscape               (std::string_view aStr) const override final;
+    virtual std::u8string       StrEscape               (std::u8string_view aStr) const override final;
     virtual bool                Validate                (void) const noexcept override final;
 
 protected:

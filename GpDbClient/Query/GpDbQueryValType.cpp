@@ -2,7 +2,7 @@
 
 namespace GPlatform {
 
-GP_ENUM_IMPL(GpDbQueryValType);
+GP_ENUM_IMPL(GpDbQueryValType)
 
 GpDbQueryValType::EnumT GpDbQueryValTypeUtils::SReflectToDbType (const GpReflectType::EnumT aType)
 {

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GpDbPostgreSql_global.hpp"
+#include "../../GpNetwork/GpNetworkCore/IO/Sockets/GpSocketTask.hpp"
+
 #include <postgresql/libpq-fe.h>
 
 namespace GPlatform {
@@ -12,7 +14,7 @@ public:
     CLASS_DD(GpDbConnectAsyncTaskPgSql)
 
 public:
-                            GpDbConnectAsyncTaskPgSql   (std::string            aName,
+                            GpDbConnectAsyncTaskPgSql   (std::u8string          aName,
                                                          GpIOEventPoller::SP    aIOPoller,
                                                          PGconn*                aPGconn);
     virtual                 ~GpDbConnectAsyncTaskPgSql  (void) noexcept override final;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GpDbQuery.hpp"
+#include "../../../GpCore2/GpUtils/Types/Containers/GpDictionary.hpp"
 
 namespace GPlatform {
 
@@ -15,7 +16,7 @@ public:
                                                         iTypes(std::move(aBuilder.TypesMove())),
                                                         iQuery(std::move(aBuilder.QueryStrMove())) {}
                             GpDbQueryMapperCacheValue   (GpDbQuery::TypeVecT&&  aTypes,
-                                                         std::string&&          aQuery) noexcept:
+                                                         std::u8string&&        aQuery) noexcept:
                                                         iTypes(std::move(aTypes)), iQuery(std::move(aQuery)) {}
                             GpDbQueryMapperCacheValue   (const GpDbQueryMapperCacheValue& aVal):
                                                         iTypes(aVal.iTypes), iQuery(aVal.iQuery) {}
@@ -30,7 +31,7 @@ public:
 
 public:
     GpDbQuery::TypeVecT     iTypes;
-    std::string             iQuery;
+    std::u8string           iQuery;
 };
 
 class GP_DB_CLIENT_API GpDbQueryMapperCache
@@ -40,14 +41,14 @@ public:
     CLASS_DD(GpDbQueryMapperCache)
 
 public:
-    using CacheT = GpElementsCatalog<GpUUID, GpDbQueryMapperCacheValue::CSP>;
+    using CacheT = GpDictionary<GpUUID, GpDbQueryMapperCacheValue::CSP>;
     using GenFnT = std::function<GpDbQueryMapperCacheValue::CSP()>;
 
 public:
                                         GpDbQueryMapperCache    (void) noexcept;
                                         ~GpDbQueryMapperCache   (void) noexcept;
 
-    static GpDbQueryMapperCache&        S                       (void) noexcept {return sMapperCache;}
+    static GpDbQueryMapperCache&        S                       (void) noexcept {return sInstance;}
 
     const GpDbQueryMapperCacheValue&    Get                     (const GpUUID&  aUID,
                                                                  GenFnT         aGenFn);
@@ -55,7 +56,7 @@ public:
 private:
     CacheT                              iCache;
 
-    static GpDbQueryMapperCache         sMapperCache;
+    static GpDbQueryMapperCache         sInstance;
 };
 
 }//GPlatform

@@ -1,7 +1,14 @@
 #pragma once
 
 #include "GpDbPostgreSql_global.hpp"
+#include "../../GpCore2/GpUtils/Types/Numerics/GpNumericTypes.hpp"
+#include "../../GpCore2/GpUtils/Types/UIDs/GpUUID.hpp"
+#include "../../GpCore2/GpUtils/Streams/GpByteWriter.hpp"
+#include "../../GpCore2/GpUtils/Streams/GpByteWriterStorageByteArray.hpp"
+#include "../../GpCore2/GpUtils/Macro/GpMacroClass.hpp"
+
 #include <postgresql/libpq-fe.h>
+#include <tuple>
 
 namespace GPlatform {
 
@@ -42,28 +49,28 @@ public:
     static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<s_int_64>& aArray);
     static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<double>& aArray);
     static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<float>& aArray);
-    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<std::string>& aArray);
+    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<std::u8string>& aArray);
     static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<GpUUID>& aArray);
     static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<GpBytesArray>& aArray);
     static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<bool>& aArray);
 
 private:
     template<typename T, bool IsN2H>
-    static std::tuple<Oid, GpBytesArray>    _SBuildPod  (const int              aOid,
-                                                         const int              aOidArray,
+    static std::tuple<Oid, GpBytesArray>    _SBuildPod  (const Oid              aOid,
+                                                         const Oid              aOidArray,
                                                          const std::vector<T>&  aArray);
 
     template<typename T>
-    static std::tuple<Oid, GpBytesArray>    _SBuildBytes(const int              aOid,
-                                                         const int              aOidArray,
+    static std::tuple<Oid, GpBytesArray>    _SBuildBytes(const Oid              aOid,
+                                                         const Oid              aOidArray,
                                                          const std::vector<T>&  aArray);
 };
 
 template<typename T, bool IsN2H>
 std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
 (
-    const int           aOid,
-    const int           aOidArray,
+    const Oid               aOid,
+    const Oid               aOidArray,
     const std::vector<T>&   aArray
 )
 {
@@ -78,7 +85,7 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
         PgArrayHeaderT header;
         header.dimensions       = BitOps::H2N<s_int_32>(1);
         header.dataOffset       = BitOps::H2N<s_int_32>(0);
-        header.oid              = BitOps::H2N<s_int_32>(aOid);
+        header.oid              = BitOps::H2N<Oid>(aOid);
         header.elementsCount    = BitOps::H2N<s_int_32>(NumOps::SConvert<s_int_32>(elementsCount));
         header.lowerBoundary    = BitOps::H2N<s_int_32>(1);
 
@@ -88,7 +95,7 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
         {
             if constexpr (IsN2H)
             {
-                e = BitOps::H2N(e);
+                e = BitOps::H2N<T>(e);
             }
 
             arrayDataWriter.Bytes(&e, sizeof(T));
@@ -103,8 +110,8 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
 template<typename T>
 std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildBytes
 (
-    const int           aOid,
-    const int           aOidArray,
+    const Oid               aOid,
+    const Oid               aOidArray,
     const std::vector<T>&   aArray
 )
 {
@@ -117,7 +124,7 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildBytes
         PgArrayHeaderT header;
         header.dimensions       = BitOps::H2N<s_int_32>(1);
         header.dataOffset       = BitOps::H2N<s_int_32>(0);
-        header.oid              = BitOps::H2N<s_int_32>(aOid);
+        header.oid              = BitOps::H2N<Oid>(aOid);
         header.elementsCount    = BitOps::H2N<s_int_32>(NumOps::SConvert<s_int_32>(aArray.size()));
         header.lowerBoundary    = BitOps::H2N<s_int_32>(1);
 

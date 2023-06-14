@@ -8,7 +8,7 @@ namespace GPlatform {
 GpDbManager::GpDbManager
 (
     GpSP<GpDbDriver>                aDriver,
-    std::string                     aConnectionStr,
+    std::u8string                   aConnectionStr,
     const GpDbConnectionMode::EnumT aMode
 ) noexcept:
 iDriver(std::move(aDriver)),
@@ -75,21 +75,25 @@ GpDbManager::ReleaseAct GpDbManager::OnRelease
     }
 
     //Notify waiting task
-    GpItcPromise promise(std::move(iConnWaitPromises.front()));
+    ConnectItcPromiseT promise(std::move(iConnWaitPromises.front()));
     iConnWaitPromises.pop();
 
-    promise.Complete(MakeSP<GpItcResult>(value_type(aValue)));
+    promise.Complete(MakeSP<ConnectItcResultT>(value_type(aValue)));
 
     return ReleaseAct::ACQUIRED;
 }
 
-std::optional<GpDbManager::value_type>  GpDbManager::OnAcquireNoElementsLeft (GpSpinlock& aLocked)
+std::optional<GpDbManager::value_type>  GpDbManager::OnAcquireNoElementsLeft (GpSpinlock& /*aLocked*/)
 {
     if (iMode == GpDbConnectionMode::SYNC)
     {
         return std::nullopt;
     }
 
+    //TODO: reimplement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    /*
     //Mode is ASYNC, wait for Release next connection
     GpItcPromise    promise;
     GpItcFuture::SP future  = promise.Future();
@@ -100,19 +104,26 @@ std::optional<GpDbManager::value_type>  GpDbManager::OnAcquireNoElementsLeft (Gp
     future.Vn().Wait();
     GpItcResult::SP futureRes = future.Vn().Result();
 
-    return GpItcResult::SExtract<value_type, std::optional<value_type>>
+    std::optional<value_type> res;
+
+    GpItcResult::SExtract<value_type>
     (
         futureRes,
-        [](value_type&& aValue) -> std::optional<value_type>
+        [&](value_type&& aValue)
         {
-            return std::move(aValue);
+            res = std::move(aValue);
         },
-        [](std::string_view aError) -> std::optional<value_type>
+        [](std::u8string_view aError)
         {
             LOG_ERROR(aError, GpTask::SCurrentUID());
-            return std::nullopt;
+        },
+        []()
+        {
         }
     );
+
+    return res;
+    */
 }
 
 }//namespace GPlatform

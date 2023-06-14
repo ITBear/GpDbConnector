@@ -12,27 +12,29 @@ class GP_DB_CLIENT_API GpDbManagerCatalog
 public:
     CLASS_REMOVE_CTRS_MOVE_COPY(GpDbManagerCatalog)
     CLASS_DD(GpDbManagerCatalog)
-    CLASS_TAG(THREAD_SAFE)
+    TAG_SET(THREAD_SAFE)
 
-    using ManagersT = GpElementsCatalog<std::string_view, GpSP<GpDbManager>>;
+    using ManagersT = GpDictionary<std::u8string, GpSP<GpDbManager>>;
 
 private:
-                                GpDbManagerCatalog      (void) noexcept;
-                                ~GpDbManagerCatalog     (void) noexcept;
+                                GpDbManagerCatalog  (void) noexcept;
+                                ~GpDbManagerCatalog (void) noexcept;
 
 public:
-    static GpDbManagerCatalog&  S                       (void) noexcept;
+    static GpDbManagerCatalog&  S                   (void) noexcept {return sInstance;}
 
-    void                        Clear                   (void);
-    void                        Init                    (const GpDbManagerCfgDesc::C::Vec::SP&  aCfgDescs,
-                                                         const GpDbDriverCatalog&               aDbDriverCatalog);
+    void                        Clear               (void);
+    void                        Init                (const GpDbManagerCfgDesc::C::Vec::SP&  aCfgDescs,
+                                                     const GpDbDriverCatalog&               aDbDriverCatalog);
 
-    void                        Add                     (GpSP<GpDbManager>                  aManager,
-                                                         const std::vector<std::string>&    aAliases);
-    GpDbManager&                Find                    (std::string_view aName);
+    void                        Add                 (GpSP<GpDbManager>                  aManager,
+                                                     const std::vector<std::u8string>&  aAliases);
+    GpDbManager&                Find                (std::u8string_view aName);
 
 private:
     ManagersT                   iManagers;
+
+    static GpDbManagerCatalog   sInstance;
 };
 
 }//GPlatform

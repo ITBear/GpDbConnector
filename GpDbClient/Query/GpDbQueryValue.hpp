@@ -1,30 +1,41 @@
 #pragma once
 
 #include "../GpDbClient_global.hpp"
+#include "../../../GpCore2/GpUtils/Types/Containers/GpContainersT.hpp"
+#include "../../../GpCore2/GpUtils/Types/Containers/GpBytesArray.hpp"
+#include "../../../GpCore2/GpUtils/Types/Containers/GpTypeShell.hpp"
 
 namespace GPlatform {
 
+class GpDbQueryValueJson_TypeShell;
+class GpDbQueryValueJsonVec1D_TypeShell;
+
+using GpDbQueryValueJson        = GpTypeShell<std::u8string,                GpDbQueryValueJson_TypeShell>;
+using GpDbQueryValueJsonVec1D   = GpTypeShell<std::vector<std::u8string>,   GpDbQueryValueJsonVec1D_TypeShell>;
+
 using GpDbQueryValue = std::variant
 <
-    s_int_16,                   //GpDbQueryValType::S_INT_16
-    std::vector<s_int_16>,      //GpDbQueryValType::S_INT_16_ARRAY_1D
-    s_int_32,                   //GpDbQueryValType::S_INT_32
-    std::vector<s_int_32>,      //GpDbQueryValType::S_INT_32_ARRAY_1D
-    s_int_64,                   //GpDbQueryValType::S_INT_64
-    std::vector<s_int_64>,      //GpDbQueryValType::S_INT_64_ARRAY_1D
-    double,                     //GpDbQueryValType::DOUBLE
-    std::vector<double>,        //GpDbQueryValType::DOUBLE_ARRAY_1D
-    float,                      //GpDbQueryValType::FLOAT
-    std::vector<float>,         //GpDbQueryValType::FLOAT_ARRAY_1D
-    std::string,                //GpDbQueryValType::STRING, GpDbQueryValType::JSON
-    std::vector<std::string>,   //GpDbQueryValType::STRING_ARRAY_1D, GpDbQueryValType::JSON_ARRAY_1D
-    GpUUID,                     //GpDbQueryValType::UUID
-    std::vector<GpUUID>,        //GpDbQueryValType::UUID_ARRAY_1D
-    GpBytesArray,               //GpDbQueryValType::BLOB
-    std::vector<GpBytesArray>,  //GpDbQueryValType::BLOB_ARRAY_1D
-    bool,                       //GpDbQueryValType::BOOLEAN
-    std::vector<bool>,          //GpDbQueryValType::BOOLEAN_ARRAY_1D
-    std::nullopt_t              //GpDbQueryValType::NULL_VAL
+    s_int_16,                   //INT_16,
+    std::vector<s_int_16>,      //INT_16_ARRAY_1D,
+    s_int_32,                   //INT_32,
+    std::vector<s_int_32>,      //INT_32_ARRAY_1D,
+    s_int_64,                   //INT_64,
+    std::vector<s_int_64>,      //INT_64_ARRAY_1D,
+    double,                     //DOUBLE,
+    std::vector<double>,        //DOUBLE_ARRAY_1D,
+    float,                      //FLOAT,
+    std::vector<float>,         //FLOAT_ARRAY_1D,
+    std::u8string,              //STRING,
+    std::vector<std::u8string>, //STRING_ARRAY_1D,
+    GpDbQueryValueJson,         //JSON,
+    GpDbQueryValueJsonVec1D,    //JSON_ARRAY_1D,
+    GpUUID,                     //UUID,
+    std::vector<GpUUID>,        //UUID_ARRAY_1D,
+    GpBytesArray,               //BLOB,
+    std::vector<GpBytesArray>,  //BLOB_ARRAY_1D,
+    bool,                       //BOOLEAN,
+    std::vector<bool>,          //BOOLEAN_ARRAY_1D,
+    std::nullopt_t              //NULL_VAL
 >;
 
 }//namespace GPlatform

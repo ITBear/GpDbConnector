@@ -2,6 +2,8 @@
 
 #include "GpDbPostgreSql_global.hpp"
 #include "GpDbConnectionPgSql.hpp"
+#include "../../GpNetwork/GpNetworkCore/IO/Sockets/GpSocketTask.hpp"
+
 #include <postgresql/libpq-fe.h>
 
 namespace GPlatform {
@@ -13,11 +15,11 @@ public:
     CLASS_DD(GpDbQueryAsyncTaskPgSql)
 
 public:
-                                GpDbQueryAsyncTaskPgSql     (std::string                aName,
+                                GpDbQueryAsyncTaskPgSql     (std::u8string              aName,
                                                              GpDbConnectionPgSql&       aDbConn,
                                                              const GpDbQuery&           aQuery,
-                                                             const GpDbQueryPrepared&   aQueryPrepared,
-                                                             const size_t               aMinResultRowsCount);
+                                                             const GpDbQueryPrepared&   aQueryPrepared
+                                                             /*const size_t             aMinResultRowsCount*/);
     virtual                     ~GpDbQueryAsyncTaskPgSql    (void) noexcept override final;
 
     virtual GpTaskDoRes         OnSockReadyToRead           (GpSocket& aSocket) override final;
@@ -34,7 +36,7 @@ private:
     GpDbConnectionPgSql&        iDbConn;
      const GpDbQuery&           iQuery;
     const GpDbQueryPrepared&    iQueryPrepared;
-    const size_t                iMinResultRowsCount;
+    //const size_t              iMinResultRowsCount = 0;
     bool                        iIsSend = false;
 };
 

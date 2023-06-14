@@ -1,4 +1,5 @@
 #include "GpDbQueryPreparedPgSql.hpp"
+#include "../../GpCore2/GpUtils/Streams/GpByteWriterStorageFixedSize.hpp"
 
 namespace GPlatform {
 
@@ -20,7 +21,7 @@ void    GpDbQueryPreparedPgSql::Prepare (const GpDbQuery& aQuery)
     THROW_COND_GP
     (
         typesCount == valuesCount,
-        [&aQuery](){return "valuesTypesCount != valuesCount. SQL '"_sv + aQuery.QueryStr() + "'"_sv;}
+        [&aQuery](){return u8"valuesTypesCount != valuesCount. SQL '"_sv + aQuery.QueryStr() + u8"'"_sv;}
     );
 
     iOIDs.reserve(valuesCount);
@@ -137,21 +138,21 @@ void    GpDbQueryPreparedPgSql::FillData
         } break;
         case GpDbQueryValType::STRING:
         {
-            std::string_view value = aQuery.Str(aValueId);
+            std::u8string_view value = aQuery.Str(aValueId);
 
             iOIDs.emplace_back(0);
-            iValuesPtr.emplace_back(value.data());
+            iValuesPtr.emplace_back(GpUTF::S_UTF8_To_STR(value).data());
             iValuesSize.emplace_back(NumOps::SConvert<int>(value.size()));
             iValuesIsBinary.emplace_back(1);
         } break;
         case GpDbQueryValType::STRING_ARRAY_1D:
         {
-            const std::vector<std::string>& value = aQuery.StrArray1D(aValueId);
+            const std::vector<std::u8string>& value = aQuery.StrArray1D(aValueId);
             _FillArray(value);
         } break;
         case GpDbQueryValType::JSON:
         {
-            std::string_view value = aQuery.Json(aValueId);
+            std::u8string_view value = aQuery.Json(aValueId);
 
             GpBytesArray jsonbData;
             jsonbData.resize(NumOps::SAdd(value.size(), size_t(1)));
@@ -161,8 +162,8 @@ void    GpDbQueryPreparedPgSql::FillData
             writer.UInt8(1);//Jsonb version
             writer.Bytes(value);
 
-            const std::byte*    dataPtr     = jsonbData.data();
-            const size_t        dataSize    = jsonbData.size();
+            const u_int_8*  dataPtr     = jsonbData.data();
+            const size_t    dataSize    = jsonbData.size();
 
             iBinaryDataVec.emplace_back(std::move(jsonbData));
 
@@ -174,7 +175,7 @@ void    GpDbQueryPreparedPgSql::FillData
         } break;
         case GpDbQueryValType::JSON_ARRAY_1D:
         {
-            const std::vector<std::string>& value = aQuery.JsonArray1D(aValueId);
+            const std::vector<std::u8string>& value = aQuery.JsonArray1D(aValueId);
             _FillArray(value);
         } break;
         case GpDbQueryValType::UUID:
@@ -240,7 +241,7 @@ void    GpDbQueryPreparedPgSql::FillData
         } break;
         default:
         {
-            THROW_GP("Unknown value type"_sv);
+            THROW_GP(u8"Unknown value type"_sv);
         };
     }
 }

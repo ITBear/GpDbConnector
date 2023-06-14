@@ -13,7 +13,22 @@ iManager(aManager)
 
 GpDbConnectionGuard::~GpDbConnectionGuard (void) noexcept
 {
-    ConnectionRelease();
+    try
+    {
+        ConnectionRelease();
+    } catch (const GpException& e)
+    {
+        GpStringUtils::SCerr("[GpDbConnectionGuard::~GpDbConnectionGuard]: exception: "_sv + e.what());
+    } catch (const std::exception& e)
+    {
+        GpStringUtils::SCerr("[GpDbConnectionGuard::~GpDbConnectionGuard]: exception: "_sv + e.what());
+    } catch (const boost::context::detail::forced_unwind&)
+    {
+        GpStringUtils::SCerr("[GpDbConnectionGuard::~GpDbConnectionGuard]: exception: boost::context::detail::forced_unwind"_sv);
+    } catch (...)
+    {
+        GpStringUtils::SCerr("[GpDbConnectionGuard::~GpDbConnectionGuard]: unknown exception"_sv);
+    }
 }
 
 void    GpDbConnectionGuard::CommitTransaction (void)
@@ -96,11 +111,11 @@ GpDbQueryRes::SP    GpDbConnectionGuard::Execute
 
 GpDbQueryRes::SP    GpDbConnectionGuard::Execute
 (
-    std::string_view    aSQL,
+    std::u8string_view  aSQL,
     const size_t        aMinResultRowsCount
 )
 {
-    GpDbQuery query((std::string(aSQL)));
+    GpDbQuery query(aSQL);
     return Execute(query, aMinResultRowsCount);
 }
 
@@ -123,11 +138,11 @@ GpDbConnection& GpDbConnectionGuard::ConnectionAcquire (void)
     return iConnection.Vn();
 }
 
-void    GpDbConnectionGuard::ConnectionRelease (void) noexcept
+void    GpDbConnectionGuard::ConnectionRelease (void)
 {
     if (iConnection.IsNULL())
     {
-        return;
+        return;     
     }
 
     GpDbConnection& conn = iConnection.Vn();
@@ -140,6 +155,10 @@ void    GpDbConnectionGuard::ConnectionRelease (void) noexcept
         } catch (const std::exception& e)
         {
             LOG_EXCEPTION(e, GpTask::SCurrentUID());
+        } catch (const boost::context::detail::forced_unwind&)
+        {
+            iConnection.Clear();
+            throw;
         } catch (...)
         {
             LOG_EXCEPTION(GpTask::SCurrentUID());

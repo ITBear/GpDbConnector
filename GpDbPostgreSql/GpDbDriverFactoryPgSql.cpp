@@ -4,7 +4,7 @@
 namespace GPlatform {
 
 GpDbDriverFactoryPgSql::GpDbDriverFactoryPgSql (void):
-GpDbDriverFactory("postgresql")
+GpDbDriverFactory(u8"postgresql")
 {
 }
 

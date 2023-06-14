@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GpDbConnectionMode.hpp"
+#include "../../GpNetwork/GpNetworkCore/IO/Events/GpIOEventPoller.hpp"
 
 namespace GPlatform {
 
@@ -13,21 +14,21 @@ public:
     CLASS_DD(GpDbDriverFactory)
 
 protected:
-    inline                          GpDbDriverFactory   (std::string aName) noexcept;
+    inline                          GpDbDriverFactory   (std::u8string aName) noexcept;
 
 public:
     virtual                         ~GpDbDriverFactory  (void) noexcept = default;
 
-    std::string_view                Name                (void) const noexcept {return  iName;}
+    std::u8string_view              Name                (void) const noexcept {return  iName;}
 
     virtual GpSP<GpDbDriver>        NewInstance         (const GpDbConnectionMode::EnumT    aMode,
                                                          GpIOEventPoller::SP                aEventPoller) const = 0;
 
 private:
-    const std::string               iName;
+    const std::u8string             iName;
 };
 
-GpDbDriverFactory::GpDbDriverFactory (std::string aName) noexcept:
+GpDbDriverFactory::GpDbDriverFactory (std::u8string aName) noexcept:
 iName(std::move(aName))
 {
 }

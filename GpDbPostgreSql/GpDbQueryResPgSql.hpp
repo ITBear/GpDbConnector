@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GpDbPostgreSql_global.hpp"
+#include "../GpDbClient/Query/GpDbQueryRes.hpp"
 #include <postgresql/libpq-fe.h>
 
 namespace GPlatform {
@@ -80,14 +81,14 @@ public:
                                                                  std::optional<std::vector<float>>  aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual std::string_view                GetStr              (const size_t                       aRowId,
+    virtual std::u8string_view              GetStr              (const size_t                       aRowId,
                                                                  const size_t                       aColId,
-                                                                 std::optional<std::string_view>    aOnNullValue) const override final;
+                                                                 std::optional<std::u8string_view>  aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual std::vector<std::string_view>   GetStrArray1D       (const size_t                               aRowId,
+    virtual std::vector<std::u8string_view> GetStrArray1D       (const size_t                               aRowId,
                                                                  const size_t                               aColId,
-                                                                 std::optional<std::vector<std::string>>    aOnNullValue) const override final;
+                                                                 std::optional<std::vector<std::u8string>>  aOnNullValue) const override final;
 
     [[nodiscard]]
     virtual GpSpanPtrCharRW                 GetStrRW            (const size_t                   aRowId,
@@ -100,14 +101,14 @@ public:
                                                                  std::optional<std::vector<GpSpanPtrCharRW>>    aOnNullValue) override final;
 
     [[nodiscard]]
-    virtual std::string_view                GetJson             (const size_t                       aRowId,
+    virtual std::u8string_view              GetJson             (const size_t                       aRowId,
                                                                  const size_t                       aColId,
-                                                                 std::optional<std::string_view>    aOnNullValue) const override final;
+                                                                 std::optional<std::u8string_view>  aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual std::vector<std::string_view>   GetJsonArray1D      (const size_t                               aRowId,
+    virtual std::vector<std::u8string_view> GetJsonArray1D      (const size_t                               aRowId,
                                                                  const size_t                               aColId,
-                                                                 std::optional<std::vector<std::string>>    aOnNullValue) const override final;
+                                                                 std::optional<std::vector<std::u8string>>  aOnNullValue) const override final;
 
     [[nodiscard]]
     virtual GpSpanPtrCharRW                 GetJsonRW           (const size_t                   aRowId,
@@ -151,7 +152,7 @@ public:
 
 private:
     void                                    ClearPgSql          (void) noexcept;
-    void                                    ThrowDbEx           (std::string_view   aMsg,
+    void                                    ThrowDbEx           (std::u8string_view aMsg,
                                                                  PGconn*            aPgConn);
 
 private:

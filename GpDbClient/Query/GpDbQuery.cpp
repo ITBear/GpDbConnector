@@ -14,11 +14,11 @@ GpDbQuery::~GpDbQuery (void) noexcept
 {
 }
 
-std::string GpDbQuery::ValuesToStr (void) const
+std::u8string   GpDbQuery::ValuesToStr (void) const
 {
     const size_t valuesCount = iValues.size();
 
-    std::string resStr;
+    std::u8string resStr;
     resStr.reserve(1024);
 
     for (size_t id = 0; id < valuesCount; ++id)
@@ -28,170 +28,175 @@ std::string GpDbQuery::ValuesToStr (void) const
 
         if (id > 0)
         {
-            resStr.append("\n"_sv);
+            resStr.append(u8"\n"_sv);
         }
 
-        resStr.append(" ["_sv + (id+1));
+        resStr.append(u8" ["_sv + (id+1));
 
         switch (valueType)
         {
             case GpDbQueryValType::INT_16:
             {
-                resStr.append(" (int16)]:     "_sv).append(StrOps::SToString(std::get<s_int_16>(value)));
+                resStr.append(u8" (int16)]:     "_sv).append(StrOps::SToString(std::get<s_int_16>(value)));
             } break;
             case GpDbQueryValType::INT_16_ARRAY_1D:
             {
-                std::string s = StrOps::SJoin<std::string>
+                std::u8string s = StrOps::SJoin<std::u8string>
                 (
                     std::get<std::vector<s_int_16>>(value),
-                    [](const auto& i)->std::string {return StrOps::SToString(*i);},
-                    ","_sv
+                    [](const auto& i)->std::u8string {return StrOps::SToString(*i);},
+                    u8","_sv
                 );
 
-                resStr.append(" (int16[])]:  ["_sv).append(s).append("]"_sv);
+                resStr.append(u8" (int16[])]:  ["_sv).append(s).append(u8"]"_sv);
             } break;
             case GpDbQueryValType::INT_32:
             {
-                resStr.append(" (int32)]:     "_sv).append(StrOps::SToString(std::get<s_int_32>(value)));
+                resStr.append(u8" (int32)]:     "_sv).append(StrOps::SToString(std::get<s_int_32>(value)));
             } break;
             case GpDbQueryValType::INT_32_ARRAY_1D:
             {
-                std::string s = StrOps::SJoin<std::string>
+                std::u8string s = StrOps::SJoin<std::u8string>
                 (
                     std::get<std::vector<s_int_32>>(value),
-                    [](const auto& i)->std::string {return StrOps::SToString(*i);},
-                    ","_sv
+                    [](const auto& i)->std::u8string {return StrOps::SToString(*i);},
+                    u8","_sv
                 );
 
-                resStr.append(" (int32[])]:  ["_sv).append(s).append("]"_sv);
+                resStr.append(u8" (int32[])]:  ["_sv).append(s).append(u8"]"_sv);
             } break;
             case GpDbQueryValType::INT_64:
             {
-                resStr.append(" (int64)]:     "_sv).append(StrOps::SToString(std::get<s_int_64>(value)));
+                resStr.append(u8" (int64)]:     "_sv).append(StrOps::SToString(std::get<s_int_64>(value)));
             } break;
             case GpDbQueryValType::INT_64_ARRAY_1D:
             {
-                std::string s = StrOps::SJoin<std::string>
+                std::u8string s = StrOps::SJoin<std::u8string>
                 (
                     std::get<std::vector<s_int_64>>(value),
-                    [](const auto& i)->std::string {return StrOps::SToString(*i);},
-                    ","_sv
+                    [](const auto& i)->std::u8string {return StrOps::SToString(*i);},
+                    u8","_sv
                 );
 
-                resStr.append(" (int64[])]:  ["_sv).append(s).append("]"_sv);
+                resStr.append(u8" (int64[])]:  ["_sv).append(s).append(u8"]"_sv);
             } break;
             case GpDbQueryValType::DOUBLE:
             {
-                resStr.append(" (double)]:    "_sv).append(StrOps::SToString(std::get<double>(value)));
+                resStr.append(u8" (double)]:    "_sv).append(StrOps::SToString(std::get<double>(value)));
             } break;
             case GpDbQueryValType::DOUBLE_ARRAY_1D:
             {
-                std::string s = StrOps::SJoin<std::string>
+                std::u8string s = StrOps::SJoin<std::u8string>
                 (
                     std::get<std::vector<double>>(value),
-                    [](const auto& i)->std::string {return StrOps::SToString(*i);},
-                    ","_sv
+                    [](const auto& i)->std::u8string {return StrOps::SToString(*i);},
+                    u8","_sv
                 );
 
-                resStr.append(" (double[])]: ["_sv).append(s).append("]"_sv);
+                resStr.append(u8" (double[])]: ["_sv).append(s).append(u8"]"_sv);
             } break;
             case GpDbQueryValType::FLOAT:
             {
-                resStr.append(" (float)]:     "_sv).append(StrOps::SToString(std::get<float>(value)));
+                resStr.append(u8" (float)]:     "_sv).append(StrOps::SToString(std::get<float>(value)));
             } break;
             case GpDbQueryValType::FLOAT_ARRAY_1D:
             {
-                std::string s = StrOps::SJoin<std::string>
+                std::u8string s = StrOps::SJoin<std::u8string>
                 (
                     std::get<std::vector<float>>(value),
-                    [](const auto& i)->std::string {return StrOps::SToString(*i);},
-                    ","_sv
+                    [](const auto& i)->std::u8string {return StrOps::SToString(*i);},
+                    u8","_sv
                 );
 
-                resStr.append(" (float[])]:  ["_sv).append(s).append("]"_sv);
+                resStr.append(u8" (float[])]:  ["_sv).append(s).append(u8"]"_sv);
             } break;
             case GpDbQueryValType::STRING:
             {
-                resStr.append(" (str)]:      '"_sv).append(std::get<std::string>(value)).append("'"_sv);
+                resStr.append(u8" (str)]:      '"_sv).append(std::get<std::u8string>(value)).append(u8"'"_sv);
             } break;
             case GpDbQueryValType::STRING_ARRAY_1D:
             {
-                std::string s = StrOps::SJoin<std::string>
+                std::u8string s = StrOps::SJoin<std::u8string>
                 (
-                    std::get<std::vector<std::string>>(value),
-                    [](const auto& i)->std::string {return "'"_sv + *i + "'"_sv;},
-                    ","_sv
+                    std::get<std::vector<std::u8string>>(value),
+                    [](const auto& i)->std::u8string {return u8"'"_sv + *i + u8"'"_sv;},
+                    u8","_sv
                 );
 
-                resStr.append(" (str[])]:    ["_sv).append(s).append("]"_sv);
+                resStr.append(u8" (str[])]:    ["_sv).append(s).append(u8"]"_sv);
             } break;
             case GpDbQueryValType::JSON:
             {
-                resStr.append(" (json)]:     '"_sv).append(std::get<std::string>(value)).append("'"_sv);
+                resStr.append(u8" (json)]:     '"_sv).append(std::get<std::u8string>(value)).append(u8"'"_sv);
             } break;
             case GpDbQueryValType::JSON_ARRAY_1D:
             {
-                std::string s = StrOps::SJoin<std::string_view>
+                std::u8string s = StrOps::SJoin<std::u8string_view>
                 (
-                    std::get<std::vector<std::string>>(value),
-                    [](const auto& i)->std::string_view {return "'"_sv + *i + "'"_sv;},
-                    ","_sv
+                    std::get<std::vector<std::u8string>>(value),
+                    [](const auto& i)->std::u8string {return u8"'"_sv + *i + u8"'"_sv;},
+                    u8","_sv
                 );
 
-                resStr.append(" (json[])]:   ["_sv).append(s).append("]"_sv);
+                resStr.append(u8" (json[])]:   ["_sv).append(s).append(u8"]"_sv);
             } break;
             case GpDbQueryValType::UUID:
             {
-                resStr.append(" (uuid)]:      "_sv).append(std::get<GpUUID>(value).ToString());
+                resStr.append(u8" (uuid)]:      "_sv).append(std::get<GpUUID>(value).ToString());
             } break;
             case GpDbQueryValType::UUID_ARRAY_1D:
             {
-                std::string s = StrOps::SJoin<std::string>
+                std::u8string s = StrOps::SJoin<std::u8string>
                 (
                     std::get<std::vector<GpUUID>>(value),
-                    [](const auto& i)->std::string {return i->ToString();},
-                    ","_sv
+                    [](const auto& i)->std::u8string {return i->ToString();},
+                    u8","_sv
                 );
 
-                resStr.append(" (uuid[])]:   ["_sv).append(s).append("]"_sv);
+                resStr.append(u8" (uuid[])]:   ["_sv).append(s).append(u8"]"_sv);
             } break;
             case GpDbQueryValType::BLOB:
             {
-                resStr.append(" (blob)]:      "_sv).append(StrOps::SFromBytesHex(std::get<GpBytesArray>(value)));
+                const GpBytesArray& blob = std::get<GpBytesArray>(value);
+                resStr.append(u8" (blob)]:      "_sv).append(StrOps::SFromBytesHex(GpSpanPtrByteR(blob.data(), blob.size())));
             } break;
             case GpDbQueryValType::BLOB_ARRAY_1D:
             {
-                std::string s = StrOps::SJoin<std::string>
+                std::u8string s = StrOps::SJoin<std::u8string>
                 (
                     std::get<std::vector<GpBytesArray>>(value),
-                    [](const auto& i)->std::string {return StrOps::SFromBytesHex(*i);},
-                    ","_sv
+                    [](const auto& i)->std::u8string
+                    {
+                        const auto& b = *i;
+                        return StrOps::SFromBytesHex(GpSpanPtrByteR(b.data(), b.size()));
+                    },
+                    u8","_sv
                 );
 
-                resStr.append(" (blob[])]:   ["_sv).append(s).append("]"_sv);
+                resStr.append(u8" (blob[])]:   ["_sv).append(s).append(u8"]"_sv);
             } break;
             case GpDbQueryValType::BOOLEAN:
             {
-                resStr.append(" (bool)]:      "_sv).append(std::get<bool>(value) ? "true"_sv : "false"_sv);
+                resStr.append(u8" (bool)]:      "_sv).append(std::get<bool>(value) ? u8"true"_sv : u8"false"_sv);
             } break;
             case GpDbQueryValType::BOOLEAN_ARRAY_1D:
             {
-                std::string s = StrOps::SJoin<std::string_view>
+                std::u8string s = StrOps::SJoin<std::u8string_view>
                 (
                     std::get<std::vector<bool>>(value),
-                    [](const auto& i)->std::string_view {return *i ? "true"_sv : "false"_sv;},
-                    ","_sv
+                    [](const auto& i)->std::u8string_view {return *i ? u8"true"_sv : u8"false"_sv;},
+                    u8","_sv
                 );
 
-                resStr.append(" (bool[])]:   ["_sv).append(s).append("]"_sv);
+                resStr.append(u8" (bool[])]:   ["_sv).append(s).append(u8"]"_sv);
             } break;
             case GpDbQueryValType::NULL_VAL:
             {
-                resStr.append(" (null val)]:  null"_sv);
+                resStr.append(u8" (null val)]:  null"_sv);
             } break;
             default:
             {
-                THROW_GP("Unknown type"_sv);
+                THROW_GP(u8"Unknown type"_sv);
             }
         }
     }
@@ -232,139 +237,199 @@ void    GpDbQuery::Reset (void)
 
 GpDbQuery&  GpDbQuery::NextInt16 (const s_int_16 aValue)
 {
-    _Next<GpDbQueryValType::INT_16>(aValue);
+    _Next<GpDbQueryValType::INT_16>(-1, aValue);
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextInt16Array1D (const std::vector<s_int_16>& aValue)
 {
-    _Next<GpDbQueryValType::INT_16_ARRAY_1D>(_MakeArray<s_int_16>(aValue));
+    _Next<GpDbQueryValType::INT_16_ARRAY_1D>(-1, _MakeArray<s_int_16>(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextInt16Array1D (std::vector<s_int_16>&& aValue)
 {
-    _Next<GpDbQueryValType::INT_16_ARRAY_1D>(std::move(aValue));
+    _Next<GpDbQueryValType::INT_16_ARRAY_1D>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQuery&  GpDbQuery::InsertInt16
+(
+    const size_t    aId,
+    const s_int_16  aValue
+)
+{
+    _Next<GpDbQueryValType::INT_32>(NumOps::SConvert<ssize_t>(aId), aValue);
+    return *this;
+}
+
+GpDbQuery&  GpDbQuery::InsertInt16Array1D
+(
+    const size_t                    aId,
+    const std::vector<s_int_16>&    aValue
+)
+{
+    _Next<GpDbQueryValType::INT_32_ARRAY_1D>(NumOps::SConvert<ssize_t>(aId), _MakeArray<s_int_32>(aValue));
+    return *this;
+}
+
+GpDbQuery&  GpDbQuery::InsertInt16Array1D
+(
+    const size_t            aId,
+    std::vector<s_int_16>&& aValue
+)
+{
+    _Next<GpDbQueryValType::INT_32_ARRAY_1D>(NumOps::SConvert<ssize_t>(aId), std::move(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextInt32 (const s_int_32 aValue)
 {
-    _Next<GpDbQueryValType::INT_32>(aValue);
+    _Next<GpDbQueryValType::INT_32>(-1, aValue);
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextInt32Array1D (const std::vector<s_int_32>& aValue)
 {
-    _Next<GpDbQueryValType::INT_32_ARRAY_1D>(_MakeArray<s_int_32>(aValue));
+    _Next<GpDbQueryValType::INT_32_ARRAY_1D>(-1, _MakeArray<s_int_32>(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextInt32Array1D (std::vector<s_int_32>&& aValue)
 {
-    _Next<GpDbQueryValType::INT_32_ARRAY_1D>(std::move(aValue));
+    _Next<GpDbQueryValType::INT_32_ARRAY_1D>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQuery&  GpDbQuery::InsertInt32
+(
+    const size_t    aId,
+    const s_int_32  aValue
+)
+{
+    _Next<GpDbQueryValType::INT_32>(NumOps::SConvert<ssize_t>(aId), aValue);
+    return *this;
+}
+
+GpDbQuery&  GpDbQuery::InsertInt32Array1D
+(
+    const size_t                    aId,
+    const std::vector<s_int_32>&    aValue
+)
+{
+    _Next<GpDbQueryValType::INT_32_ARRAY_1D>(NumOps::SConvert<ssize_t>(aId), _MakeArray<s_int_32>(aValue));
+    return *this;
+}
+
+GpDbQuery&  GpDbQuery::InsertInt32Array1D
+(
+    const size_t            aId,
+    std::vector<s_int_32>&& aValue
+)
+{
+    _Next<GpDbQueryValType::INT_32_ARRAY_1D>(NumOps::SConvert<ssize_t>(aId), std::move(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextInt64 (const s_int_64 aValue)
 {
-    _Next<GpDbQueryValType::INT_64>(aValue);
+    _Next<GpDbQueryValType::INT_64>(-1, aValue);
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextInt64Array1D (const std::vector<s_int_64>& aValue)
 {
-    _Next<GpDbQueryValType::INT_64_ARRAY_1D>(_MakeArray<s_int_64>(aValue));
+    _Next<GpDbQueryValType::INT_64_ARRAY_1D>(-1, _MakeArray<s_int_64>(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextInt64Array1D (std::vector<s_int_64>&& aValue)
 {
-    _Next<GpDbQueryValType::INT_64_ARRAY_1D>(std::move(aValue));
+    _Next<GpDbQueryValType::INT_64_ARRAY_1D>(-1, std::move(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextDouble (const double aValue)
 {
-    _Next<GpDbQueryValType::DOUBLE>(aValue);
+    _Next<GpDbQueryValType::DOUBLE>(-1, aValue);
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextDoubleArray1D (const std::vector<double>& aValue)
 {
-    _Next<GpDbQueryValType::DOUBLE_ARRAY_1D>(_MakeArray<double>(aValue));
+    _Next<GpDbQueryValType::DOUBLE_ARRAY_1D>(-1, _MakeArray<double>(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextDoubleArray1D (std::vector<double>&& aValue)
 {
-    _Next<GpDbQueryValType::DOUBLE_ARRAY_1D>(std::move(aValue));
+    _Next<GpDbQueryValType::DOUBLE_ARRAY_1D>(-1, std::move(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextFloat (const float aValue)
 {
-    _Next<GpDbQueryValType::FLOAT>(aValue);
+    _Next<GpDbQueryValType::FLOAT>(-1, aValue);
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextFloatArray1D (const std::vector<float>& aValue)
 {
-    _Next<GpDbQueryValType::FLOAT_ARRAY_1D>(_MakeArray<float>(aValue));
+    _Next<GpDbQueryValType::FLOAT_ARRAY_1D>(-1, _MakeArray<float>(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextFloatArray1D (std::vector<float>&& aValue)
 {
-    _Next<GpDbQueryValType::FLOAT_ARRAY_1D>(std::move(aValue));
+    _Next<GpDbQueryValType::FLOAT_ARRAY_1D>(-1, std::move(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::NextStr (std::string_view aValue)
+GpDbQuery&  GpDbQuery::NextStr (std::u8string_view aValue)
 {
-    _Next<GpDbQueryValType::STRING>(std::string(aValue));
+    _Next<GpDbQueryValType::STRING>(-1, std::u8string(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::NextStr (std::string&& aValue)
+GpDbQuery&  GpDbQuery::NextStr (std::u8string&& aValue)
 {
-    _Next<GpDbQueryValType::STRING>(std::move(aValue));
+    _Next<GpDbQueryValType::STRING>(-1, std::move(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::NextStrArray1D (const std::vector<std::string_view>& aValue)
+GpDbQuery&  GpDbQuery::NextStrArray1D (const std::vector<std::u8string_view>& aValue)
 {
-    _Next<GpDbQueryValType::STRING_ARRAY_1D>(_MakeArray<std::string>(aValue));
+    _Next<GpDbQueryValType::STRING_ARRAY_1D>(-1, _MakeArray<std::u8string>(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::NextStrArray1D (const std::vector<std::string>& aValue)
+GpDbQuery&  GpDbQuery::NextStrArray1D (const std::vector<std::u8string>& aValue)
 {
-    _Next<GpDbQueryValType::STRING_ARRAY_1D>(_MakeArray<std::string>(aValue));
+    _Next<GpDbQueryValType::STRING_ARRAY_1D>(-1, _MakeArray<std::u8string>(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::NextStrArray1D (std::vector<std::string>&& aValue)
+GpDbQuery&  GpDbQuery::NextStrArray1D (std::vector<std::u8string>&& aValue)
 {
-    _Next<GpDbQueryValType::STRING_ARRAY_1D>(std::move(aValue));
+    _Next<GpDbQueryValType::STRING_ARRAY_1D>(-1, std::move(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextStrArray1D (const GpEnumFlags& aValue)
 {
-    _Next<GpDbQueryValType::STRING_ARRAY_1D>(aValue.ToStringArray());
+    _Next<GpDbQueryValType::STRING_ARRAY_1D>(-1, aValue.ToStringArray());
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::NextJson (std::string_view aValue)
+GpDbQuery&  GpDbQuery::NextJson (std::u8string_view aValue)
 {
-    _Next<GpDbQueryValType::JSON>(std::string(aValue));
+    _Next<GpDbQueryValType::JSON>(-1, std::u8string(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::NextJson (std::string&& aValue)
+GpDbQuery&  GpDbQuery::NextJson (std::u8string&& aValue)
 {
-    _Next<GpDbQueryValType::JSON>(std::move(aValue));
+    _Next<GpDbQueryValType::JSON>(-1, std::move(aValue));
     return *this;
 }
 
@@ -373,101 +438,101 @@ GpDbQuery&  GpDbQuery::NextJson (const GpReflectObject& aValue)
     return NextJson(GpJsonSerializer::SToStr(aValue, {GpJsonSerializerFlag::WRITE_MODEL_UID}));
 }
 
-GpDbQuery&  GpDbQuery::NextJsonArray1D (const std::vector<std::string_view>& aValue)
+GpDbQuery&  GpDbQuery::NextJsonArray1D (const std::vector<std::u8string_view>& aValue)
 {
-    _Next<GpDbQueryValType::JSON_ARRAY_1D>(_MakeArray<std::string>(aValue));
+    _Next<GpDbQueryValType::JSON_ARRAY_1D>(-1, _MakeArray<std::u8string>(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::NextJsonArray1D (const std::vector<std::string>& aValue)
+GpDbQuery&  GpDbQuery::NextJsonArray1D (const std::vector<std::u8string>& aValue)
 {
-    _Next<GpDbQueryValType::JSON_ARRAY_1D>(_MakeArray<std::string>(aValue));
+    _Next<GpDbQueryValType::JSON_ARRAY_1D>(-1, _MakeArray<std::u8string>(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::NextJsonArray1D (std::vector<std::string>&& aValue)
+GpDbQuery&  GpDbQuery::NextJsonArray1D (std::vector<std::u8string>&& aValue)
 {
-    _Next<GpDbQueryValType::JSON_ARRAY_1D>(std::move(aValue));
+    _Next<GpDbQueryValType::JSON_ARRAY_1D>(-1, std::move(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextJsonArray1D (const std::vector<GpReflectObject::SP>& aValue)
 {
     const size_t            size = aValue.size();
-    std::vector<std::string>    v(size);
+    std::vector<std::u8string>  v(size);
 
     for (size_t id = 0; id < size; id++)
     {
         v[id] = GpJsonSerializer::SToStr(aValue[id].V(), {GpJsonSerializerFlag::WRITE_MODEL_UID});
     }
 
-    _Next<GpDbQueryValType::JSON_ARRAY_1D>(std::move(v));
+    _Next<GpDbQueryValType::JSON_ARRAY_1D>(-1, std::move(v));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextUuid (const GpUUID& aValue)
 {
-    _Next<GpDbQueryValType::UUID>(aValue);
+    _Next<GpDbQueryValType::UUID>(-1, aValue);
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextUuidArray1D (const std::vector<GpUUID>& aValue)
 {
-    _Next<GpDbQueryValType::UUID_ARRAY_1D>(_MakeArray<GpUUID>(aValue));
+    _Next<GpDbQueryValType::UUID_ARRAY_1D>(-1, _MakeArray<GpUUID>(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextUuidArray1D (std::vector<GpUUID>&& aValue)
 {
-    _Next<GpDbQueryValType::UUID_ARRAY_1D>(std::move(aValue));
+    _Next<GpDbQueryValType::UUID_ARRAY_1D>(-1, std::move(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextBlob (const GpSpanPtrByteR aValue)
 {
-    _Next<GpDbQueryValType::BLOB>(aValue.ToByteArray());
+    _Next<GpDbQueryValType::BLOB>(-1, aValue.ToByteArray());
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextBlob (GpBytesArray&& aValue)
 {
-    _Next<GpDbQueryValType::BLOB>(std::move(aValue));
+    _Next<GpDbQueryValType::BLOB>(-1, std::move(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextBlobArray1D (const std::vector<GpBytesArray>& aValue)
 {
-    _Next<GpDbQueryValType::BLOB_ARRAY_1D>(_MakeArray<GpBytesArray>(aValue));
+    _Next<GpDbQueryValType::BLOB_ARRAY_1D>(-1, _MakeArray<GpBytesArray>(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextBlobArray1D (std::vector<GpBytesArray>&& aValue)
 {
-    _Next<GpDbQueryValType::BLOB_ARRAY_1D>(std::move(aValue));
+    _Next<GpDbQueryValType::BLOB_ARRAY_1D>(-1, std::move(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextBoolean (const bool aValue)
 {
-    _Next<GpDbQueryValType::BOOLEAN>(aValue);
+    _Next<GpDbQueryValType::BOOLEAN>(-1, aValue);
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextBooleanArray1D (const std::vector<bool>& aValue)
 {
-    _Next<GpDbQueryValType::BOOLEAN_ARRAY_1D>(_MakeArray<bool>(aValue));
+    _Next<GpDbQueryValType::BOOLEAN_ARRAY_1D>(-1, _MakeArray<bool>(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextBooleanArray1D (std::vector<bool>&& aValue)
 {
-    _Next<GpDbQueryValType::BOOLEAN_ARRAY_1D>(std::move(aValue));
+    _Next<GpDbQueryValType::BOOLEAN_ARRAY_1D>(-1, std::move(aValue));
     return *this;
 }
 
 GpDbQuery&  GpDbQuery::NextNULL (void)
 {
-    _Next<GpDbQueryValType::NULL_VAL>(std::nullopt);
+    _Next<GpDbQueryValType::NULL_VAL>(-1, std::nullopt);
     return *this;
 }
 
@@ -495,7 +560,7 @@ GpDbQuery&  GpDbQuery::NextProp
         } break;
         default:
         {
-            THROW_GP("Unknown container type "_sv + GpReflectContainerType::SToString(propContainer));
+            THROW_GP(u8"Unknown container type "_sv + GpReflectContainerType::SToString(propContainer));
         }
     }
 
@@ -592,31 +657,31 @@ GpDbQuery&  GpDbQuery::AddFloatArray1D (std::vector<float>&& aValue)
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::AddStr (std::string_view aValue)
+GpDbQuery&  GpDbQuery::AddStr (std::u8string_view aValue)
 {
-    _Add<GpDbQueryValType::STRING>(std::string(aValue));
+    _Add<GpDbQueryValType::STRING>(std::u8string(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::AddStr (std::string&& aValue)
+GpDbQuery&  GpDbQuery::AddStr (std::u8string&& aValue)
 {
     _Add<GpDbQueryValType::STRING>(std::move(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::AddStrArray1D (const std::vector<std::string_view>& aValue)
+GpDbQuery&  GpDbQuery::AddStrArray1D (const std::vector<std::u8string_view>& aValue)
 {
-    _Add<GpDbQueryValType::STRING_ARRAY_1D>(_MakeArray<std::string>(aValue));
+    _Add<GpDbQueryValType::STRING_ARRAY_1D>(_MakeArray<std::u8string>(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::AddStrArray1D (const std::vector<std::string>& aValue)
+GpDbQuery&  GpDbQuery::AddStrArray1D (const std::vector<std::u8string>& aValue)
 {
-    _Add<GpDbQueryValType::STRING_ARRAY_1D>(_MakeArray<std::string>(aValue));
+    _Add<GpDbQueryValType::STRING_ARRAY_1D>(_MakeArray<std::u8string>(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::AddStrArray1D (std::vector<std::string>&& aValue)
+GpDbQuery&  GpDbQuery::AddStrArray1D (std::vector<std::u8string>&& aValue)
 {
     _Add<GpDbQueryValType::STRING_ARRAY_1D>(std::move(aValue));
     return *this;
@@ -628,13 +693,13 @@ GpDbQuery&  GpDbQuery::AddStrArray1D (const GpEnumFlags& aValue)
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::AddJson (std::string_view aValue)
+GpDbQuery&  GpDbQuery::AddJson (std::u8string_view aValue)
 {
-    _Add<GpDbQueryValType::JSON>(std::string(aValue));
+    _Add<GpDbQueryValType::JSON>(std::u8string(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::AddJson (std::string&& aValue)
+GpDbQuery&  GpDbQuery::AddJson (std::u8string&& aValue)
 {
     _Add<GpDbQueryValType::JSON>(std::move(aValue));
     return *this;
@@ -645,19 +710,19 @@ GpDbQuery&  GpDbQuery::AddJson (const GpReflectObject& aValue)
     return AddJson(GpJsonSerializer::SToStr(aValue, {GpJsonSerializerFlag::WRITE_MODEL_UID}));
 }
 
-GpDbQuery&  GpDbQuery::AddJsonArray1D (const std::vector<std::string_view>& aValue)
+GpDbQuery&  GpDbQuery::AddJsonArray1D (const std::vector<std::u8string_view>& aValue)
 {
-    _Add<GpDbQueryValType::JSON_ARRAY_1D>(_MakeArray<std::string>(aValue));
+    _Add<GpDbQueryValType::JSON_ARRAY_1D>(_MakeArray<std::u8string>(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::AddJsonArray1D (const std::vector<std::string>& aValue)
+GpDbQuery&  GpDbQuery::AddJsonArray1D (const std::vector<std::u8string>& aValue)
 {
-    _Add<GpDbQueryValType::JSON_ARRAY_1D>(_MakeArray<std::string>(aValue));
+    _Add<GpDbQueryValType::JSON_ARRAY_1D>(_MakeArray<std::u8string>(aValue));
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::AddJsonArray1D (std::vector<std::string>&& aValue)
+GpDbQuery&  GpDbQuery::AddJsonArray1D (std::vector<std::u8string>&& aValue)
 {
     _Add<GpDbQueryValType::JSON_ARRAY_1D>(std::move(aValue));
     return *this;
@@ -666,7 +731,7 @@ GpDbQuery&  GpDbQuery::AddJsonArray1D (std::vector<std::string>&& aValue)
 GpDbQuery&  GpDbQuery::AddJsonArray1D (const std::vector<GpReflectObject::SP>& aValue)
 {
     const size_t            size = aValue.size();
-    std::vector<std::string>    v(size);
+    std::vector<std::u8string>  v(size);
 
     for (size_t id = 0; id < size; id++)
     {
@@ -745,12 +810,10 @@ GpDbQuery&  GpDbQuery::AddNULL (void)
 
 GpDbQuery&  GpDbQuery::FromObject
 (
-    GpReflectObject&            aObject,
+    const GpReflectObject&      aObject,
     GpDbQueryBuilderMode::EnumT aMode
 )
 {
-    GpReflectUtils::SGenerateOnce(aObject);
-
     const GpReflectModel&   model   = aObject.ReflectModel();
     const void*             dataPtr = aObject.ReflectDataPtr();
 
@@ -842,7 +905,8 @@ void    GpDbQuery::_NextProp
         } break;
         case GpReflectType::BLOB:
         {
-            NextBlob(aProp.Value_BLOB(aDataPtr));
+            const GpBytesArray& blob = aProp.Value_BLOB(aDataPtr);
+            NextBlob(GpSpanPtrByteR(blob.data(), blob.size()));
         } break;
         case GpReflectType::OBJECT:
         {
@@ -865,7 +929,7 @@ void    GpDbQuery::_NextProp
         case GpReflectType::NOT_SET:[[fallthrough]];
         default:
         {
-            THROW_GP("Unsupported type NOT_SET"_sv); break;
+            THROW_GP(u8"Unsupported type NOT_SET"_sv); break;
         }
     }
 }
@@ -936,7 +1000,7 @@ void    GpDbQuery::_NextPropVec
         } break;
         case GpReflectType::OBJECT:
         {
-            THROW_GP("Unsupported type Object vector"_sv); break;
+            THROW_GP(u8"Unsupported type Object vector"_sv); break;
         } break;
         case GpReflectType::OBJECT_SP:
         {
@@ -945,16 +1009,16 @@ void    GpDbQuery::_NextPropVec
         } break;
         case GpReflectType::ENUM:
         {
-            THROW_GP("Unsupported type ENUM vector"_sv); break;
+            THROW_GP(u8"Unsupported type ENUM vector"_sv); break;
         } break;
         case GpReflectType::ENUM_FLAGS:
         {
-            THROW_GP("Unsupported type ENUM_FLAGS vector"_sv); break;
+            THROW_GP(u8"Unsupported type ENUM_FLAGS vector"_sv); break;
         } break;
         case GpReflectType::NOT_SET:[[fallthrough]];
         default:
         {
-            THROW_GP("Unsupported type NOT_SET"_sv); break;
+            THROW_GP(u8"Unsupported type NOT_SET"_sv); break;
         }
     }
 }

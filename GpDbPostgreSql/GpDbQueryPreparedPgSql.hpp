@@ -2,6 +2,7 @@
 
 #include "GpDbPostgreSql_global.hpp"
 #include "GpDbArrayUtilsPgSql.hpp"
+#include "../GpDbClient/Query/GpDbQueryPrepared.hpp"
 #include <postgresql/libpq-fe.h>
 
 namespace GPlatform {
@@ -52,8 +53,8 @@ void    GpDbQueryPreparedPgSql::_FillArray (const T& aArray)
 {
     auto[oid, arrayData] = GpDbArrayUtilsPgSql::SBuild(aArray);
 
-    const std::byte*    dataPtr     = arrayData.data();
-    const size_t        dataSize    = arrayData.size();
+    const u_int_8*  dataPtr     = arrayData.data();
+    const size_t    dataSize    = arrayData.size();
 
     iBinaryDataVec.emplace_back(std::move(arrayData));
 

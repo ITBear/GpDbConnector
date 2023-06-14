@@ -8,21 +8,49 @@ class GP_DB_DATA_MODELS_API GpDbSearchDesc final: public GpReflectObject
 {
 public:
     CLASS_DD(GpDbSearchDesc)
-    REFLECT_DECLARE("6cd0aa57-3ea6-4c1c-8886-8519164566b1"_uuid)
+    REFLECT_DECLARE(u8"6cd0aa57-3ea6-4c1c-8886-8519164566b1"_uuid)
 
 public:
-                                    GpDbSearchDesc  (void) noexcept;
-                                    GpDbSearchDesc  (const GpDbSearchDesc& aDesc);
-                                    GpDbSearchDesc  (GpDbSearchDesc&& aDesc) noexcept;
-                                    GpDbSearchDesc  (std::string                            aFilter,
+                                    GpDbSearchDesc  (void) noexcept = default;
+    inline                          GpDbSearchDesc  (const GpDbSearchDesc& aDesc);
+    inline                          GpDbSearchDesc  (GpDbSearchDesc&& aDesc) noexcept;
+    inline                          GpDbSearchDesc  (std::u8string                          aFilter,
                                                      const size_t                           aLimit,
-                                                     const GpDbSearchOrderDesc::C::Vec::SP& aOrder) noexcept;
+                                                     const GpDbSearchOrderDesc::C::Vec::SP& aOrder);
     virtual                         ~GpDbSearchDesc (void) noexcept override final;
 
 public:
-    std::string                     filter;
+    std::u8string                   filter;
     size_t                          limit = 0;
     GpDbSearchOrderDesc::C::Vec::SP order;
 };
+
+GpDbSearchDesc::GpDbSearchDesc (const GpDbSearchDesc& aDesc):
+GpReflectObject(aDesc),
+filter(GpReflectUtils::SCopyValue(aDesc.filter)),
+limit (GpReflectUtils::SCopyValue(aDesc.limit)),
+order (GpReflectUtils::SCopyValue(aDesc.order))
+{
+}
+
+GpDbSearchDesc::GpDbSearchDesc (GpDbSearchDesc&& aDesc) noexcept:
+GpReflectObject(std::move(aDesc)),
+filter(std::move(aDesc.filter)),
+limit (std::move(aDesc.limit)),
+order (std::move(aDesc.order))
+{
+}
+
+GpDbSearchDesc::GpDbSearchDesc
+(
+    std::u8string                           aFilter,
+    const size_t                            aLimit,
+    const GpDbSearchOrderDesc::C::Vec::SP&  aOrder
+):
+filter(std::move(aFilter)),
+limit (aLimit),
+order (GpReflectUtils::SCopyValue(aOrder))
+{
+}
 
 }//namespace GPlatform

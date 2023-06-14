@@ -20,18 +20,20 @@ public:
 public:
     inline                              GpDbQuery           (void) noexcept;
     inline                              GpDbQuery           (GpDbQuery&& aDbQuery) noexcept;
-    inline                              GpDbQuery           (std::string aQueryStr) noexcept;
-    inline                              GpDbQuery           (std::string_view aQueryStr);
-    inline                              GpDbQuery           (std::string        aQueryStr,
+    inline                              GpDbQuery           (std::u8string aQueryStr) noexcept;
+    inline                              GpDbQuery           (std::u8string_view aQueryStr);
+    inline                              GpDbQuery           (std::u8string      aQueryStr,
                                                              const TypeVecT&    aTypes);
-    inline                              GpDbQuery           (std::string&&  aQueryStr,
+    inline                              GpDbQuery           (std::u8string&&    aQueryStr,
                                                              TypeVecT&&     aTypes) noexcept;
                                         GpDbQuery           (const GpDbQueryMapperCacheValue& aCacheValue);
     inline                              GpDbQuery           (GpDbQueryBuilder&& aQueryBuilder);
                                         ~GpDbQuery          (void) noexcept;
 
-    std::string_view                    QueryStr            (void) const noexcept {return iQueryStr;}
-    std::string                         ValuesToStr         (void) const;
+    inline GpDbQuery&                   operator=           (GpDbQuery&& aDbQuery) noexcept;
+
+    std::u8string_view                  QueryStr            (void) const noexcept {return iQueryStr;}
+    std::u8string                       ValuesToStr         (void) const;
     const TypeVecT&                     Types               (void) const noexcept {return iTypes;}
     const ValueVecT&                    Values              (void) const noexcept {return iValues;}
 
@@ -39,92 +41,106 @@ public:
     void                                AddValues           (GpDbQuery&& aDbQuery);
     void                                Reset               (void);
 
-    GpDbQuery&                          NextInt16           (const s_int_16                     aValue);
-    GpDbQuery&                          NextInt16Array1D    (const std::vector<s_int_16>&           aValue);
-    GpDbQuery&                          NextInt16Array1D    (std::vector<s_int_16>&&                aValue);
+    GpDbQuery&                          NextInt16           (const s_int_16                 aValue);
+    GpDbQuery&                          NextInt16Array1D    (const std::vector<s_int_16>&   aValue);
+    GpDbQuery&                          NextInt16Array1D    (std::vector<s_int_16>&&        aValue);
 
-    GpDbQuery&                          NextInt32           (const s_int_32                     aValue);
-    GpDbQuery&                          NextInt32Array1D    (const std::vector<s_int_32>&           aValue);
-    GpDbQuery&                          NextInt32Array1D    (std::vector<s_int_32>&&                aValue);
+    GpDbQuery&                          InsertInt16         (const size_t                   aId,
+                                                             const s_int_16                 aValue);
+    GpDbQuery&                          InsertInt16Array1D  (const size_t                   aId,
+                                                             const std::vector<s_int_16>&   aValue);
+    GpDbQuery&                          InsertInt16Array1D  (const size_t                   aId,
+                                                             std::vector<s_int_16>&&        aValue);
 
-    GpDbQuery&                          NextInt64           (const s_int_64                     aValue);
-    GpDbQuery&                          NextInt64Array1D    (const std::vector<s_int_64>&           aValue);
-    GpDbQuery&                          NextInt64Array1D    (std::vector<s_int_64>&&                aValue);
+    GpDbQuery&                          NextInt32           (const s_int_32                 aValue);
+    GpDbQuery&                          NextInt32Array1D    (const std::vector<s_int_32>&   aValue);
+    GpDbQuery&                          NextInt32Array1D    (std::vector<s_int_32>&&        aValue);
 
-    GpDbQuery&                          NextDouble          (const double                       aValue);
-    GpDbQuery&                          NextDoubleArray1D   (const std::vector<double>&         aValue);
-    GpDbQuery&                          NextDoubleArray1D   (std::vector<double>&&                  aValue);
+    GpDbQuery&                          InsertInt32         (const size_t                   aId,
+                                                             const s_int_32                 aValue);
+    GpDbQuery&                          InsertInt32Array1D  (const size_t                   aId,
+                                                             const std::vector<s_int_32>&   aValue);
+    GpDbQuery&                          InsertInt32Array1D  (const size_t                   aId,
+                                                             std::vector<s_int_32>&&        aValue);
 
-    GpDbQuery&                          NextFloat           (const float                        aValue);
-    GpDbQuery&                          NextFloatArray1D    (const std::vector<float>&              aValue);
-    GpDbQuery&                          NextFloatArray1D    (std::vector<float>&&                   aValue);
+    GpDbQuery&                          NextInt64           (const s_int_64                 aValue);
+    GpDbQuery&                          NextInt64Array1D    (const std::vector<s_int_64>&   aValue);
+    GpDbQuery&                          NextInt64Array1D    (std::vector<s_int_64>&&        aValue);
 
-    GpDbQuery&                          NextStr             (std::string_view                   aValue);
-    GpDbQuery&                          NextStr             (std::string&&                      aValue);
-    GpDbQuery&                          NextStrArray1D      (const std::vector<std::string_view>&   aValue);
-    GpDbQuery&                          NextStrArray1D      (const std::vector<std::string>&        aValue);
-    GpDbQuery&                          NextStrArray1D      (std::vector<std::string>&&         aValue);
+    GpDbQuery&                          NextDouble          (const double                   aValue);
+    GpDbQuery&                          NextDoubleArray1D   (const std::vector<double>&     aValue);
+    GpDbQuery&                          NextDoubleArray1D   (std::vector<double>&&          aValue);
+
+    GpDbQuery&                          NextFloat           (const float                    aValue);
+    GpDbQuery&                          NextFloatArray1D    (const std::vector<float>&      aValue);
+    GpDbQuery&                          NextFloatArray1D    (std::vector<float>&&           aValue);
+
+    GpDbQuery&                          NextStr             (std::u8string_view             aValue);
+    GpDbQuery&                          NextStr             (std::u8string&&                    aValue);
+    GpDbQuery&                          NextStrArray1D      (const std::vector<std::u8string_view>& aValue);
+    GpDbQuery&                          NextStrArray1D      (const std::vector<std::u8string>&      aValue);
+    GpDbQuery&                          NextStrArray1D      (std::vector<std::u8string>&&           aValue);
     GpDbQuery&                          NextStrArray1D      (const GpEnumFlags&                 aValue);
 
-    GpDbQuery&                          NextJson            (std::string_view                   aValue);
-    GpDbQuery&                          NextJson            (std::string&&                      aValue);
-    GpDbQuery&                          NextJson            (const GpReflectObject&         aValue);
-    GpDbQuery&                          NextJsonArray1D     (const std::vector<std::string_view>&   aValue);
-    GpDbQuery&                          NextJsonArray1D     (const std::vector<std::string>&        aValue);
-    GpDbQuery&                          NextJsonArray1D     (std::vector<std::string>&&         aValue);
+    GpDbQuery&                          NextJson            (std::u8string_view         aValue);
+    GpDbQuery&                          NextJson            (std::u8string&&                aValue);
+    GpDbQuery&                          NextJson            (const GpReflectObject&     aValue);
+    GpDbQuery&                          NextJsonArray1D     (const std::vector<std::u8string_view>& aValue);
+    GpDbQuery&                          NextJsonArray1D     (const std::vector<std::u8string>&      aValue);
+    GpDbQuery&                          NextJsonArray1D     (std::vector<std::u8string>&&               aValue);
     GpDbQuery&                          NextJsonArray1D     (const std::vector<GpReflectObject::SP>& aValue);
 
     GpDbQuery&                          NextUuid            (const GpUUID&                      aValue);
     GpDbQuery&                          NextUuidArray1D     (const std::vector<GpUUID>&         aValue);
-    GpDbQuery&                          NextUuidArray1D     (std::vector<GpUUID>&&                  aValue);
+    GpDbQuery&                          NextUuidArray1D     (std::vector<GpUUID>&&              aValue);
 
     GpDbQuery&                          NextBlob            (const GpSpanPtrByteR               aValue);
     GpDbQuery&                          NextBlob            (GpBytesArray&&                     aValue);
-    GpDbQuery&                          NextBlobArray1D     (const std::vector<GpBytesArray>&       aValue);
-    GpDbQuery&                          NextBlobArray1D     (std::vector<GpBytesArray>&&            aValue);
+    GpDbQuery&                          NextBlobArray1D     (const std::vector<GpBytesArray>&   aValue);
+    GpDbQuery&                          NextBlobArray1D     (std::vector<GpBytesArray>&&        aValue);
 
-    GpDbQuery&                          NextBoolean         (const bool                         aValue);
-    GpDbQuery&                          NextBooleanArray1D  (const std::vector<bool>&               aValue);
-    GpDbQuery&                          NextBooleanArray1D  (std::vector<bool>&&                    aValue);
+    GpDbQuery&                          NextBoolean         (const bool                 aValue);
+    GpDbQuery&                          NextBooleanArray1D  (const std::vector<bool>&   aValue);
+    GpDbQuery&                          NextBooleanArray1D  (std::vector<bool>&&        aValue);
 
     GpDbQuery&                          NextNULL            (void);
 
     GpDbQuery&                          NextProp            (const GpReflectProp&   aProp,
                                                              const void*            aDataPtr);
 
-    GpDbQuery&                          AddInt16            (const s_int_16                     aValue);
-    GpDbQuery&                          AddInt16Array1D     (const std::vector<s_int_16>&           aValue);
-    GpDbQuery&                          AddInt16Array1D     (std::vector<s_int_16>&&                aValue);
+    GpDbQuery&                          AddInt16            (const s_int_16                 aValue);
+    GpDbQuery&                          AddInt16Array1D     (const std::vector<s_int_16>&   aValue);
+    GpDbQuery&                          AddInt16Array1D     (std::vector<s_int_16>&&        aValue);
 
-    GpDbQuery&                          AddInt32            (const s_int_32                     aValue);
-    GpDbQuery&                          AddInt32Array1D     (const std::vector<s_int_32>&           aValue);
-    GpDbQuery&                          AddInt32Array1D     (std::vector<s_int_32>&&                aValue);
+    GpDbQuery&                          AddInt32            (const s_int_32                 aValue);
+    GpDbQuery&                          AddInt32Array1D     (const std::vector<s_int_32>&   aValue);
+    GpDbQuery&                          AddInt32Array1D     (std::vector<s_int_32>&&        aValue);
 
-    GpDbQuery&                          AddInt64            (const s_int_64                     aValue);
-    GpDbQuery&                          AddInt64Array1D     (const std::vector<s_int_64>&           aValue);
-    GpDbQuery&                          AddInt64Array1D     (std::vector<s_int_64>&&                aValue);
+    GpDbQuery&                          AddInt64            (const s_int_64                 aValue);
+    GpDbQuery&                          AddInt64Array1D     (const std::vector<s_int_64>&   aValue);
+    GpDbQuery&                          AddInt64Array1D     (std::vector<s_int_64>&&        aValue);
 
-    GpDbQuery&                          AddDouble           (const double                       aValue);
-    GpDbQuery&                          AddDoubleArray1D    (const std::vector<double>&         aValue);
-    GpDbQuery&                          AddDoubleArray1D    (std::vector<double>&&                  aValue);
+    GpDbQuery&                          AddDouble           (const double                   aValue);
+    GpDbQuery&                          AddDoubleArray1D    (const std::vector<double>&     aValue);
+    GpDbQuery&                          AddDoubleArray1D    (std::vector<double>&&          aValue);
 
-    GpDbQuery&                          AddFloat            (const float                        aValue);
-    GpDbQuery&                          AddFloatArray1D     (const std::vector<float>&              aValue);
-    GpDbQuery&                          AddFloatArray1D     (std::vector<float>&&                   aValue);
+    GpDbQuery&                          AddFloat            (const float                    aValue);
+    GpDbQuery&                          AddFloatArray1D     (const std::vector<float>&      aValue);
+    GpDbQuery&                          AddFloatArray1D     (std::vector<float>&&           aValue);
 
-    GpDbQuery&                          AddStr              (std::string_view                   aValue);
-    GpDbQuery&                          AddStr              (std::string&&                      aValue);
-    GpDbQuery&                          AddStrArray1D       (const std::vector<std::string_view>&   aValue);
-    GpDbQuery&                          AddStrArray1D       (const std::vector<std::string>&        aValue);
-    GpDbQuery&                          AddStrArray1D       (std::vector<std::string>&&         aValue);
-    GpDbQuery&                          AddStrArray1D       (const GpEnumFlags&                 aValue);
+    GpDbQuery&                          AddStr              (std::u8string_view             aValue);
+    GpDbQuery&                          AddStr              (std::u8string&&                    aValue);
+    GpDbQuery&                          AddStrArray1D       (const std::vector<std::u8string_view>& aValue);
+    GpDbQuery&                          AddStrArray1D       (const std::vector<std::u8string>&      aValue);
+    GpDbQuery&                          AddStrArray1D       (std::vector<std::u8string>&&       aValue);
+    GpDbQuery&                          AddStrArray1D       (const GpEnumFlags&             aValue);
 
-    GpDbQuery&                          AddJson             (std::string_view                   aValue);
-    GpDbQuery&                          AddJson             (std::string&&                      aValue);
+    GpDbQuery&                          AddJson             (std::u8string_view             aValue);
+    GpDbQuery&                          AddJson             (std::u8string&&                    aValue);
     GpDbQuery&                          AddJson             (const GpReflectObject&         aValue);
-    GpDbQuery&                          AddJsonArray1D      (const std::vector<std::string_view>&   aValue);
-    GpDbQuery&                          AddJsonArray1D      (const std::vector<std::string>&        aValue);
-    GpDbQuery&                          AddJsonArray1D      (std::vector<std::string>&&                 aValue);
+    GpDbQuery&                          AddJsonArray1D      (const std::vector<std::u8string_view>& aValue);
+    GpDbQuery&                          AddJsonArray1D      (const std::vector<std::u8string>&      aValue);
+    GpDbQuery&                          AddJsonArray1D      (std::vector<std::u8string>&&                   aValue);
     GpDbQuery&                          AddJsonArray1D      (const std::vector<GpReflectObject::SP>&    aValue);
 
     GpDbQuery&                          AddUuid             (const GpUUID&                      aValue);
@@ -142,7 +158,7 @@ public:
 
     GpDbQuery&                          AddNULL             (void);
 
-    GpDbQuery&                          FromObject          (GpReflectObject&               aObject,
+    GpDbQuery&                          FromObject          (const GpReflectObject&         aObject,
                                                              GpDbQueryBuilderMode::EnumT    aMode);
 
     inline s_int_16                     Int16               (const size_t aId) const;
@@ -152,19 +168,19 @@ public:
     inline s_int_64                     Int64               (const size_t aId) const;
     inline const std::vector<s_int_64>& Int64Array1D        (const size_t aId) const;
     inline double                       Double              (const size_t aId) const;
-    inline const std::vector<double>&       DoubleArray1D       (const size_t aId) const;
+    inline const std::vector<double>&   DoubleArray1D       (const size_t aId) const;
     inline float                        Float               (const size_t aId) const;
-    inline const std::vector<float>&        FloatArray1D        (const size_t aId) const;
-    inline std::string_view             Str                 (const size_t aId) const;
-    inline const std::vector<std::string>&  StrArray1D          (const size_t aId) const;
-    inline std::string_view             Json                (const size_t aId) const;
-    inline const std::vector<std::string>&  JsonArray1D         (const size_t aId) const;
+    inline const std::vector<float>&    FloatArray1D        (const size_t aId) const;
+    inline std::u8string_view           Str                 (const size_t aId) const;
+    inline const std::vector<std::u8string>&StrArray1D      (const size_t aId) const;
+    inline std::u8string_view           Json                (const size_t aId) const;
+    inline const std::vector<std::u8string>&JsonArray1D     (const size_t aId) const;
     inline const GpUUID&                Uuid                (const size_t aId) const;
-    inline const std::vector<GpUUID>&       UuidArray1D         (const size_t aId) const;
+    inline const std::vector<GpUUID>&   UuidArray1D         (const size_t aId) const;
     inline bool                         Boolean             (const size_t aId) const;
     inline const std::vector<bool>&     BooleanArray1D      (const size_t aId) const;
     inline const GpBytesArray&          Blob                (const size_t aId) const;
-    inline const std::vector<GpBytesArray>&BlobArray1D          (const size_t aId) const;
+    inline const std::vector<GpBytesArray>&BlobArray1D      (const size_t aId) const;
 
 private:
     void                                _NextProp           (const GpReflectProp&   aProp,
@@ -175,19 +191,20 @@ private:
                                                              const void*            aDataPtr);
 
     template<GpDbQueryValType::EnumT E>
-    void                                _Next               (auto&& aValue);
+    void                                _Next               (const ssize_t  aId,
+                                                             auto&&         aValue);
 
     template<GpDbQueryValType::EnumT E>
     void                                _Add                (auto&& aValue);
 
     template<typename T>
-    std::vector<T>                          _MakeArray          (const auto& aVector) const;
+    std::vector<T>                      _MakeArray          (const auto& aVector) const;
 
     template<typename T>
-    std::vector<T>                          _MakeNumArray       (const auto& aVector) const;
+    std::vector<T>                      _MakeNumArray       (const auto& aVector) const;
 
 private:
-    std::string         iQueryStr;
+    std::u8string       iQueryStr;
     TypeVecT            iTypes;
     ValueVecT           iValues;
 };
@@ -198,24 +215,24 @@ GpDbQuery::GpDbQuery (void) noexcept
 
 GpDbQuery::GpDbQuery (GpDbQuery&& aDbQuery) noexcept:
 iQueryStr(std::move(aDbQuery.iQueryStr)),
-iTypes(std::move(aDbQuery.iTypes)),
-iValues(std::move(aDbQuery.iValues))
+iTypes   (std::move(aDbQuery.iTypes)),
+iValues  (std::move(aDbQuery.iValues))
 {
 }
 
-GpDbQuery::GpDbQuery (std::string aQueryStr) noexcept:
+GpDbQuery::GpDbQuery (std::u8string aQueryStr) noexcept:
 iQueryStr(std::move(aQueryStr))
 {
 }
 
-GpDbQuery::GpDbQuery (std::string_view aQueryStr):
-iQueryStr(std::string_view(aQueryStr))
+GpDbQuery::GpDbQuery (std::u8string_view aQueryStr):
+iQueryStr(std::u8string_view(aQueryStr))
 {
 }
 
 GpDbQuery::GpDbQuery
 (
-    std::string     aQueryStr,
+    std::u8string   aQueryStr,
     const TypeVecT& aTypes
 ):
 iQueryStr(std::move(aQueryStr)),
@@ -225,19 +242,28 @@ iTypes(aTypes)
 
 GpDbQuery::GpDbQuery
 (
-    std::string&&   aQueryStr,
+    std::u8string&& aQueryStr,
     TypeVecT&&      aTypes
 ) noexcept:
 iQueryStr(std::move(aQueryStr)),
-iTypes(std::move(aTypes))
+iTypes   (std::move(aTypes))
 {
 }
 
 GpDbQuery::GpDbQuery (GpDbQueryBuilder&& aQueryBuilder):
 iQueryStr(aQueryBuilder.QueryStrMove()),
-iTypes(aQueryBuilder.TypesMove()),
-iValues(aQueryBuilder.ValuesMove())
+iTypes   (aQueryBuilder.TypesMove()),
+iValues  (aQueryBuilder.ValuesMove())
 {
+}
+
+GpDbQuery&  GpDbQuery::operator= (GpDbQuery&& aDbQuery) noexcept
+{
+    iQueryStr   = std::move(aDbQuery.iQueryStr);
+    iTypes      = std::move(aDbQuery.iTypes);
+    iValues     = std::move(aDbQuery.iValues);
+
+    return *this;
 }
 
 s_int_16    GpDbQuery::Int16 (const size_t aId) const
@@ -290,24 +316,24 @@ const std::vector<float>&   GpDbQuery::FloatArray1D (const size_t aId) const
     return std::get<std::vector<float>>(iValues.at(aId));
 }
 
-std::string_view    GpDbQuery::Str (const size_t aId) const
+std::u8string_view  GpDbQuery::Str (const size_t aId) const
 {
-    return std::get<std::string>(iValues.at(aId));
+    return std::get<std::u8string>(iValues.at(aId));
 }
 
-const std::vector<std::string>& GpDbQuery::StrArray1D (const size_t aId) const
+const std::vector<std::u8string>&   GpDbQuery::StrArray1D (const size_t aId) const
 {
-    return std::get<std::vector<std::string>>(iValues.at(aId));
+    return std::get<std::vector<std::u8string>>(iValues.at(aId));
 }
 
-std::string_view    GpDbQuery::Json (const size_t aId) const
+std::u8string_view  GpDbQuery::Json (const size_t aId) const
 {
-    return std::get<std::string>(iValues.at(aId));
+    return std::get<std::u8string>(iValues.at(aId));
 }
 
-const std::vector<std::string>& GpDbQuery::JsonArray1D (const size_t aId) const
+const std::vector<std::u8string>&   GpDbQuery::JsonArray1D (const size_t aId) const
 {
-    return std::get<std::vector<std::string>>(iValues.at(aId));
+    return std::get<std::vector<std::u8string>>(iValues.at(aId));
 }
 
 const GpUUID&   GpDbQuery::Uuid (const size_t aId) const
@@ -341,7 +367,11 @@ const std::vector<GpBytesArray>&    GpDbQuery::BlobArray1D (const size_t aId) co
 }
 
 template<GpDbQueryValType::EnumT E>
-void    GpDbQuery::_Next (auto&& aValue)
+void    GpDbQuery::_Next
+(
+    const ssize_t   aId,
+    auto&&          aValue
+)
 {
     const GpDbQueryValType::EnumT type = iTypes.at(iValues.size());
 
@@ -349,14 +379,26 @@ void    GpDbQuery::_Next (auto&& aValue)
     {
         if constexpr (std::is_move_assignable_v<decltype(aValue)>)
         {
-            iValues.emplace_back(std::move(aValue));
+            if (aId < 0)
+            {
+                iValues.emplace_back(std::move(aValue));
+            } else
+            {
+                iValues.insert(iValues.begin() + aId, std::move(aValue));
+            }
         } else
         {
-            iValues.emplace_back(aValue);
+            if (aId < 0)
+            {
+                iValues.emplace_back(aValue);
+            } else
+            {
+                iValues.insert(iValues.begin() + aId, aValue);
+            }
         }
     } else
     {
-        THROW_GP("Wrong value type, must be "_sv + GpDbQueryValType::SToString(type));
+        THROW_GP(u8"Wrong value type, must be "_sv + GpDbQueryValType::SToString(type));
     }
 }
 
@@ -392,7 +434,7 @@ template<typename T>
 std::vector<T>  GpDbQuery::_MakeNumArray (const auto& aVector) const
 {
     const size_t    size = aVector.size();
-    std::vector<T>      v(size);
+    std::vector<T>  v(size);
 
     for (size_t id = 0; id < size; id++)
     {

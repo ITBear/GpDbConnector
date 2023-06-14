@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GpDbQueryResState.hpp"
+#include "../../../GpCore2/GpReflection/GpReflectObject.hpp"
 
 namespace GPlatform {
 
@@ -73,19 +74,19 @@ public:
                                                                  std::optional<float>   aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<float>              GetFloatArray1D     (const size_t                   aRowId,
-                                                                 const size_t                   aColId,
+    virtual std::vector<float>              GetFloatArray1D     (const size_t                       aRowId,
+                                                                 const size_t                       aColId,
                                                                  std::optional<std::vector<float>>  aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::string_view                GetStr              (const size_t                       aRowId,
+    virtual std::u8string_view              GetStr              (const size_t                       aRowId,
                                                                  const size_t                       aColId,
-                                                                 std::optional<std::string_view>    aOnNullValue) const = 0;
+                                                                 std::optional<std::u8string_view>  aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<std::string_view>   GetStrArray1D       (const size_t                               aRowId,
+    virtual std::vector<std::u8string_view> GetStrArray1D       (const size_t                               aRowId,
                                                                  const size_t                               aColId,
-                                                                 std::optional<std::vector<std::string>>    aOnNullValue) const = 0;
+                                                                 std::optional<std::vector<std::u8string>>  aOnNullValue) const = 0;
 
     [[nodiscard]]
     virtual GpSpanPtrCharRW                 GetStrRW            (const size_t                   aRowId,
@@ -98,14 +99,14 @@ public:
                                                                  std::optional<std::vector<GpSpanPtrCharRW>>    aOnNullValue) = 0;
 
     [[nodiscard]]
-    virtual std::string_view                GetJson             (const size_t                       aRowId,
+    virtual std::u8string_view              GetJson             (const size_t                       aRowId,
                                                                  const size_t                       aColId,
-                                                                 std::optional<std::string_view>    aOnNullValue) const = 0;
+                                                                 std::optional<std::u8string_view>  aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<std::string_view>   GetJsonArray1D      (const size_t                               aRowId,
+    virtual std::vector<std::u8string_view> GetJsonArray1D      (const size_t                               aRowId,
                                                                  const size_t                               aColId,
-                                                                 std::optional<std::vector<std::string>>    aOnNullValue) const = 0;
+                                                                 std::optional<std::vector<std::u8string>>  aOnNullValue) const = 0;
 
     [[nodiscard]]
     virtual GpSpanPtrCharRW                 GetJsonRW           (const size_t                   aRowId,
@@ -147,21 +148,31 @@ public:
                                                                  const size_t                       aColId,
                                                                  std::optional<std::vector<bool>>   aOnNullValue) const = 0;
 
+
+    template<typename T>
+    [[nodiscard]] typename T::EnumT         GetEnum             (const size_t                       aRowId,
+                                                                 const size_t                       aColId,
+                                                                 std::optional<typename T::EnumT>   aOnNullValue) const;
+
     [[nodiscard]]
-    GpReflectObject::SP                     GetObject           (const size_t   aRowId,
+    GpReflectObject::SP                     ColToObject         (const size_t   aRowId,
                                                                  const size_t   aColId) const;
 
     [[nodiscard]]
-    GpReflectObject::C::Vec::SP             GetObjectArray1D    (const size_t   aRowId,
+    GpReflectObject::C::Vec::SP             ColToObjectArray1D  (const size_t   aRowId,
                                                                  const size_t   aColId) const;
 
     [[nodiscard]]
-    GpReflectObject::SP                     GetObject           (const size_t           aRowId,
+    GpReflectObject::SP                     ColToObject         (const size_t           aRowId,
                                                                  const size_t           aColId,
                                                                  const GpReflectModel&  aModel) const;
 
+    template<typename T>
+    [[nodiscard]] typename T::SP            ColToObjectAs       (const size_t           aRowId,
+                                                                 const size_t           aColId) const;
+
     [[nodiscard]]
-    GpReflectObject::C::Vec::SP             GetObjectArray1D    (const size_t           aRowId,
+    GpReflectObject::C::Vec::SP             ColToObjectArray1D  (const size_t           aRowId,
                                                                  const size_t           aColId,
                                                                  const GpReflectModel&  aModel) const;
 
@@ -173,15 +184,6 @@ public:
     [[nodiscard]]
     GpReflectObject::C::Vec::SP             RowsToObject        (const size_t           aColStartId,
                                                                  const GpReflectModel&  aModel) const;
-
-    template<typename T>
-    [[nodiscard]] typename T::EnumT         GetEnum             (const size_t                       aRowId,
-                                                                 const size_t                       aColId,
-                                                                 std::optional<typename T::EnumT>   aOnNullValue) const;
-
-    template<typename T>
-    [[nodiscard]] typename T::SP            GetObjectAs         (const size_t   aRowId,
-                                                                 const size_t   aColId) const;
 
     template<typename T>
     [[nodiscard]] typename T::SP            RowToObjectAs       (const size_t aRowId,
@@ -221,14 +223,14 @@ template<typename T>
     std::optional<typename T::EnumT>    aOnNullValue
 ) const
 {
-    std::string_view strVal = GetStr(aRowId, aColId, ""_sv);
+    std::u8string_view strVal = GetStr(aRowId, aColId, {});
 
     if (strVal.length() == 0)
     {
         THROW_COND_GP
         (
             aOnNullValue.has_value(),
-            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is empty"_sv;}
+            [&](){return u8"Value on ["_sv + aRowId + u8", "_sv + aColId + u8"] is empty"_sv;}
         );
         return aOnNullValue.value();
     }
@@ -237,13 +239,18 @@ template<typename T>
 }
 
 template<typename T>
-[[nodiscard]] typename T::SP    GpDbQueryRes::GetObjectAs
+[[nodiscard]] typename T::SP    GpDbQueryRes::ColToObjectAs
 (
     const size_t    aRowId,
     const size_t    aColId
 ) const
 {
-    return GetObject(aRowId, aColId, T::SReflectModel()).template CastAs<typename T::SP>();
+    return ColToObject
+    (
+        aRowId,
+        aColId,
+        T::SReflectModel()
+    ).template CastAs<typename T::SP>();
 }
 
 template<typename T>
@@ -284,35 +291,35 @@ template<typename T>
     return res;
 }
 
-template<typename ToT, typename  FromT>
-std::vector<ToT>    GpDbQueryRes::_SConvertArrayNum (const std::vector<FromT>& aVec)
+template<typename TO, typename  FROM>
+std::vector<TO> GpDbQueryRes::_SConvertArrayNum (const std::vector<FROM>& aVec)
 {
     const size_t size = aVec.size();
-    std::vector<ToT> res(size);
+    std::vector<TO> res(size);
 
     for (size_t id = 0; id < size; ++id)
     {
-        if constexpr (GpUnitUtils::SHasTag_GpUnit<ToT>())
+        if constexpr (GpHasTag_GpUnit<TO>())
         {
-            res[id] = ToT::SMake(aVec[id]);
+            res[id] = TO::SMake(aVec[id]);
         } else
         {
-            res[id] = NumOps::SConvert<ToT>(aVec[id]);
+            res[id] = NumOps::SConvert<TO>(aVec[id]);
         }
     }
 
     return res;
 }
 
-template<typename ToT, typename  FromT>
-std::vector<ToT>    GpDbQueryRes::_SConvertArrayBytes (std::vector<FromT>& aVec)
+template<typename TO, typename  FROM>
+std::vector<TO> GpDbQueryRes::_SConvertArrayBytes (std::vector<FROM>& aVec)
 {
     const size_t size = aVec.size();
-    std::vector<ToT> res(size);
+    std::vector<TO> res(size);
 
     for (size_t id = 0; id < size; ++id)
     {
-        res[id] = static_cast<ToT>(aVec[id]);
+        res[id] = static_cast<TO>(aVec[id]);
     }
 
     return res;
