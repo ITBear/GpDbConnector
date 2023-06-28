@@ -14,14 +14,14 @@ public:
                                     GpDbSearchDesc  (void) noexcept = default;
     inline                          GpDbSearchDesc  (const GpDbSearchDesc& aDesc);
     inline                          GpDbSearchDesc  (GpDbSearchDesc&& aDesc) noexcept;
-    inline                          GpDbSearchDesc  (std::u8string                          aFilter,
-                                                     const size_t                           aLimit,
-                                                     const GpDbSearchOrderDesc::C::Vec::SP& aOrder);
+    inline                          GpDbSearchDesc  (std::u8string                      aFilter,
+                                                     const u_int_32                     aLimit,
+                                                     GpDbSearchOrderDesc::C::Vec::SP    aOrder);
     virtual                         ~GpDbSearchDesc (void) noexcept override final;
 
 public:
     std::u8string                   filter;
-    size_t                          limit = 0;
+    u_int_32                        limit = 0;
     GpDbSearchOrderDesc::C::Vec::SP order;
 };
 
@@ -43,13 +43,13 @@ order (std::move(aDesc.order))
 
 GpDbSearchDesc::GpDbSearchDesc
 (
-    std::u8string                           aFilter,
-    const size_t                            aLimit,
-    const GpDbSearchOrderDesc::C::Vec::SP&  aOrder
+    std::u8string                   aFilter,
+    const u_int_32                  aLimit,
+    GpDbSearchOrderDesc::C::Vec::SP aOrder
 ):
 filter(std::move(aFilter)),
 limit (aLimit),
-order (GpReflectUtils::SCopyValue(aOrder))
+order (std::move(aOrder))
 {
 }
 

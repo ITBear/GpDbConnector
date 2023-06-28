@@ -30,11 +30,14 @@ GpDbQuerySearchBuilder::~GpDbQuerySearchBuilder (void) noexcept
 
 void    GpDbQuerySearchBuilder::SEARCH_WHERE
 (
-    GpDbQueryBuilder&       aBuilder,
-    const GpDbSearchDesc&   aSearchDesc
+    GpDbQueryBuilder&               aBuilder,
+    GpReflectModel::C::Opt::CRef    aModel,
+    const GpDbSearchDesc&           aSearchDesc,
+    const s_int_32                  aRealmId,
+    const s_int_32                  aLanguageId
 )
 {
-    ProcessFilter(aBuilder, aSearchDesc);
+    ProcessFilter(aBuilder, aModel, aSearchDesc, aRealmId, aLanguageId);
 }
 
 void    GpDbQuerySearchBuilder::SEARCH_ORDER
@@ -57,8 +60,11 @@ void    GpDbQuerySearchBuilder::SEARCH_LIMIT
 
 void    GpDbQuerySearchBuilder::ProcessFilter
 (
-    GpDbQueryBuilder&       aBuilder,
-    const GpDbSearchDesc&   aSearchDesc
+    GpDbQueryBuilder&               aBuilder,
+    GpReflectModel::C::Opt::CRef    aModel,
+    const GpDbSearchDesc&           aSearchDesc,
+    const s_int_32                  aRealmId,
+    const s_int_32                  aLanguageId
 )
 {
     std::u8string_view  filter          = aSearchDesc.filter;
@@ -141,10 +147,35 @@ void    GpDbQuerySearchBuilder::ProcessFilter
             id = ParseNum(id, filter, aBuilder);
         } else if (ch == u8'"')
         {
-            id = ParseStr(id+1, filter, u8'"', u8'\\', true, aBuilder);
+            id = ParseStr(id+1, filter, u8'"', u8'\\', true, aBuilder);//PROP NAME
         } else if (ch == '\'')
         {
-            id = ParseStr(id+1, filter, u8'\'', u8'\\', false, aBuilder);
+            id = ParseStr(id+1, filter, u8'\'', u8'\\', false, aBuilder);//STRING CONSTANT
+        } else if (ch == u8'L')
+        {
+            if (GpReflectProp::C::Opt::CRef propOpt;
+                   !iLastPropName.empty()
+                && aModel.has_value()
+                && (propOpt = aModel.value().get().PropOpt(iLastPropName)).has_value()
+                && (propOpt.value().get().FlagTest(GpReflectPropFlag::MULTILANGUAGE_STRING)))
+            {
+                //IN (SELECT language.find_item_ids_like(aRealmId, aLanguageId, 'xxxxx%'))
+
+                aBuilder.IN().BRACE_BEGIN()
+                    .SELECT().RAW(u8"language.find_item_ids_like"_sv).BRACE_BEGIN()
+                        .VALUE(GpDbQueryValue(aRealmId))
+                        .COMMA().VALUE(GpDbQueryValue(aLanguageId))
+                        .COMMA();
+
+                id = FindAndParseStr(id+1, filter, u8'\'', u8'\\', false, aBuilder);//STRING CONSTANT
+
+                aBuilder
+                    .BRACE_END()
+                .BRACE_END();
+            } else
+            {
+                aBuilder.ILIKE();
+            }
         } else if (ch == u8' ')
         {
             //Skip
@@ -218,7 +249,7 @@ void    GpDbQuerySearchBuilder::ProcessLimitCond
     const GpDbSearchDesc&   aSearchDesc
 )
 {
-    const size_t limit = std::min(aSearchDesc.limit, size_t(250));
+    const size_t limit = std::min(NumOps::SConvert<size_t>(aSearchDesc.limit), size_t(250));
 
     if (limit == 0)
     {
@@ -226,6 +257,47 @@ void    GpDbQuerySearchBuilder::ProcessLimitCond
     }
 
     aBuilder.LIMIT(limit);
+}
+
+size_t  GpDbQuerySearchBuilder::FindAndParseStr
+(
+    const size_t        aStartId,
+    std::u8string_view  aStr,
+    const char8_t       aStopChar,
+    const char8_t       aEscapeChar,
+    const bool          aIsPropName,
+    GpDbQueryBuilder&   aBuilder
+)
+{
+    const size_t    filterLength = aStr.length();
+    size_t          id;
+
+    for (id = aStartId; id < filterLength; id++)
+    {
+        const char8_t ch = aStr[id];
+
+        if (ch == '\'')
+        {
+            return ParseStr(id+1, aStr, aStopChar, aEscapeChar, aIsPropName, aBuilder);//STRING CONSTANT
+        } else if (ch == u8' ')
+        {
+            //Skip
+        } else if (ch == u8'\n')
+        {
+            //Skip
+        } else if (ch == u8'\r')
+        {
+            //Skip
+        } else if (ch == u8'\t')
+        {
+            //Skip
+        } else
+        {
+            THROW_GP(u8"Parsing error: unexpected character '"_sv + ch + u8"' at position "_sv + id);
+        }
+    }
+
+    return id;
 }
 
 size_t  GpDbQuerySearchBuilder::ParseStr
@@ -248,13 +320,13 @@ size_t  GpDbQuerySearchBuilder::ParseStr
 
         if (ch == aStopChar)
         {
-            if (aIsPropName)
+            if (aIsPropName)//Prop name
             {
                 aBuilder.COL(strBuffer);
-            } else
+                iLastPropName = strBuffer;
+            } else//Value
             {
-                auto [valueType, newId] = DetectType(id+1, aStr);
-
+                const auto [valueType, newId] = DetectType(id+1, aStr);
                 const bool isTypeSet = (newId > (id+1));
 
                 id = newId;

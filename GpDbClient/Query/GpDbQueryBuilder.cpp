@@ -415,6 +415,27 @@ GpDbQueryBuilder&   GpDbQueryBuilder::LIKE (const GpDbQueryValType::EnumT aValue
     return *this;
 }
 
+GpDbQueryBuilder&   GpDbQueryBuilder::LIKE (void)
+{
+    _CheckForSpace();
+
+    iQueryStr
+        .append(u8"LIKE "_sv);
+
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::ILIKE (void)
+{
+    _CheckForSpace();
+
+    iQueryStr
+        .append(u8"ILIKE "_sv);
+
+    return *this;
+}
+
+
 GpDbQueryBuilder&   GpDbQueryBuilder::IS_NULL (void)
 {
     _CheckForSpace();
@@ -851,6 +872,15 @@ GpDbQueryBuilder&   GpDbQueryBuilder::COL_EQUAL_TO_VAL
 GpDbQueryBuilder&   GpDbQueryBuilder::COL_EQUAL_TO_VAL
 (
     std::u8string_view  aName,
+    GpDbQueryValue&&    aValue
+)
+{
+    return COL(aName).EQUAL().VALUE(std::move(aValue));
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::COL_EQUAL_TO_VAL
+(
+    std::u8string_view  aName,
     std::u8string_view  aValue
 )
 {
@@ -1065,6 +1095,7 @@ GpDbQueryBuilder&   GpDbQueryBuilder::OBJECT_BINDS
 (
     const GpReflectModel&               aModel,
     const GpDbQueryBuilderMode::EnumT   aMode,
+    const s_int_32                      aRealmId,
     const s_int_32                      aLanguageId
 )
 {
@@ -1084,10 +1115,12 @@ GpDbQueryBuilder&   GpDbQueryBuilder::OBJECT_BINDS
         if (propInfo.FlagTest(GpReflectPropFlag::MULTILANGUAGE_STRING))
         {
             res
-                .append(u8"language.add_item($"_sv)
-                .append(StrOps::SToString<size_t>(iTypes.size()))
+                .append(u8"language.add_item("_sv)
+                .append(StrOps::SToString(aRealmId))
+                .append(u8","_sv + StrOps::SToString(aLanguageId))
+                .append(u8",$"_sv + StrOps::SToString<size_t>(iTypes.size()))
                 .append(i->bindType)
-                .append(u8","_sv + StrOps::SToString(aLanguageId) + u8")"_sv);
+                .append(u8")"_sv);
         } else
         {
             res
@@ -1136,14 +1169,20 @@ GpDbQueryBuilder&   GpDbQueryBuilder::OBJECT_FOR_UPDATE
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::SEARCH_WHERE (const GpDbSearchDesc& aSearchDesc)
-{
+GpDbQueryBuilder&   GpDbQueryBuilder::SEARCH_WHERE
+(
+    GpReflectModel::C::Opt::CRef    aModel,
+    const GpDbSearchDesc&           aSearchDesc,
+    const s_int_32                  aRealmId,
+    const s_int_32                  aLanguageId
+)
+{   
     if (iQuerySearchBuilder.IsNULL())
     {
         iQuerySearchBuilder = MakeSP<GpDbQuerySearchBuilder>();
     }
 
-    iQuerySearchBuilder.V().SEARCH_WHERE(*this, aSearchDesc);
+    iQuerySearchBuilder.V().SEARCH_WHERE(*this, aModel, aSearchDesc, aRealmId, aLanguageId);
 
     return *this;
 }

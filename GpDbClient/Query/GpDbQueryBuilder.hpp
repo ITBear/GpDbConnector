@@ -96,6 +96,8 @@ public:
     GpDbQueryBuilder&           BETWEEN             (const GpDbQueryValType::EnumT aValueTypeA,
                                                      const GpDbQueryValType::EnumT aValueTypeB);
     GpDbQueryBuilder&           LIKE                (const GpDbQueryValType::EnumT aValueType);
+    GpDbQueryBuilder&           LIKE                (void);
+    GpDbQueryBuilder&           ILIKE               (void);
     GpDbQueryBuilder&           IS_NULL             (void);
     GpDbQueryBuilder&           IS_NOT_NULL         (void);
 
@@ -144,6 +146,8 @@ public:
     GpDbQueryBuilder&           COL_EQUAL_TO_VAL    (std::u8string_view             aName,
                                                      const GpDbQueryValType::EnumT  aValueType);
     GpDbQueryBuilder&           COL_EQUAL_TO_VAL    (std::u8string_view aName,
+                                                     GpDbQueryValue&&   aValue);
+    GpDbQueryBuilder&           COL_EQUAL_TO_VAL    (std::u8string_view aName,
                                                      std::u8string_view aValue);
     GpDbQueryBuilder&           COL_EQUAL_TO_COL    (std::u8string_view aName1,
                                                      std::u8string_view aName2);
@@ -176,14 +180,18 @@ public:
                                                      const s_int_32                     aLanguageId);
     GpDbQueryBuilder&           OBJECT_BINDS        (const GpReflectModel&              aModel,
                                                      const GpDbQueryBuilderMode::EnumT  aMode,
+                                                     const s_int_32                     aRealmId,
                                                      const s_int_32                     aLanguageId);
     GpDbQueryBuilder&           OBJECT_FOR_UPDATE   (const GpReflectModel&              aModel,
                                                      const GpDbQueryBuilderMode::EnumT  aMode,
                                                      const s_int_32                     aLanguageId);
 
-    GpDbQueryBuilder&           SEARCH_WHERE        (const GpDbSearchDesc&  aSearchDesc);
-    GpDbQueryBuilder&           SEARCH_ORDER        (const GpDbSearchDesc&  aSearchDesc);
-    GpDbQueryBuilder&           SEARCH_LIMIT        (const GpDbSearchDesc&  aSearchDesc);
+    GpDbQueryBuilder&           SEARCH_WHERE        (GpReflectModel::C::Opt::CRef   aModel,
+                                                     const GpDbSearchDesc&          aSearchDesc,
+                                                     const s_int_32                 aRealmId,
+                                                     const s_int_32                 aLanguageId);
+    GpDbQueryBuilder&           SEARCH_ORDER        (const GpDbSearchDesc&          aSearchDesc);
+    GpDbQueryBuilder&           SEARCH_LIMIT        (const GpDbSearchDesc&          aSearchDesc);
 
     GpSP<GpDbQuerySearchBuilder>QuerySearchBuilder  (void) const {return iQuerySearchBuilder;}
 
