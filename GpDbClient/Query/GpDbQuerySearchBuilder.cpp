@@ -32,12 +32,10 @@ void    GpDbQuerySearchBuilder::SEARCH_WHERE
 (
     GpDbQueryBuilder&               aBuilder,
     GpReflectModel::C::Opt::CRef    aModel,
-    const GpDbSearchDesc&           aSearchDesc,
-    const s_int_32                  aRealmId,
-    const s_int_32                  aLanguageId
+    const GpDbSearchDesc&           aSearchDesc
 )
 {
-    ProcessFilter(aBuilder, aModel, aSearchDesc, aRealmId, aLanguageId);
+    ProcessFilter(aBuilder, aModel, aSearchDesc);
 }
 
 void    GpDbQuerySearchBuilder::SEARCH_ORDER
@@ -62,9 +60,7 @@ void    GpDbQuerySearchBuilder::ProcessFilter
 (
     GpDbQueryBuilder&               aBuilder,
     GpReflectModel::C::Opt::CRef    aModel,
-    const GpDbSearchDesc&           aSearchDesc,
-    const s_int_32                  aRealmId,
-    const s_int_32                  aLanguageId
+    const GpDbSearchDesc&           aSearchDesc
 )
 {
     std::u8string_view  filter          = aSearchDesc.filter;
@@ -159,13 +155,10 @@ void    GpDbQuerySearchBuilder::ProcessFilter
                 && (propOpt = aModel.value().get().PropOpt(iLastPropName)).has_value()
                 && (propOpt.value().get().FlagTest(GpReflectPropFlag::MULTILANGUAGE_STRING)))
             {
-                //IN (SELECT language.find_item_ids_like(aRealmId, aLanguageId, 'xxxxx%'))
+                //IN (SELECT language.find_item_ids_like('xxxxx%'))
 
                 aBuilder.IN().BRACE_BEGIN()
-                    .SELECT().RAW(u8"language.find_item_ids_like"_sv).BRACE_BEGIN()
-                        .VALUE(GpDbQueryValue(aRealmId))
-                        .COMMA().VALUE(GpDbQueryValue(aLanguageId))
-                        .COMMA();
+                    .SELECT().RAW(u8"language.find_item_ids_like"_sv).BRACE_BEGIN();
 
                 id = FindAndParseStr(id+1, filter, u8'\'', u8'\\', false, aBuilder);//STRING CONSTANT
 
@@ -203,7 +196,7 @@ void    GpDbQuerySearchBuilder::ProcessOrderByCond
 {
     const GpDbSearchOrderDesc::C::Vec::SP& order = aSearchDesc.order;
 
-    if (order.size() == 0)
+    if (order.empty())
     {
         return;
     }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GpDbManagerCatalog.hpp"
 #include "GpDbConnection.hpp"
 
 namespace GPlatform {
@@ -15,7 +16,8 @@ public:
     using ManagerRefT = std::optional<std::reference_wrapper<GpDbManager>>;
 
 public:
-                                GpDbConnectionGuard     (GpDbManager& aManager) noexcept;
+    inline                      GpDbConnectionGuard     (GpDbManager& aManager) noexcept;
+    inline                      GpDbConnectionGuard     (std::u8string_view aManagerName);
                                 ~GpDbConnectionGuard    (void) noexcept;
 
     inline void                 BeginTransaction        (GpDbTransactionIsolation::EnumT aIsolationLevel);
@@ -36,6 +38,16 @@ private:
     GpDbManager&                iManager;
     GpDbConnection::SP          iConnection;
 };
+
+GpDbConnectionGuard::GpDbConnectionGuard (GpDbManager& aManager) noexcept:
+iManager(aManager)
+{
+}
+
+GpDbConnectionGuard::GpDbConnectionGuard (std::u8string_view aManagerName):
+GpDbConnectionGuard(GpDbManagerCatalog::S().Find(aManagerName))
+{
+}
 
 void    GpDbConnectionGuard::BeginTransaction (GpDbTransactionIsolation::EnumT aIsolationLevel)
 {

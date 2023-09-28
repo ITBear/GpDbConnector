@@ -1,7 +1,13 @@
 #include "GpDbConnectionPgSql.hpp"
+#include "GpDbQueryAsyncTaskPgSql.hpp"
 #include "GpDbQueryPreparedPgSql.hpp"
 #include "GpDbQueryResPgSql.hpp"
-#include "GpDbQueryAsyncTaskPgSql.hpp"
+
+#include "../../GpCore2/GpTasks/GpTask.hpp"
+#include "../../GpCore2/GpTasks/Scheduler/GpTaskScheduler.hpp"
+#include "../../GpCore2/GpUtils/Other/GpRAIIonDestruct.hpp"
+#include "../../GpCore2/GpUtils/Other/GpCallHandler2.hpp"
+#include "../../GpLog/GpLogCore/GpLog.hpp"
 
 namespace GPlatform {
 
@@ -23,7 +29,7 @@ void    GpDbConnectionPgSql::Close (void)
     ClosePgConn();
 }
 
-GpDbQueryRes::SP    GpDbConnectionPgSql::Execute
+GpDbQueryRes::SP    GpDbConnectionPgSql::_Execute
 (
     const GpDbQuery&            aQuery,
     const GpDbQueryPrepared&    aQueryPrepared,
@@ -33,40 +39,37 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::Execute
     //Log
     {
         //Get current task
-        GpTask* currentTask = GpTask::SCurrent();
+        const auto currentTaskOpt = GpTask::SCurrentTask();
 
         THROW_COND_GP
         (
-            currentTask != nullptr,
-            "Current task is nullptr"_sv
+            currentTaskOpt.has_value(),
+            u8"Ensure that the DB connection executes inside the task"_sv
         );
 
-        const GpUUID        currentTaskGuid = currentTask->Guid();
+        const GpUUID        currentTaskGuid = currentTaskOpt.value().get().IdAsUUID();
         const std::u8string dbQueryValues   = aQuery.ValuesToStr();
 
         if (dbQueryValues.length() > 0)
         {
-            LOG_INFO(u8"[GpDbConnectionPgSql::Execute]: SQL '"_sv + aQuery.QueryStr() + u8"', values:\n"_sv + dbQueryValues, currentTaskGuid);
+            LOG_INFO(u8"[GpDbConnectionPgSql::_Execute]: SQL '"_sv + aQuery.QueryStr() + u8"', values:\n"_sv + dbQueryValues, currentTaskGuid);
         } else
         {
-            LOG_INFO(u8"[GpDbConnectionPgSql::Execute]: SQL '"_sv + aQuery.QueryStr() + u8"'"_sv, currentTaskGuid);
+            LOG_INFO(u8"[GpDbConnectionPgSql::_Execute]: SQL '"_sv + aQuery.QueryStr() + u8"'"_sv, currentTaskGuid);
         }
     }
 
-    switch (Mode())
+    const GpDbConnectionMode::EnumT connMode = Mode();
+
+    if (connMode == GpDbConnectionMode::ASYNC) [[likely]]
     {
-        case GpDbConnectionMode::SYNC:
-        {
-            return ExecuteSync(aQuery, aQueryPrepared, aMinResultRowsCount);
-        } break;
-        case GpDbConnectionMode::ASYNC:
-        {
-            return ExecuteAsync(aQuery, aQueryPrepared, aMinResultRowsCount);
-        } break;
-        default:
-        {
-            THROW_GP(u8"Unknown connection mode"_sv);
-        }
+        return ExecuteAsync(aQuery, aQueryPrepared, aMinResultRowsCount);
+    } else if (connMode == GpDbConnectionMode::SYNC)
+    {
+        return ExecuteSync(aQuery, aQueryPrepared, aMinResultRowsCount);
+    } else
+    {
+        THROW_GP(u8"Unknown connection mode"_sv);
     }
 }
 
@@ -88,14 +91,47 @@ std::u8string   GpDbConnectionPgSql::StrEscape (std::u8string_view aStr) const
 
 bool    GpDbConnectionPgSql::Validate (void) const noexcept
 {
-    if (iPgConn == nullptr)
+    if (iPgConn == nullptr) [[unlikely]]
     {
         return false;
     }
 
     const ConnStatusType connectionStatus = PQstatus(iPgConn);
-
     return connectionStatus != CONNECTION_BAD;
+}
+
+void    GpDbConnectionPgSql::SetEnv (const std::vector<std::tuple<std::u8string, std::u8string>>& aValues)
+{
+    if (aValues.size() == 0) [[likely]]
+    {
+        return;
+    }
+
+    size_t sqlStrLen = 7 + (aValues.size() * 26);
+
+    for (const auto& [a, b]: aValues)
+    {
+        sqlStrLen += a.length();
+        sqlStrLen += b.length();
+    }
+
+    std::u8string sql;
+    sql.reserve(sqlStrLen);
+    sql.append(u8"select ");
+
+    GpCallHandler2 callOnce;
+
+    for (const auto& [a, b]: aValues)
+    {
+        callOnce.CallIfNonFirst([&sql](){sql.append(u8",");});
+        sql.append(u8"set_config('").append(a).append(u8"', '").append(b).append(u8"', false)");
+    }
+
+    GpDbQuery               query(sql);
+    GpDbQueryPreparedPgSql  queryPrepared;
+    queryPrepared.Prepare(query);
+
+    Execute(query, queryPrepared, 0);
 }
 
 void    GpDbConnectionPgSql::OnBeginTransaction (GpDbTransactionIsolation::EnumT aIsolationLevel)
@@ -143,7 +179,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync
     (
         iPgConn,
         GpUTF::S_UTF8_To_STR(queryZT).data(),
-        int(aQuery.Values().size()),
+        NumOps::SConvert<int>(aQuery.Values().size()),
         queryPrepared.OIDs().data(),
         queryPrepared.ValuesPtr().data(),
         queryPrepared.ValuesSize().data(),
@@ -159,66 +195,79 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync
 
 GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
 (
-    const GpDbQuery&            /*aQuery*/,
-    const GpDbQueryPrepared&    /*aQueryPrepared*/,
-    const size_t                /*aMinResultRowsCount*/
+    const GpDbQuery&            aQuery,
+    const GpDbQueryPrepared&    aQueryPrepared,
+    const size_t                aMinResultRowsCount
 )
 {
-    //TODO: reimplement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    /*
-    //Create SQL requesr task and wait
+    // Create SQL request task and wait
     GpDbQueryAsyncTaskPgSql::SP queryTask = MakeSP<GpDbQueryAsyncTaskPgSql>
     (
-        "SQL async query",
         *this,
         aQuery,
-        aQueryPrepared,
-        aMinResultRowsCount
+        aQueryPrepared
     );
 
-    GpItcFuture::SP future = GpTaskScheduler::S().NewToWaitingDepend(queryTask);
-    EventPoller().V().AddSubscriber
+    GpTask::DoneFutureT::SP queryTaskDoneFuture = queryTask.Vn().GetDoneFuture();
+
+    // Add to event poller
+    const GpTask::IdT queryTaskTaskId = queryTask.Vn().Id();
+
+    GpRAIIonDestruct onFinishRemoveEventPollerSubscription
     (
-        queryTask,
-        queryTask.Vn().Socket().Id()
-    );
-
-    future.Vn().Wait();
-    GpItcResult::SP futureRes = future.Vn().Result();
-
-    GpDbQueryResPgSql::SP res;
-
-    GpItcResult::SExtract<GpDbQueryResPgSql::SP>
-    (
-        futureRes,
-        [&](GpDbQueryResPgSql::SP&& aRes)
-        {
-            res = std::move(aRes);
-        },
-        [&](std::u8string_view aError) -> GpDbQueryResPgSql::SP
-        {
-            THROW_DB
-            (
-                GpDbExceptionCode::QUERY_ERROR,
-                "Failed to do query: "_sv + aError + u8"\nPG error message: " + std::u8string_view(PQerrorMessage(iPgConn))
-            );
-        },
         [&]()
         {
-            THROW_DB
+            IOEventPoller()->RemoveSubscription
             (
-                GpDbExceptionCode::QUERY_ERROR,
-                "Failed to do query: DB result is null"_sv
+                PQsocket(iPgConn),
+                queryTaskTaskId
             );
+        }
+    );
+
+    IOEventPoller()->AddSubscription
+    (
+        PQsocket(iPgConn),
+        queryTaskTaskId,
+        [queryTaskTaskId](const GpIOEventsTypes aIOEventsTypes)
+        {
+            GpTaskScheduler::S().MakeTaskReady(queryTaskTaskId, aIOEventsTypes);
+        }
+    );
+
+    // Start query task
+    GpTaskScheduler::S().NewToReady(queryTask, 0.0_si_s);
+
+    // Wait for started
+    while (!queryTaskDoneFuture.Vn().IsReady())
+    {
+        queryTaskDoneFuture.Vn().WaitFor(100.0_si_ms);
+    }
+
+    // Check result
+    GpDbQueryResPgSql::SP res;
+
+    GpTask::StartFutureT::SCheckIfReady
+    (
+        queryTaskDoneFuture.V(),
+        [&](typename GpTaskFiber::StartFutureT::value_type& aRes)//OnSuccessFnT
+        {
+            LOG_INFO(u8"[GpDbConnectionPgSql::ExecuteAsync]: OK"_sv);
+            res = std::move(aRes.Value<GpDbQueryResPgSql::SP>());
+        },
+        [&](void)//OnEmptyFnT
+        {
+            LOG_ERROR(u8"[GpDbConnectionPgSql::ExecuteAsync]: empty result: '"_sv + aQuery.QueryStr() + u8"', values "_sv + aQuery.ValuesToStr());
+        },
+        [](const GpException& aEx)//OnExceptionFnT
+        {
+            throw aEx;
         }
     );
 
     res.V().Process(aMinResultRowsCount, iPgConn);
 
     return res;
-    */
 }
 
 void    GpDbConnectionPgSql::ClosePgConn (void) noexcept

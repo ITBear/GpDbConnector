@@ -13,6 +13,7 @@ void    GpDbSearchDesc::_SReflectCollectProps (GpReflectProp::C::Vec::Val& aProp
 {
     PROP(filter);
     PROP(limit);
+    PROP(min_id);
     PROP(order);
 }
 

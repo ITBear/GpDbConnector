@@ -45,18 +45,33 @@ public:
     using GenFnT = std::function<GpDbQueryMapperCacheValue::CSP()>;
 
 public:
-                                        GpDbQueryMapperCache    (void) noexcept;
-                                        ~GpDbQueryMapperCache   (void) noexcept;
+                                            GpDbQueryMapperCache    (void) noexcept = default;
+                                            ~GpDbQueryMapperCache   (void) noexcept = default;
 
-    static GpDbQueryMapperCache&        S                       (void) noexcept {return sInstance;}
+    static GpDbQueryMapperCache&            S                       (void) noexcept {return sInstance;}
 
-    const GpDbQueryMapperCacheValue&    Get                     (const GpUUID&  aUID,
-                                                                 GenFnT         aGenFn);
+    inline const GpDbQueryMapperCacheValue& Get                     (const GpUUID&  aUID,
+                                                                     GenFnT&&       aGenFn);
 
 private:
-    CacheT                              iCache;
+    CacheT                                  iCache;
 
-    static GpDbQueryMapperCache         sInstance;
+    static GpDbQueryMapperCache             sInstance;
 };
+
+const GpDbQueryMapperCacheValue&    GpDbQueryMapperCache::Get
+(
+    const GpUUID&   aUID,
+    GenFnT&&        aGenFn
+)
+{
+    GpDbQueryMapperCacheValue::CSP& res = iCache.GetOrSet
+    (
+        aUID,
+        std::move(aGenFn)
+    );
+
+    return res.V();
+}
 
 }//GPlatform

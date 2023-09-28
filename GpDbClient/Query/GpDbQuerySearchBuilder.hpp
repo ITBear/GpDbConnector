@@ -17,9 +17,7 @@ public:
 
     void                        SEARCH_WHERE            (GpDbQueryBuilder&              aBuilder,
                                                          GpReflectModel::C::Opt::CRef   aModel,
-                                                         const GpDbSearchDesc&          aSearchDesc,
-                                                         const s_int_32                 aRealmId,
-                                                         const s_int_32                 aLanguageId);
+                                                         const GpDbSearchDesc&          aSearchDesc);
     void                        SEARCH_ORDER            (GpDbQueryBuilder&      aBuilder,
                                                          const GpDbSearchDesc&  aSearchDesc);
     void                        SEARCH_LIMIT            (GpDbQueryBuilder&      aBuilder,
@@ -28,9 +26,7 @@ public:
 private:
     void                        ProcessFilter           (GpDbQueryBuilder&              aBuilder,
                                                          GpReflectModel::C::Opt::CRef   aModel,
-                                                         const GpDbSearchDesc&          aSearchDesc,
-                                                         const s_int_32                 aRealmId,
-                                                         const s_int_32                 aLanguageId);
+                                                         const GpDbSearchDesc&          aSearchDesc);
     void                        ProcessOrderByCond      (GpDbQueryBuilder&      aBuilder,
                                                          const GpDbSearchDesc&  aSearchDesc);
     void                        ProcessLimitCond        (GpDbQueryBuilder&      aBuilder,

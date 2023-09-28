@@ -281,7 +281,7 @@ void    GpDbQueryRes::_RowToObjectPropVec
         } break;
         case GpReflectType::BOOLEAN:
         {
-            aProp.Vec_Bool(aDataPtr) = GetBooleanArray1D(aRowId, aColId, {});
+            THROW_GP(u8"Unsupported type vector of booleans"_sv); break;
         } break;
         case GpReflectType::UUID:
         {

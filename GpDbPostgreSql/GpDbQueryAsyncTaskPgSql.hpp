@@ -2,7 +2,7 @@
 
 #include "GpDbPostgreSql_global.hpp"
 #include "GpDbConnectionPgSql.hpp"
-#include "../../GpNetwork/GpNetworkCore/IO/Sockets/GpSocketTask.hpp"
+#include "../../GpNetwork/GpNetworkCore/Tasks/GpSocketTask.hpp"
 
 #include <postgresql/libpq-fe.h>
 
@@ -15,28 +15,21 @@ public:
     CLASS_DD(GpDbQueryAsyncTaskPgSql)
 
 public:
-                                GpDbQueryAsyncTaskPgSql     (std::u8string              aName,
-                                                             GpDbConnectionPgSql&       aDbConn,
+                                GpDbQueryAsyncTaskPgSql     (GpDbConnectionPgSql&       aDbConn,
                                                              const GpDbQuery&           aQuery,
-                                                             const GpDbQueryPrepared&   aQueryPrepared
-                                                             /*const size_t             aMinResultRowsCount*/);
+                                                             const GpDbQueryPrepared&   aQueryPrepared);
     virtual                     ~GpDbQueryAsyncTaskPgSql    (void) noexcept override final;
 
-    virtual GpTaskDoRes         OnSockReadyToRead           (GpSocket& aSocket) override final;
-    virtual GpTaskDoRes         OnSockReadyToWrite          (GpSocket& aSocket) override final;
-    virtual void                OnSockClosed                (GpSocket& aSocket) override final;
-    virtual void                OnSockError                 (GpSocket& aSocket) override final;
-
-private:
-    GpTaskDoRes                 ProcessR                    (void);
-    GpTaskDoRes                 ProcessW                    (void);
-    void                        Send                        (void);
+protected:
+    virtual GpTaskRunRes::EnumT OnReadyToRead               (GpSocket& aSocket) override final;
+    virtual GpTaskRunRes::EnumT OnReadyToWrite              (GpSocket& aSocket) override final;
+    virtual void                OnClosed                    (GpSocket& aSocket) override final;
+    virtual void                OnError                     (GpSocket& aSocket) override final;
 
 private:
     GpDbConnectionPgSql&        iDbConn;
-     const GpDbQuery&           iQuery;
+    const GpDbQuery&            iQuery;
     const GpDbQueryPrepared&    iQueryPrepared;
-    //const size_t              iMinResultRowsCount = 0;
     bool                        iIsSend = false;
 };
 

@@ -2,7 +2,7 @@
 #include "GpDbManager.hpp"
 #include "GpDbDriverFactory.hpp"
 #include "GpDbDriver.hpp"
-#include "../../GpNetwork/GpNetworkCore/IO/Events/GpIOEventPollerCatalog.hpp"
+#include "../../GpNetwork/GpNetworkCore/Pollers/GpIOEventPollerCatalog.hpp"
 
 namespace GPlatform {
 
@@ -17,7 +17,7 @@ GpDbManagerCatalog::~GpDbManagerCatalog (void) noexcept
     iManagers.Clear();
 }
 
-void    GpDbManagerCatalog::Init
+void    GpDbManagerCatalog::Start
 (
     const GpDbManagerCfgDesc::C::Vec::SP&   aCfgDescs,
     const GpDbDriverCatalog&                aDbDriverCatalog
@@ -26,11 +26,19 @@ void    GpDbManagerCatalog::Init
     for (const GpDbManagerCfgDesc::SP& cfgDescSP: aCfgDescs)
     {
         const GpDbManagerCfgDesc&   cfgDesc         = cfgDescSP.V();
+        const auto                  eventPollerOpt  = GpIOEventPollerCatalog::S().Get(cfgDesc.event_poller_name);
+
+        THROW_COND_GP
+        (
+            eventPollerOpt.has_value(),
+            [&cfgDesc](){return u8"Event poller not found by name '"_sv + cfgDesc.event_poller_name + u8"'"_sv;}
+        );
+
         const GpDbDriverFactory&    driverFactory   = aDbDriverCatalog.Find(cfgDesc.driver_name);
         GpDbDriver::SP              driverSP        = driverFactory.NewInstance
         (
             cfgDesc.mode.Value(),
-            GpIOEventPollerCatalog::S().Find(cfgDesc.event_poller)
+            eventPollerOpt.value()
         );
 
         GpDbManager::SP dbManager = MakeSP<GpDbManager>
@@ -46,7 +54,7 @@ void    GpDbManagerCatalog::Init
     }
 }
 
-void    GpDbManagerCatalog::Clear (void)
+void    GpDbManagerCatalog::StopAndClear (void)
 {
     iManagers.Clear();
 }
@@ -76,4 +84,4 @@ GpDbManager&    GpDbManagerCatalog::Find (std::u8string_view aName)
     return res.value().get().V();
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

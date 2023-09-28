@@ -20,10 +20,10 @@ os_linux{
 #------------------------------- LIBS END ----------------------------------
 
 HEADERS += \
-	GpDbClient.hpp \
 	GpDbClient_global.hpp \
 	GpDbConnection.hpp \
 	GpDbConnectionGuard.hpp \
+	GpDbConnectionHookManager.hpp \
 	GpDbConnectionMode.hpp \
 	GpDbConnectionStatus.hpp \
 	GpDbDriver.hpp \
@@ -48,6 +48,7 @@ HEADERS += \
 SOURCES += \
 	GpDbConnection.cpp \
 	GpDbConnectionGuard.cpp \
+	GpDbConnectionHookManager.cpp \
 	GpDbConnectionMode.cpp \
 	GpDbConnectionStatus.cpp \
 	GpDbDriverCatalog.cpp \

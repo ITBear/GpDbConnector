@@ -828,10 +828,17 @@ GpDbQuery&  GpDbQuery::FromObject
         } else if (aMode == GpDbQueryBuilderMode::READ)
         {
             //NOP
+            /*
+            if (propInfo.FlagTest(GpReflectPropFlag::MULTILANGUAGE_STRING))
+            {
+                propName = u8"language.get_item("_sv + propName + u8") AS "_sv + srcPropName;
+            }
+            */
         } else if (aMode == GpDbQueryBuilderMode::UPDATE)
         {
             if (   (propInfo.FlagTest(GpReflectPropFlag::GENERATED_ONCE))
-                || (propInfo.FlagTest(GpReflectPropFlag::GENERATED_OUTSIDE)))
+                || (propInfo.FlagTest(GpReflectPropFlag::GENERATED_OUTSIDE))
+                || (propInfo.FlagTest(GpReflectPropFlag::PRIMARY_KEY)))
             {
                 continue;
             }

@@ -22,8 +22,6 @@ LIBS += -lpq
 #------------------------------- LIBS END ----------------------------------
 
 SOURCES += \
-	GpDbArrayUtilsPgSql.cpp \
-	GpDbConnectAsyncTaskPgSql.cpp \
 	GpDbConnectionPgSql.cpp \
 	GpDbDriverFactoryPgSql.cpp \
 	GpDbDriverPgSql.cpp \
@@ -33,11 +31,9 @@ SOURCES += \
 
 HEADERS += \
 	GpDbArrayUtilsPgSql.hpp \
-	GpDbConnectAsyncTaskPgSql.hpp \
 	GpDbConnectionPgSql.hpp \
 	GpDbDriverFactoryPgSql.hpp \
 	GpDbDriverPgSql.hpp \
-	GpDbPostgreSql.hpp \
 	GpDbPostgreSql_global.hpp \
 	GpDbQueryAsyncTaskPgSql.hpp \
 	GpDbQueryPreparedPgSql.hpp \

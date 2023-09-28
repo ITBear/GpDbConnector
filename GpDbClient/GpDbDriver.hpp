@@ -2,7 +2,7 @@
 
 #include "GpDbConnectionMode.hpp"
 #include "Query/GpDbQueryPrepared.hpp"
-#include "../../GpNetwork/GpNetworkCore/IO/Events/GpIOEventPoller.hpp"
+#include "../../GpNetwork/GpNetworkCore/Pollers/GpIOEventPoller.hpp"
 
 namespace GPlatform {
 
@@ -42,8 +42,8 @@ GpDbDriver::GpDbDriver
     const GpDbConnectionMode::EnumT aMode,
     GpIOEventPoller::SP             aEventPoller
 ) noexcept:
-iName(std::move(aName)),
-iMode(aMode),
+iName       (std::move(aName)),
+iMode       (aMode),
 iEventPoller(std::move(aEventPoller))
 {
 }

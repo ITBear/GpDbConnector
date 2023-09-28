@@ -16,7 +16,7 @@ void    GpDbManagerCfgDesc::_SReflectCollectProps (GpReflectProp::C::Vec::Val& a
     PROP(max_conn_pool_size);
     PROP(connection_str);
     PROP(mode);
-    PROP(event_poller);
+    PROP(event_poller_name);
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

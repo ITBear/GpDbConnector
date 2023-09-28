@@ -1,7 +1,7 @@
 #include "GpDbManager.hpp"
 #include "GpDbDriver.hpp"
 #include "GpDbConnection.hpp"
-#include "GpDbManagerCfgDesc.hpp"
+#include "../../GpCore2/GpUtils/SyncPrimitives/GpUnlockGuard.hpp"
 
 namespace GPlatform {
 
@@ -11,9 +11,9 @@ GpDbManager::GpDbManager
     std::u8string                   aConnectionStr,
     const GpDbConnectionMode::EnumT aMode
 ) noexcept:
-iDriver(std::move(aDriver)),
+iDriver (std::move(aDriver)),
 iConnStr(std::move(aConnectionStr)),
-iMode(aMode)
+iMode   (aMode)
 {
 }
 
@@ -34,96 +34,105 @@ GpDbConnection::SP  GpDbManager::NewElement (GpSpinlock& aLocked)
 {
     GpUnlockGuard unlock(aLocked);
 
-    GpDbConnection::SP conn = iDriver.Vn().NewConnection(iConnStr);
-    return conn;
+    return iDriver.V().NewConnection(iConnStr);
 }
 
 void    GpDbManager::OnClear (void) noexcept
 {
-    //NOP
+    // NOP
 }
 
-bool    GpDbManager::Validate (GpSP<GpDbConnection> aConnection) noexcept
+bool    GpDbManager::Validate (GpSP<GpDbConnection>& aConnection) noexcept
 {
     return aConnection.V().Validate();
 }
 
 void    GpDbManager::OnAcquire
 (
-    value_type& /*aValue*/,
-    GpSpinlock& /*aLocked*/
+    GpSP<GpDbConnection>&   /*aDbConnection*/,
+    GpSpinlock&             /*aLocked*/
 )
 {
-    //NOP
+    // NOP
 }
 
 GpDbManager::ReleaseAct GpDbManager::OnRelease
 (
-    value_type& aValue,
-    GpSpinlock& /*aLocked*/
+    GpSP<GpDbConnection>&   aDbConnection,
+    GpSpinlock&             aLocked
 )
 {
-    if (iMode == GpDbConnectionMode::SYNC)
+    if (iMode == GpDbConnectionMode::ASYNC) [[likely]]
+    {
+        // Check if there are NO tasks waiting for connections
+        if (iConnWaitPromises.empty()) [[likely]]
+        {
+            return ReleaseAct::PUSH_TO_ELEMENTS;
+        }
+
+        // Notify waiting task
+        ConnectItcPromiseT promise(std::move(iConnWaitPromises.front()));
+        iConnWaitPromises.pop();
+
+        GpUnlockGuard unlock(aLocked);
+
+        promise.Fulfill(aDbConnection);
+
+        return ReleaseAct::ACQUIRED;
+    } else if (iMode == GpDbConnectionMode::SYNC)
     {
         return ReleaseAct::PUSH_TO_ELEMENTS;
-    }
-
-    //Mode is ASYNC, check if there are NO tasks waiting for connections
-    if (iConnWaitPromises.size() == 0)
+    } else
     {
-        return ReleaseAct::PUSH_TO_ELEMENTS;
+        THROW_GP(u8"Unknown DB connection mode"_sv);
     }
-
-    //Notify waiting task
-    ConnectItcPromiseT promise(std::move(iConnWaitPromises.front()));
-    iConnWaitPromises.pop();
-
-    promise.Complete(MakeSP<ConnectItcResultT>(value_type(aValue)));
-
-    return ReleaseAct::ACQUIRED;
 }
 
-std::optional<GpDbManager::value_type>  GpDbManager::OnAcquireNoElementsLeft (GpSpinlock& /*aLocked*/)
+std::optional<GpSP<GpDbConnection>> GpDbManager::OnAcquireNoElementsLeft (GpSpinlock& aLocked)
 {
-    if (iMode == GpDbConnectionMode::SYNC)
+    if (iMode == GpDbConnectionMode::ASYNC) [[likely]]
+    {
+        // Mode is ASYNC, wait for Release next connection
+        ConnectItcPromiseT      promise;
+        ConnectItcFutureT::SP   future = promise.Future();
+        iConnWaitPromises.push(std::move(promise));
+
+        GpUnlockGuard unlock(aLocked);
+
+        // Wait for future
+        while (!future.Vn().IsReady())
+        {
+            future.Vn().WaitFor(250.0_si_ms);
+        }
+
+        std::optional<GpSP<GpDbConnection>> res;
+
+        // Check result
+        ConnectItcFutureT::SCheckIfReady
+        (
+            future.V(),
+            [&](GpSP<GpDbConnection>& aConnection)
+            {
+                res = std::move(aConnection);
+            },
+            [](void)
+            {
+                // NOP
+            },
+            [](const GpException& aEx)
+            {
+                throw aEx;
+            }
+        );
+
+        return res;
+    } else if (iMode == GpDbConnectionMode::SYNC)
     {
         return std::nullopt;
+    } else
+    {
+        THROW_GP(u8"Unknown DB connection mode"_sv);
     }
-
-    //TODO: reimplement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    /*
-    //Mode is ASYNC, wait for Release next connection
-    GpItcPromise    promise;
-    GpItcFuture::SP future  = promise.Future();
-    iConnWaitPromises.push(std::move(promise));
-
-    GpUnlockGuard unlock(aLocked);
-
-    future.Vn().Wait();
-    GpItcResult::SP futureRes = future.Vn().Result();
-
-    std::optional<value_type> res;
-
-    GpItcResult::SExtract<value_type>
-    (
-        futureRes,
-        [&](value_type&& aValue)
-        {
-            res = std::move(aValue);
-        },
-        [](std::u8string_view aError)
-        {
-            LOG_ERROR(aError, GpTask::SCurrentUID());
-        },
-        []()
-        {
-        }
-    );
-
-    return res;
-    */
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

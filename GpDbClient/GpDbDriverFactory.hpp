@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GpDbConnectionMode.hpp"
-#include "../../GpNetwork/GpNetworkCore/IO/Events/GpIOEventPoller.hpp"
+#include "../../GpNetwork/GpNetworkCore/Pollers/GpIOEventPoller.hpp"
 
 namespace GPlatform {
 

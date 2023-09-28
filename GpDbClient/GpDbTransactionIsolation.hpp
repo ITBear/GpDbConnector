@@ -13,4 +13,4 @@ GP_ENUM(GP_DB_CLIENT_API, GpDbTransactionIsolation,
     READ_UNCOMMITTED
 );
 
-}//namespace GPlatform
+}// namespace GPlatform

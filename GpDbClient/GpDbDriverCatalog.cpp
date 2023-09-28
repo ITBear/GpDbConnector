@@ -14,6 +14,7 @@ GpDbDriverCatalog::~GpDbDriverCatalog (void) noexcept
 void    GpDbDriverCatalog::Add (GpSP<GpDbDriverFactory> aFactory)
 {
     const GpDbDriverFactory& driverFactory = aFactory.V();
+
     iCatalog.Set
     (
         std::u8string(driverFactory.Name()),

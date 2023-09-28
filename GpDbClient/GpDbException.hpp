@@ -7,6 +7,4 @@ namespace GPlatform {
 
 EXCEPTION_CODE(GP_DB_CLIENT_API, GpDbException, DB)
 
-}//namespace GPlatform
-
-
+}// namespace GPlatform

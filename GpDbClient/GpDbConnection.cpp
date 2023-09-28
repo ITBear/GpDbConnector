@@ -1,4 +1,6 @@
 #include "GpDbConnection.hpp"
+#include "GpDbConnectionHookManager.hpp"
+#include "../../GpCore2/GpUtils/Other/GpRAIIonDestruct.hpp"
 
 namespace GPlatform {
 
@@ -11,10 +13,11 @@ void    GpDbConnection::BeginTransaction (GpDbTransactionIsolation::EnumT aIsola
     THROW_COND_GP
     (
         iIsTransactionOpen == false,
-        "Transaction already open"_sv
+        u8"Transaction already open"_sv
     );
 
     OnBeginTransaction(aIsolationLevel);
+
     iIsTransactionOpen  = true;
     iTransactionLevel   = aIsolationLevel;
 }
@@ -24,7 +27,7 @@ void    GpDbConnection::CommitTransaction (void)
     THROW_COND_GP
     (
         iIsTransactionOpen == true,
-        "Transaction not open"_sv
+        u8"Transaction not open"_sv
     );
 
     try
@@ -63,6 +66,53 @@ void    GpDbConnection::RollbackTransaction (void)
 
     iIsTransactionOpen  = false;
     iTransactionLevel   = TransactionLevelTE::READ_UNCOMMITTED;
+}
+
+GpDbQueryRes::SP    GpDbConnection::Execute
+(
+    const GpDbQuery&            aQuery,
+    const GpDbQueryPrepared&    aQueryPrepared,
+    const size_t                aMinResultRowsCount
+)
+{
+    const bool _isCallHook = iIsCallHook;
+
+    GpRAIIonDestruct isCallHookRestore
+    (
+        [&]()
+        {
+            iIsCallHook = _isCallHook;
+        }
+    );
+
+    if (_isCallHook)
+    {
+        iIsCallHook = false;
+        GpDbConnectionHookManager::S().OnExecute
+        (
+            *this,
+            GpDbConnectionHookManager::Mode::BEFORE_EXECUTE
+        );
+    }
+
+    GpDbQueryRes::SP res = _Execute
+    (
+        aQuery,
+        aQueryPrepared,
+        aMinResultRowsCount
+    );
+
+    if (_isCallHook)
+    {
+        iIsCallHook = false;
+        GpDbConnectionHookManager::S().OnExecute
+        (
+            *this,
+            GpDbConnectionHookManager::Mode::AFTER_EXECUTE
+        );
+    }
+
+    return res;
 }
 
 }//namespace GPlatform

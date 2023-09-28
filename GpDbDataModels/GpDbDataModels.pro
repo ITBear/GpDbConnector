@@ -20,7 +20,6 @@ os_linux{
 #------------------------------- LIBS END ----------------------------------
 
 HEADERS += \
-	GpDbDataModels.hpp \
 	GpDbDataModels_global.hpp \
 	Search/GpDbDataModelsSearch.hpp \
 	Search/GpDbSearchDesc.hpp \

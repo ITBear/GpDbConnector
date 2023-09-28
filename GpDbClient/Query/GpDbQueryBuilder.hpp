@@ -90,6 +90,7 @@ public:
     GpDbQueryBuilder&           AS                  (void);
     GpDbQueryBuilder&           AS                  (std::u8string_view aName);
     GpDbQueryBuilder&           IN                  (void);
+    GpDbQueryBuilder&           ANY                 (const GpDbQueryValType::EnumT  aValueType);
     GpDbQueryBuilder&           ANY                 (const GpDbQueryValType::EnumT  aValueType,
                                                      std::u8string_view             aTypeCast);
     GpDbQueryBuilder&           BETWEEN             (void);
@@ -110,6 +111,8 @@ public:
                                                      std::u8string_view aTable);
     GpDbQueryBuilder&           SELECT              (void);
     GpDbQueryBuilder&           SELECT_ALL          (void);
+    GpDbQueryBuilder&           SELECT_ALL          (std::u8string_view aTable);
+    GpDbQueryBuilder&           FROM                (std::u8string_view aTable);
     GpDbQueryBuilder&           FROM                (std::u8string_view aSchema,
                                                      std::u8string_view aTable);
     GpDbQueryBuilder&           FROM                (void);
@@ -117,6 +120,8 @@ public:
     GpDbQueryBuilder&           UPDATE              (std::u8string_view aSchema,
                                                      std::u8string_view aTable);
     GpDbQueryBuilder&           DISTINCT            (std::u8string_view aName);
+    GpDbQueryBuilder&           DISTINCT            (std::u8string_view aTable,
+                                                     std::u8string_view aName);
     GpDbQueryBuilder&           SET                 (void);
     GpDbQueryBuilder&           ORDER_BY            (void);
     GpDbQueryBuilder&           LIMIT               (const size_t aValue);
@@ -141,7 +146,12 @@ public:
                                                      std::u8string_view aTable);
 
     GpDbQueryBuilder&           COL                 (std::u8string_view aName);
+    GpDbQueryBuilder&           COL                 (std::u8string_view aTable,
+                                                     std::u8string_view aName);
     GpDbQueryBuilder&           COL_AS              (std::u8string_view aName,
+                                                     std::u8string_view aNameAs);
+    GpDbQueryBuilder&           COL_AS              (std::u8string_view aTable,
+                                                     std::u8string_view aName,
                                                      std::u8string_view aNameAs);
     GpDbQueryBuilder&           COL_EQUAL_TO_VAL    (std::u8string_view             aName,
                                                      const GpDbQueryValType::EnumT  aValueType);
@@ -158,6 +168,8 @@ public:
     GpDbQueryBuilder&           COL_ASSIGN          (std::u8string_view             aName,
                                                      const GpDbQueryValType::EnumT  aValueType);
 
+    GpDbQueryBuilder&           NAME                (std::u8string_view aName);
+
     GpDbQueryBuilder&           VALUE_NULL          (void);
     GpDbQueryBuilder&           VALUE               (const GpDbQueryValType::EnumT aValueType);
     GpDbQueryBuilder&           VALUE               (GpDbQueryValue&& aValue);
@@ -172,24 +184,16 @@ public:
                                                      std::u8string_view aTypeCast);
 
     GpDbQueryBuilder&           OBJECT_NAMES        (const GpReflectModel&              aModel,
-                                                     const GpDbQueryBuilderMode::EnumT  aMode,
-                                                     const s_int_32                     aLanguageId);
+                                                     const GpDbQueryBuilderMode::EnumT  aMode);
     GpDbQueryBuilder&           OBJECT_NAMES        (std::u8string_view                 aPrefix,
                                                      const GpReflectModel&              aModel,
-                                                     const GpDbQueryBuilderMode::EnumT  aMode,
-                                                     const s_int_32                     aLanguageId);
+                                                     const GpDbQueryBuilderMode::EnumT  aMode);
     GpDbQueryBuilder&           OBJECT_BINDS        (const GpReflectModel&              aModel,
-                                                     const GpDbQueryBuilderMode::EnumT  aMode,
-                                                     const s_int_32                     aRealmId,
-                                                     const s_int_32                     aLanguageId);
-    GpDbQueryBuilder&           OBJECT_FOR_UPDATE   (const GpReflectModel&              aModel,
-                                                     const GpDbQueryBuilderMode::EnumT  aMode,
-                                                     const s_int_32                     aLanguageId);
+                                                     const GpDbQueryBuilderMode::EnumT  aMode);
+    GpDbQueryBuilder&           OBJECT_FOR_UPDATE   (const GpReflectModel&              aModel);
 
     GpDbQueryBuilder&           SEARCH_WHERE        (GpReflectModel::C::Opt::CRef   aModel,
-                                                     const GpDbSearchDesc&          aSearchDesc,
-                                                     const s_int_32                 aRealmId,
-                                                     const s_int_32                 aLanguageId);
+                                                     const GpDbSearchDesc&          aSearchDesc);
     GpDbQueryBuilder&           SEARCH_ORDER        (const GpDbSearchDesc&          aSearchDesc);
     GpDbQueryBuilder&           SEARCH_LIMIT        (const GpDbSearchDesc&          aSearchDesc);
 
@@ -207,8 +211,7 @@ private:
     static std::u8string_view   _SCheckIfName       (std::u8string_view aStr);
     static std::vector<TypeInfo>_SFromModel         (std::u8string_view                 aPrefix,
                                                      const GpReflectModel&              aModel,
-                                                     const GpDbQueryBuilderMode::EnumT  aMode,
-                                                     const s_int_32                     aLanguageId);
+                                                     const GpDbQueryBuilderMode::EnumT  aMode);
     static std::u8string        _SEscape            (std::u8string_view aStr);
 
 private:

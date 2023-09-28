@@ -4,7 +4,7 @@
 #include "Query/GpDbQueryPrepared.hpp"
 #include "Query/GpDbQuery.hpp"
 #include "../../GpCore2/GpUtils/Types/Containers/GpElementsPool.hpp"
-#include "../../GpCore2/GpTasks/ITC/GpItcPromise.hpp"
+#include "../../GpCore2/GpTasks/ITC/GpItcSharedPromise.hpp"
 
 namespace GPlatform {
 
@@ -19,35 +19,34 @@ public:
     CLASS_DD(GpDbManager)
     TAG_SET(THREAD_SAFE)
 
-    using ConnectItcPromiseT    = GpItcPromise<value_type>;
-    using ConnectItcFutureT     = GpItcFuture<value_type>;
-    using ConnectItcResultT     = GpItcResult<value_type>;
+    using ConnectItcPromiseT    = GpItcSharedPromise<GpSP<GpDbConnection>>;
+    using ConnectItcFutureT     = GpItcSharedFuture<GpSP<GpDbConnection>>;
 
 public:
-                                        GpDbManager             (GpSP<GpDbDriver>                   aDriver,
-                                                                 std::u8string                      aConnectionStr,
-                                                                 const GpDbConnectionMode::EnumT    aMode) noexcept;
-    virtual                             ~GpDbManager            (void) noexcept override final;
+                                                GpDbManager             (GpSP<GpDbDriver>                   aDriver,
+                                                                         std::u8string                      aConnectionStr,
+                                                                         const GpDbConnectionMode::EnumT    aMode) noexcept;
+    virtual                                     ~GpDbManager            (void) noexcept override final;
 
-    GpDbQueryPrepared::CSP              Prepare                 (const GpDbQuery& aQuery) const;
+    GpDbQueryPrepared::CSP                      Prepare                 (const GpDbQuery& aQuery) const;
 
 protected:
-    virtual void                        PreInit                 (const size_t aCount) override final;
-    virtual GpSP<GpDbConnection>        NewElement              (GpSpinlock& aLocked) override final;
-    virtual void                        OnClear                 (void) noexcept override final;
-    virtual bool                        Validate                (GpSP<GpDbConnection> aConnection) noexcept override final;
+    virtual void                                PreInit                 (const size_t aCount) override final;
+    virtual GpSP<GpDbConnection>                NewElement              (GpSpinlock& aLocked) override final;
+    virtual void                                OnClear                 (void) noexcept override final;
+    virtual bool                                Validate                (GpSP<GpDbConnection>& aConnection) noexcept override final;
 
-    virtual void                        OnAcquire               (value_type& aValue,
-                                                                 GpSpinlock& aLocked) override final;
-    virtual ReleaseAct                  OnRelease               (value_type& aValue,
-                                                                 GpSpinlock& aLocked) override final;
-    virtual std::optional<value_type>   OnAcquireNoElementsLeft (GpSpinlock& aLocked) override final;
+    virtual void                                OnAcquire               (GpSP<GpDbConnection>& aDbConnection,
+                                                                         GpSpinlock& aLocked) override final;
+    virtual ReleaseAct                          OnRelease               (GpSP<GpDbConnection>& aDbConnection,
+                                                                         GpSpinlock& aLocked) override final;
+    virtual std::optional<GpSP<GpDbConnection>> OnAcquireNoElementsLeft (GpSpinlock& aLocked) override final;
 
 private:
-    GpSP<GpDbDriver>                    iDriver;
-    const std::u8string                 iConnStr;
-    const GpDbConnectionMode::EnumT     iMode;
-    std::queue<ConnectItcPromiseT>      iConnWaitPromises;
+    GpSP<GpDbDriver>                            iDriver;
+    const std::u8string                         iConnStr;
+    const GpDbConnectionMode::EnumT             iMode;
+    std::queue<ConnectItcPromiseT>              iConnWaitPromises;
 };
 
-}//GPlatform
+}// GPlatform

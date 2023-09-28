@@ -3,6 +3,7 @@
 #include "GpDbPostgreSql_global.hpp"
 #include "../../GpCore2/GpUtils/Types/Numerics/GpNumericTypes.hpp"
 #include "../../GpCore2/GpUtils/Types/UIDs/GpUUID.hpp"
+#include "../../GpCore2/GpUtils/Types/Strings/GpStringOps.hpp"
 #include "../../GpCore2/GpUtils/Streams/GpByteWriter.hpp"
 #include "../../GpCore2/GpUtils/Streams/GpByteWriterStorageByteArray.hpp"
 #include "../../GpCore2/GpUtils/Macro/GpMacroClass.hpp"
@@ -23,20 +24,25 @@ struct PgArrayHeaderT
 } __attribute__ ((__packed__));/**/
 
 //https://github.com/postgres/postgres/blob/master/src/include/utils/array.h
-//https://stackoverflow.com/questions/26499266/whats-the-proper-index-for-querying-structures-in-arrays-in-postgres-jsonb/27708358#27708358
-/*
-* A standard varlena array has the following internal structure:
- *    <vl_len_>     - standard varlena header word
- *    <ndim>        - number of dimensions of the array
- *    <dataoffset>  - offset to stored data, or 0 if no nulls bitmap
- *    <elemtype>    - element type OID
- *    <dimensions>  - length of each array axis (C array of int)
- *    <lower bnds>  - lower boundary of each dimension (C array of int)
- *    <null bitmap> - bitmap showing locations of nulls (OPTIONAL)
- *    <actual data> - whatever is the stored data
- *
- * The <dimensions> and <lower bnds> arrays each have ndim elements.
-*/
+
+constexpr const Oid INT2OID         = 21;
+constexpr const Oid INT2VECTOROID   = 22;
+constexpr const Oid INT4OID         = 23;
+constexpr const Oid INT4ARRAYOID    = 1007;
+constexpr const Oid INT8OID         = 20;
+constexpr const Oid INT8ARRAYOID    = 1016;
+constexpr const Oid FLOAT8OID       = 701;
+constexpr const Oid FLOAT8ARRAYOID  = 1022;
+constexpr const Oid FLOAT4OID       = 700;
+constexpr const Oid FLOAT4ARRAYOID  = 1021;
+constexpr const Oid TEXTOID         = 25;
+constexpr const Oid TEXTARRAYOID    = 1009;
+constexpr const Oid UUIDOID         = 2950;
+constexpr const Oid UUIDARRAYOID    = 2951;
+constexpr const Oid BYTEAOID        = 17;
+constexpr const Oid BYTEAARRAYOID   = 1001;
+constexpr const Oid BOOLOID         = 16;
+constexpr const Oid BOOLARRAYOID    = 1000;
 
 class GpDbArrayUtilsPgSql
 {
@@ -44,27 +50,228 @@ public:
     CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbArrayUtilsPgSql)
 
 public:
-    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<s_int_16>& aArray);
-    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<s_int_32>& aArray);
-    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<s_int_64>& aArray);
-    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<double>& aArray);
-    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<float>& aArray);
-    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<std::u8string>& aArray);
-    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<GpUUID>& aArray);
-    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<GpBytesArray>& aArray);
-    static std::tuple<Oid, GpBytesArray>    SBuild      (const std::vector<bool>& aArray);
-
-private:
-    template<typename T, bool IsN2H>
-    static std::tuple<Oid, GpBytesArray>    _SBuildPod  (const Oid              aOid,
-                                                         const Oid              aOidArray,
-                                                         const std::vector<T>&  aArray);
+    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<s_int_16>& aArray);
+    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<s_int_32>& aArray);
+    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<s_int_64>& aArray);
+    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<double>& aArray);
+    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<float>& aArray);
+    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<std::u8string>& aArray);
+    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<GpUUID>& aArray);
+    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<GpBytesArray>& aArray);
+    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<bool>& aArray);
 
     template<typename T>
-    static std::tuple<Oid, GpBytesArray>    _SBuildBytes(const Oid              aOid,
-                                                         const Oid              aOidArray,
-                                                         const std::vector<T>&  aArray);
+    static std::vector<T>                       SRead           (GpSpanPtrByteRW aData);
+
+private:
+    template<typename T>
+    static constexpr Oid                        _SOidFromT      (void);
+
+    template<typename T, bool IsN2H>
+    static std::tuple<Oid, GpBytesArray>        _SBuildPod      (const Oid              aOid,
+                                                                 const Oid              aOidArray,
+                                                                 const std::vector<T>&  aArray);
+
+    template<typename T>
+    static std::tuple<Oid, GpBytesArray>        _SBuildBytes    (const Oid              aOid,
+                                                                 const Oid              aOidArray,
+                                                                 const std::vector<T>&  aArray);
+
+    template<typename T, bool IsN2H>
+    static std::vector<T>                       _SReadPod       (GpSpanPtrByteR aData,
+                                                                 const size_t   aElementsCount);
+
+    template<typename T>
+    static std::vector<T>                       _SReadBytes     (GpSpanPtrByteRW    aData,
+                                                                 const size_t       aElementsCount);
 };
+
+std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<s_int_16>& aArray)
+{
+    return _SBuildPod<s_int_16, true>(INT2OID, INT2VECTOROID, aArray);
+}
+
+std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<s_int_32>& aArray)
+{
+    return _SBuildPod<s_int_32, true>(INT4OID, INT4ARRAYOID, aArray);
+}
+
+std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<s_int_64>& aArray)
+{
+    return _SBuildPod<s_int_64, true>(INT8OID, INT8ARRAYOID, aArray);
+}
+
+std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<double>& aArray)
+{
+    return _SBuildPod<double, true>(FLOAT8OID, FLOAT8ARRAYOID, aArray);
+}
+
+std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<float>& aArray)
+{
+    return _SBuildPod<float, true>(FLOAT4OID, FLOAT4ARRAYOID, aArray);
+}
+
+std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<std::u8string>& aArray)
+{
+    return _SBuildBytes<std::u8string>(TEXTOID, TEXTARRAYOID, aArray);
+}
+
+std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<GpUUID>& aArray)
+{
+    return _SBuildPod<GpUUID, false>(UUIDOID, UUIDARRAYOID, aArray);
+}
+
+std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<GpBytesArray>& aArray)
+{
+    return _SBuildBytes<GpBytesArray>(BYTEAOID, BYTEAARRAYOID, aArray);
+}
+
+std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<bool>& aArray)
+{
+    std::vector<std::u8string> strs;
+    for (const bool v: aArray)
+    {
+        if (v) strs.emplace_back(u8"true");
+        else strs.emplace_back(u8"false");
+    }
+
+    return _SBuildBytes<std::u8string>(BOOLOID, BOOLARRAYOID, strs);
+}
+
+template<typename T>
+std::vector<T>  GpDbArrayUtilsPgSql::SRead (GpSpanPtrByteRW aData)
+
+{
+    // Check data size
+    THROW_COND_GP
+    (
+        aData.Count() >= sizeof(PgArrayHeaderT),
+        u8"Data size is less than PgArrayHeaderT header size"_sv
+    );
+
+    PgArrayHeaderT& header = *reinterpret_cast<PgArrayHeaderT*>(aData.Ptr());
+
+    header.dimensions       = BitOps::N2H<s_int_32>(header.dimensions);
+    header.dataOffset       = BitOps::N2H<s_int_32>(header.dataOffset);
+    header.oid              = BitOps::N2H<Oid>(header.oid);
+    header.elementsCount    = BitOps::N2H<s_int_32>(header.elementsCount);
+    header.lowerBoundary    = BitOps::N2H<s_int_32>(header.lowerBoundary);
+
+    // Check header.dimensions
+    THROW_COND_GP
+    (
+        header.dimensions == 1,
+        u8"Array must be 1D"_sv
+    );
+
+    // Check header.dataOffset
+    THROW_COND_GP
+    (
+        header.dataOffset == 0,
+        u8"Data offset must be 0"_sv
+    );
+
+    const Oid oid = _SOidFromT<T>();
+
+    // Check header.oid
+    THROW_COND_GP
+    (
+        header.oid == oid,
+        [](){return u8"OID "_sv + StrOps::SToString(oid) + u8" doesn't match type T"_sv;}
+    );
+
+    // Check header.elementsCount
+    THROW_COND_GP
+    (
+        header.elementsCount >= 0,
+        u8"Elements count must be 0"_sv
+    );
+
+    // Check header.lowerBoundary
+    THROW_COND_GP
+    (
+        header.lowerBoundary == 1,
+        u8"Lower boundary must be 1"_sv
+    );
+
+    if (header.elementsCount == 0)
+    {
+        return {};
+    }
+
+    aData = aData.OffsetAdd(sizeof(PgArrayHeaderT));
+    const size_t elementsCount = NumOps::SConvert<size_t>(header.elementsCount);
+
+    if constexpr(std::is_same_v<T, s_int_16>)
+    {
+        return _SReadPod<T, true>(aData, elementsCount);
+    } else if constexpr(std::is_same_v<T, s_int_32>)
+    {
+        return _SReadPod<T, true>(aData, elementsCount);
+    } else if constexpr(std::is_same_v<T, s_int_64>)
+    {
+        return _SReadPod<T, true>(aData, elementsCount);
+    } else if constexpr(std::is_same_v<T, double>)
+    {
+        return _SReadPod<T, true>(aData, elementsCount);
+    } else if constexpr(std::is_same_v<T, float>)
+    {
+        return _SReadPod<T, true>(aData, elementsCount);
+    } else if constexpr(std::is_same_v<T, std::u8string_view>)
+    {
+        return _SReadBytes<T>(aData, elementsCount);
+    } else if constexpr(std::is_same_v<T, GpSpanPtrCharRW>)
+    {
+        return _SReadBytes<T>(aData, elementsCount);
+    } else if constexpr(std::is_same_v<T, GpUUID>)
+    {
+        return _SReadPod<T, false>(aData, elementsCount);
+    } else if constexpr(std::is_same_v<T, GpSpanPtrByteR>)
+    {
+        return _SReadBytes<T>(aData, elementsCount);
+    } else
+    {
+        GpThrowCe<GpException>(u8"Unknown type");
+    }
+
+    return {};
+}
+
+template<typename T>
+constexpr Oid   GpDbArrayUtilsPgSql::_SOidFromT (void)
+{
+    if constexpr(std::is_same_v<T, s_int_16>)
+    {
+        return INT2OID;
+    } else if constexpr(std::is_same_v<T, s_int_32>)
+    {
+        return INT4OID;
+    } else if constexpr(std::is_same_v<T, s_int_64>)
+    {
+        return INT8OID;
+    } else if constexpr(std::is_same_v<T, double>)
+    {
+        return FLOAT8OID;
+    } else if constexpr(std::is_same_v<T, float>)
+    {
+        return FLOAT4OID;
+    } else if constexpr(std::is_same_v<T, std::u8string_view>)
+    {
+        return TEXTOID;
+    } else if constexpr(std::is_same_v<T, GpSpanPtrCharRW>)
+    {
+        return TEXTOID;
+    } else if constexpr(std::is_same_v<T, GpUUID>)
+    {
+        return UUIDOID;
+    } else if constexpr(std::is_same_v<T, GpSpanPtrByteR>)
+    {
+        return BYTEAOID;
+    } else
+    {
+        GpThrowCe<GpException>(u8"Unknown type");
+    }
+}
 
 template<typename T, bool IsN2H>
 std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
@@ -78,7 +285,7 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
     {
         const size_t elementsCount = aArray.size();
 
-        arrayData.resize(elementsCount*sizeof(T));
+        arrayData.resize(sizeof(PgArrayHeaderT) + elementsCount*(sizeof(s_int_32) + sizeof(T)));
         GpByteWriterStorageByteArray    arrayDataStorage(arrayData);
         GpByteWriter                    arrayDataWriter(arrayDataStorage);
 
@@ -91,17 +298,20 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
 
         arrayDataWriter.Bytes({&header, 1});
 
-        for (T e: aArray)
+        const s_int_32 sizeofElement = BitOps::H2N<s_int_32>(NumOps::SConvert<s_int_32>(sizeof(T)));
+
+        for (T element: aArray)
         {
             if constexpr (IsN2H)
             {
-                e = BitOps::H2N<T>(e);
+                element = BitOps::H2N<T>(element);
             }
 
-            arrayDataWriter.Bytes(&e, sizeof(T));
+            arrayDataWriter.Bytes(&sizeofElement, sizeof(T));
+            arrayDataWriter.Bytes(&element, sizeof(T));
         }
 
-        arrayDataWriter.ShrinkToFit();
+        //arrayDataWriter.ShrinkToFit();
     }
 
     return {aOidArray, std::move(arrayData)};
@@ -117,7 +327,16 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildBytes
 {
     GpBytesArray arrayData;
     {
-        arrayData.resize(512);
+        const size_t    elementsCount   = aArray.size();
+        size_t          totalSize       = sizeof(PgArrayHeaderT) + elementsCount * sizeof(s_int_32)/*element data size*/;
+
+        for (const T& e: aArray)
+        {
+            const size_t elementDataSize = e.size();
+            totalSize += elementDataSize;
+        }
+
+        arrayData.resize(totalSize);
         GpByteWriterStorageByteArray    arrayDataStorage(arrayData);
         GpByteWriter                    arrayDataWriter(arrayDataStorage);
 
@@ -125,26 +344,120 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildBytes
         header.dimensions       = BitOps::H2N<s_int_32>(1);
         header.dataOffset       = BitOps::H2N<s_int_32>(0);
         header.oid              = BitOps::H2N<Oid>(aOid);
-        header.elementsCount    = BitOps::H2N<s_int_32>(NumOps::SConvert<s_int_32>(aArray.size()));
+        header.elementsCount    = BitOps::H2N<s_int_32>(NumOps::SConvert<s_int_32>(elementsCount));
         header.lowerBoundary    = BitOps::H2N<s_int_32>(1);
 
         arrayDataWriter.Bytes({&header, 1});
 
         for (const T& e: aArray)
         {
-            const size_t dataSize = e.size();
+            const size_t elementDataSize = e.size();
 
-            //Size
-            arrayDataWriter.SInt32(NumOps::SConvert<s_int_32>(dataSize));
+            // Element data size
+            arrayDataWriter.SInt32(BitOps::H2N<s_int_32>(NumOps::SConvert<s_int_32>(elementDataSize)));
 
-            //Data
-            arrayDataWriter.Bytes(e.data(), dataSize);
+            // Element data
+            arrayDataWriter.Bytes(e.data(), elementDataSize);
         }
 
-        arrayDataWriter.ShrinkToFit();
+        //arrayDataWriter.ShrinkToFit();
     }
 
     return {aOidArray, std::move(arrayData)};
+}
+
+template<typename T, bool IsN2H>
+std::vector<T>  GpDbArrayUtilsPgSql::_SReadPod
+(
+    GpSpanPtrByteR  aData,
+    const size_t    aElementsCount
+)
+{
+    const size_t dataSize       = aData.Count();
+    const size_t expectedSize   = aElementsCount * (sizeof(s_int_32) + sizeof(T));
+
+    THROW_COND_GP
+    (
+        dataSize == expectedSize,
+        [dataSize, expectedSize]()
+        {
+            return u8"Size "_sv + StrOps::SToString(dataSize) + u8" of the result doesn't match the expected size "_sv + StrOps::SToString(expectedSize);
+        }
+    );
+
+    std::vector<T> res;
+    res.resize(aElementsCount);
+
+    for (size_t id = 0; id < aElementsCount; id++)
+    {
+        // Element size
+        aData.OffsetAdd(sizeof(s_int_32));
+
+        // Element value
+        T element;
+        std::memcpy(&element, aData.Ptr(), sizeof(T));
+
+        if constexpr(IsN2H)
+        {
+            res[id] = BitOps::H2N<T>(element);
+        } else
+        {
+            res[id] = element;
+        }
+    }
+
+    return res;
+}
+
+template<typename T>
+std::vector<T>  GpDbArrayUtilsPgSql::_SReadBytes
+(
+    GpSpanPtrByteRW aData,
+    const size_t    aElementsCount
+)
+{
+    const size_t dataSize   = aData.Count();
+    size_t expectedSize     = aElementsCount * sizeof(s_int_32);
+
+    {
+        GpSpanPtrByteR d = aData;
+        for (size_t id = 0; id < aElementsCount; id++)
+        {
+            // Element size
+            s_int_32 elementSize = 0;
+            std::memcpy(&elementSize, d.Ptr(), sizeof(s_int_32));
+            const size_t size = NumOps::SConvert<size_t>(elementSize);
+            expectedSize += size;
+            d.OffsetAdd(sizeof(s_int_32) + size);
+        }
+    }
+
+    THROW_COND_GP
+    (
+        dataSize == expectedSize,
+        [dataSize, expectedSize]()
+        {
+            return u8"Size "_sv + StrOps::SToString(dataSize) + u8" of the result doesn't match the expected size "_sv + StrOps::SToString(expectedSize);
+        }
+    );
+
+    std::vector<T> res;
+    res.resize(aElementsCount);
+
+    for (size_t id = 0; id < aElementsCount; id++)
+    {
+        // Element size
+        s_int_32 elementSize = 0;
+        std::memcpy(&elementSize, aData.Ptr(), sizeof(s_int_32));
+        const size_t size = NumOps::SConvert<size_t>(elementSize);
+        aData.OffsetAdd(sizeof(s_int_32));
+
+        // Element value
+        res[id] = {reinterpret_cast<typename T::value_type*>(aData.Ptr()), size};
+        aData.OffsetAdd(size);
+    }
+
+    return res;
 }
 
 }//namespace GPlatform

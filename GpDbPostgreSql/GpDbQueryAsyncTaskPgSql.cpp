@@ -1,33 +1,29 @@
 #include "GpDbQueryAsyncTaskPgSql.hpp"
-#include "GpDbQueryResPgSql.hpp"
+#include "../../GpNetwork/GpNetworkCore/Sockets/GpSocketTCP.hpp"
 #include "../GpDbClient/GpDbException.hpp"
-#include "../../GpNetwork/GpNetworkCore/IO/Sockets/GpSocketTCP.hpp"
+#include "GpDbQueryResPgSql.cpp"
+#include "GpDbQueryPreparedPgSql.hpp"
 
 namespace GPlatform {
 
 GpDbQueryAsyncTaskPgSql::GpDbQueryAsyncTaskPgSql
 (
-    std::u8string               aName,
     GpDbConnectionPgSql&        aDbConn,
     const GpDbQuery&            aQuery,
     const GpDbQueryPrepared&    aQueryPrepared
-    //const size_t              aMinResultRowsCount
 ):
 GpSocketTask
 (
-    std::move(aName),
-    aDbConn.EventPoller(),
     GpSocketTCP::SFromID
     (
         aDbConn.SocketId(),
-        GpSocket::CloseModeT::NO_CLOSE_ON_DESTRUCT,
+        GpSocket::CloseModeT::KEEP_ON_DESTRUCT,
         GpSocketTCP::StateT::INCOMING
     )
 ),
-iDbConn(aDbConn),
-iQuery(aQuery),
+iDbConn       (aDbConn),
+iQuery        (aQuery),
 iQueryPrepared(aQueryPrepared)
-//iMinResultRowsCount(aMinResultRowsCount)
 {
 }
 
@@ -35,116 +31,50 @@ GpDbQueryAsyncTaskPgSql::~GpDbQueryAsyncTaskPgSql (void) noexcept
 {
 }
 
-GpTaskDoRes GpDbQueryAsyncTaskPgSql::OnSockReadyToRead (GpSocket& /*aSocket*/)
+GpTaskRunRes::EnumT GpDbQueryAsyncTaskPgSql::OnReadyToRead (GpSocket& /*aSocket*/)
 {
-    try
-    {
-        return ProcessR();
-    } catch (const GpException& e)
-    {
-        CompletePromise(MakeSP<CompleteItcResultT>(e));
-        throw;
-    } catch (const std::exception& e)
-    {
-        CompletePromise(MakeSP<CompleteItcResultT>(e));
-        throw;
-    } catch (...)
-    {
-        //CompletePromise(MakeSP<CompleteItcResultT>(std::runtime_error("Unknown exception")));
-        CompletePromise(MakeSP<CompleteItcResultT>(GpException(u8"Unknown exception")));
-        throw;
-    }
-}
-
-GpTaskDoRes GpDbQueryAsyncTaskPgSql::OnSockReadyToWrite (GpSocket& /*aSocket*/)
-{
-    try
-    {
-        return ProcessW();
-    } catch (const GpException& e)
-    {
-        CompletePromise(MakeSP<CompleteItcResultT>(e));
-        throw;
-    } catch (const std::exception& e)
-    {
-        CompletePromise(MakeSP<CompleteItcResultT>(e));
-        throw;
-    } catch (...)
-    {
-        //CompletePromise(MakeSP<CompleteItcResultT>(std::runtime_error("Unknown exception")));
-        CompletePromise(MakeSP<CompleteItcResultT>(GpException(u8"Unknown exception")));
-        throw;
-    }
-}
-
-void    GpDbQueryAsyncTaskPgSql::OnSockClosed (GpSocket& /*aSocket*/)
-{
-    //CompletePromise(MakeSP<CompleteItcResultT>(std::runtime_error("Socket closed")));
-    CompletePromise(MakeSP<CompleteItcResultT>(GpException(u8"Socket closed")));
-}
-
-void    GpDbQueryAsyncTaskPgSql::OnSockError (GpSocket& /*aSocket*/)
-{
-    //CompletePromise(MakeSP<CompleteItcResultT>(std::runtime_error("Socket error")));
-    CompletePromise(MakeSP<CompleteItcResultT>(GpException(u8"Socket error")));
-}
-
-GpTaskDoRes GpDbQueryAsyncTaskPgSql::ProcessR (void)
-{
+    // Get connection
     PGconn* pgConn = iDbConn.PgConn();
 
+    // Consume input
     const int rc = PQconsumeInput(pgConn);
 
-    if (rc == 0)
+    THROW_COND_DB
+    (
+        rc != 0,
+        GpDbExceptionCode::CONNECTION_ERROR,
+        u8"PQconsumeInput return error: "_sv + GpUTF::S_STR_To_UTF8(PQerrorMessage(pgConn))
+    );
+
+    // Consume and ignore PGnotify
     {
-        CompletePromise
-        (
-            MakeSP<CompleteItcResultT>
-            (
-                GpException(u8"PQconsumeInput return error: "_sv + GpUTF::S_STR_To_UTF8(PQerrorMessage(pgConn)))
-            )
-        );
-
-        return GpTaskDoRes::DONE;
-    }
-
-    PGnotify* pgNotify = nullptr;
-
-    while ((pgNotify = PQnotifies(pgConn)) != nullptr)
-    {
-        PQfreemem(pgNotify);
-    }
-
-    if (PQisBusy(pgConn) == 0)
-    {
-        PGresult* pgResult = nullptr;
-
-        while ((pgResult = PQgetResult(pgConn)) != nullptr)
+        PGnotify* pgNotify = nullptr;
+        while ((pgNotify = PQnotifies(pgConn)) != nullptr)
         {
-            CompletePromise(MakeSP<CompleteItcResultT>(size_t(0)));
-            //TODO: reimplement
-            //CompletePromise(MakeSP<CompleteItcResultT>(MakeSP<GpDbQueryResPgSql>(pgResult)));
+            PQfreemem(pgNotify);
         }
-
-        return GpTaskDoRes::DONE;
     }
 
-    return GpTaskDoRes::WAITING;
-}
-
-GpTaskDoRes GpDbQueryAsyncTaskPgSql::ProcessW (void)
-{
-    if (iIsSend == false)
+    // Check if connection is busy (IO operations)
+    if (PQisBusy(pgConn))
     {
-        Send();
-        iIsSend = true;
+        return GpTaskRunRes::WAIT;
     }
 
-    return GpTaskDoRes::WAITING;
+    // Get result
+    PGresult* pgResult = PQgetResult(pgConn);
+    DonePromiseHolder().Fulfill(MakeSP<GpDbQueryResPgSql>(pgResult));
+
+    return GpTaskRunRes::DONE;
 }
 
-void    GpDbQueryAsyncTaskPgSql::Send (void)
+GpTaskRunRes::EnumT GpDbQueryAsyncTaskPgSql::OnReadyToWrite (GpSocket& /*aSocket*/)
 {
+    if (iIsSend)
+    {
+        return GpTaskRunRes::WAIT;
+    }
+
     const GpDbQueryPreparedPgSql&   queryPrepared   = static_cast<const GpDbQueryPreparedPgSql&>(iQueryPrepared);
     std::u8string_view              queryStr        = iQuery.QueryStr();
     std::u8string                   queryZT;
@@ -152,6 +82,7 @@ void    GpDbQueryAsyncTaskPgSql::Send (void)
     queryZT.reserve(NumOps::SAdd<size_t>(queryStr.length(), 1));
     queryZT.append(queryStr).append(u8"\0"_sv);
 
+    // NOTE: Can be blocked until all data is written to the socket
     const int sendRes = PQsendQueryParams
     (
         iDbConn.PgConn(),
@@ -169,6 +100,28 @@ void    GpDbQueryAsyncTaskPgSql::Send (void)
         sendRes == 1,
         GpDbExceptionCode::QUERY_ERROR,
         [&](){return u8"Failed to do SQL query: "_sv + GpUTF::S_STR_To_UTF8(PQerrorMessage(iDbConn.PgConn()));}
+    );
+
+    iIsSend = true;
+
+    return GpTaskRunRes::WAIT;
+}
+
+void    GpDbQueryAsyncTaskPgSql::OnClosed (GpSocket& /*aSocket*/)
+{
+    THROW_DB
+    (
+        GpDbExceptionCode::QUERY_ERROR,
+        u8"Failed to do SQL query: socket closed"_sv
+    );
+}
+
+void    GpDbQueryAsyncTaskPgSql::OnError (GpSocket& /*aSocket*/)
+{
+    THROW_DB
+    (
+        GpDbExceptionCode::QUERY_ERROR,
+        u8"Failed to do SQL query: socket error"_sv
     );
 }
 

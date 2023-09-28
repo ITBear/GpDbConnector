@@ -84,9 +84,9 @@ public:
                                                                  std::optional<std::u8string_view>  aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<std::u8string_view> GetStrArray1D       (const size_t                               aRowId,
-                                                                 const size_t                               aColId,
-                                                                 std::optional<std::vector<std::u8string>>  aOnNullValue) const = 0;
+    virtual std::vector<std::u8string_view> GetStrArray1D       (const size_t                                   aRowId,
+                                                                 const size_t                                   aColId,
+                                                                 std::optional<std::vector<std::u8string_view>> aOnNullValue) const = 0;
 
     [[nodiscard]]
     virtual GpSpanPtrCharRW                 GetStrRW            (const size_t                   aRowId,
@@ -104,9 +104,9 @@ public:
                                                                  std::optional<std::u8string_view>  aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<std::u8string_view> GetJsonArray1D      (const size_t                               aRowId,
-                                                                 const size_t                               aColId,
-                                                                 std::optional<std::vector<std::u8string>>  aOnNullValue) const = 0;
+    virtual std::vector<std::u8string_view> GetJsonArray1D      (const size_t                                   aRowId,
+                                                                 const size_t                                   aColId,
+                                                                 std::optional<std::vector<std::u8string_view>> aOnNullValue) const = 0;
 
     [[nodiscard]]
     virtual GpSpanPtrCharRW                 GetJsonRW           (const size_t                   aRowId,
@@ -142,12 +142,6 @@ public:
     virtual bool                            GetBoolean          (const size_t           aRowId,
                                                                  const size_t           aColId,
                                                                  std::optional<bool>    aOnNullValue) const = 0;
-
-    [[nodiscard]]
-    virtual std::vector<bool>               GetBooleanArray1D   (const size_t                       aRowId,
-                                                                 const size_t                       aColId,
-                                                                 std::optional<std::vector<bool>>   aOnNullValue) const = 0;
-
 
     template<typename T>
     [[nodiscard]] typename T::EnumT         GetEnum             (const size_t                       aRowId,

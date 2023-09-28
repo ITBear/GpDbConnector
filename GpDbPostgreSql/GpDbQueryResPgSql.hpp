@@ -86,9 +86,9 @@ public:
                                                                  std::optional<std::u8string_view>  aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual std::vector<std::u8string_view> GetStrArray1D       (const size_t                               aRowId,
-                                                                 const size_t                               aColId,
-                                                                 std::optional<std::vector<std::u8string>>  aOnNullValue) const override final;
+    virtual std::vector<std::u8string_view> GetStrArray1D       (const size_t                                   aRowId,
+                                                                 const size_t                                   aColId,
+                                                                 std::optional<std::vector<std::u8string_view>> aOnNullValue) const override final;
 
     [[nodiscard]]
     virtual GpSpanPtrCharRW                 GetStrRW            (const size_t                   aRowId,
@@ -106,9 +106,9 @@ public:
                                                                  std::optional<std::u8string_view>  aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual std::vector<std::u8string_view> GetJsonArray1D      (const size_t                               aRowId,
-                                                                 const size_t                               aColId,
-                                                                 std::optional<std::vector<std::u8string>>  aOnNullValue) const override final;
+    virtual std::vector<std::u8string_view> GetJsonArray1D      (const size_t                                   aRowId,
+                                                                 const size_t                                   aColId,
+                                                                 std::optional<std::vector<std::u8string_view>> aOnNullValue) const override final;
 
     [[nodiscard]]
     virtual GpSpanPtrCharRW                 GetJsonRW           (const size_t                   aRowId,
@@ -144,11 +144,6 @@ public:
     virtual bool                            GetBoolean          (const size_t           aRowId,
                                                                  const size_t           aColId,
                                                                  std::optional<bool>    aOnNullValue) const override final;
-
-    [[nodiscard]]
-    virtual std::vector<bool>               GetBooleanArray1D   (const size_t                       aRowId,
-                                                                 const size_t                       aColId,
-                                                                 std::optional<std::vector<bool>>   aOnNullValue) const override final;
 
 private:
     void                                    ClearPgSql          (void) noexcept;

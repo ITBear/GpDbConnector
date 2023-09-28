@@ -5,4 +5,4 @@ namespace GPlatform {
 
 EXCEPTION_CODE_IMPL(GpDbException)
 
-}//namespace GPlatform
+}// namespace GPlatform

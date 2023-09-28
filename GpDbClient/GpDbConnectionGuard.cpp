@@ -1,15 +1,19 @@
 #include "GpDbConnectionGuard.hpp"
 #include "GpDbManager.hpp"
 #include "GpDbConnection.hpp"
-#include "GpDbManagerCatalog.hpp"
 #include "GpDbException.hpp"
+#include "../../GpLog/GpLogCore/GpLog.hpp"
+#include "../../GpCore2/GpUtils/Types/Strings/GpStringUtils.hpp"
+#include "../../GpCore2/GpTasks/GpTask.hpp"
+
+GP_WARNING_PUSH()
+GP_WARNING_DISABLE(shadow)
+
+#include <boost/context/fiber.hpp>
+
+GP_WARNING_POP()
 
 namespace GPlatform {
-
-GpDbConnectionGuard::GpDbConnectionGuard (GpDbManager& aManager) noexcept:
-iManager(aManager)
-{
-}
 
 GpDbConnectionGuard::~GpDbConnectionGuard (void) noexcept
 {
@@ -146,29 +150,42 @@ void    GpDbConnectionGuard::ConnectionRelease (void)
     }
 
     GpDbConnection& conn = iConnection.Vn();
+
     if (conn.IsTransactionOpen())
     {
         try
-        {
-            conn.RollbackTransaction();
-            Manager().Release(iConnection);
+        {           
+            conn.RollbackTransaction();         
         } catch (const std::exception& e)
         {
-            LOG_EXCEPTION(e, GpTask::SCurrentUID());
+            const auto currentTaskOpt = GpTask::SCurrentTask();
+
+            if (currentTaskOpt.has_value())
+            {
+                LOG_EXCEPTION(e, currentTaskOpt.value().get().IdAsUUID());
+            } else
+            {
+                LOG_EXCEPTION(e);
+            }
         } catch (const boost::context::detail::forced_unwind&)
         {
             iConnection.Clear();
             throw;
         } catch (...)
         {
-            LOG_EXCEPTION(GpTask::SCurrentUID());
+            const auto currentTaskOpt = GpTask::SCurrentTask();
+
+            if (currentTaskOpt.has_value())
+            {
+                LOG_EXCEPTION(currentTaskOpt.value().get().IdAsUUID());
+            } else
+            {
+                LOG_EXCEPTION();
+            }
         }
-    } else
-    {
-        Manager().Release(iConnection);
     }
 
-    iConnection.Clear();
+    Manager().Release(std::move(iConnection));
 }
 
 }//namespace GPlatform

@@ -18,6 +18,13 @@ void    GpDbQueryPreparedPgSql::Prepare (const GpDbQuery& aQuery)
     const size_t typesCount     = types.size();
     const size_t valuesCount    = aQuery.Values().size();
 
+
+    if (   (typesCount == valuesCount)
+        && (valuesCount == 0))
+    {
+        return;
+    }
+
     THROW_COND_GP
     (
         typesCount == valuesCount,
