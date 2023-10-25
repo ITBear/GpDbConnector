@@ -236,7 +236,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
     );
 
     // Start query task
-    GpTaskScheduler::S().NewToReady(queryTask, 0.0_si_s);
+    GpTaskScheduler::S().NewToReady(queryTask);
 
     // Wait for started
     while (!queryTaskDoneFuture.Vn().IsReady())

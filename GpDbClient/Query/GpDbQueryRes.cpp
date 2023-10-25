@@ -88,6 +88,10 @@ GpReflectObject::SP GpDbQueryRes::RowToObject
             {
                 _RowToObjectPropVec(dataPtr, propInfo, aRowId, colId);
             } break;
+            case GpReflectContainerType::VECTOR_WRAP:
+            {
+                _RowToObjectPropVecWrap(dataPtr, propInfo, aRowId, colId);
+            } break;
             case GpReflectContainerType::MAP:
             {
                 _RowToObjectPropMap(dataPtr, propInfo, aRowId, colId);
@@ -303,7 +307,9 @@ void    GpDbQueryRes::_RowToObjectPropVec
         } break;
         case GpReflectType::OBJECT_SP:
         {
-             aProp.Vec_ObjectSP(aDataPtr) = ColToObjectArray1D(aRowId, aColId, {});
+            // TODO: implement
+            THROW_GP_NOT_IMPLEMENTED();
+            //aProp.Vec_ObjectSP(aDataPtr) = ColToObjectArray1D(aRowId, aColId, ?);
         } break;
         case GpReflectType::ENUM:
         {
@@ -319,6 +325,25 @@ void    GpDbQueryRes::_RowToObjectPropVec
             THROW_GP(u8"Unsupported type NOT_SET"_sv); break;
         }
     }
+}
+
+void    GpDbQueryRes::_RowToObjectPropVecWrap
+(
+    void*                   /*aDataPtr*/,
+    const GpReflectProp&    aProp,
+    const size_t            /*aRowId*/,
+    const size_t            /*aColId*/
+) const
+{
+    THROW_COND_GP
+    (
+        aProp.Type() == GpReflectType::OBJECT,
+        u8"Unsupported type"_sv
+    );
+
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+    //aProp.VecWrap_Object(aDataPtr) = ColToObjectArray1D(aRowId, aColId, {});
 }
 
 void    GpDbQueryRes::_RowToObjectPropMap

@@ -458,12 +458,26 @@ GpDbQuery&  GpDbQuery::NextJsonArray1D (std::vector<std::u8string>&& aValue)
 
 GpDbQuery&  GpDbQuery::NextJsonArray1D (const std::vector<GpReflectObject::SP>& aValue)
 {
-    const size_t            size = aValue.size();
+    const size_t                size = aValue.size();
     std::vector<std::u8string>  v(size);
 
     for (size_t id = 0; id < size; id++)
     {
         v[id] = GpJsonSerializer::SToStr(aValue[id].V(), {GpJsonSerializerFlag::WRITE_MODEL_UID});
+    }
+
+    _Next<GpDbQueryValType::JSON_ARRAY_1D>(-1, std::move(v));
+    return *this;
+}
+
+GpDbQuery&  GpDbQuery::NextJsonArray1D (const GpVectorReflectObjWrapBase& aValue)
+{
+    const size_t                size = aValue.size();
+    std::vector<std::u8string>  v(size);
+
+    for (size_t id = 0; id < size; id++)
+    {
+        v[id] = GpJsonSerializer::SToStr(aValue[id], {GpJsonSerializerFlag::WRITE_MODEL_UID});
     }
 
     _Next<GpDbQueryValType::JSON_ARRAY_1D>(-1, std::move(v));
@@ -553,6 +567,10 @@ GpDbQuery&  GpDbQuery::NextProp
         case GpReflectContainerType::VECTOR:
         {
             _NextPropVec(aProp, aDataPtr);
+        } break;
+        case GpReflectContainerType::VECTOR_WRAP:
+        {
+            _NextPropVecWrap(aProp, aDataPtr);
         } break;
         case GpReflectContainerType::MAP:
         {
@@ -1013,6 +1031,95 @@ void    GpDbQuery::_NextPropVec
         {
             const std::vector<GpReflectObject::SP>& objectVec = aProp.Vec_ObjectSP(aDataPtr);
             NextJsonArray1D(objectVec);
+        } break;
+        case GpReflectType::ENUM:
+        {
+            THROW_GP(u8"Unsupported type ENUM vector"_sv); break;
+        } break;
+        case GpReflectType::ENUM_FLAGS:
+        {
+            THROW_GP(u8"Unsupported type ENUM_FLAGS vector"_sv); break;
+        } break;
+        case GpReflectType::NOT_SET:[[fallthrough]];
+        default:
+        {
+            THROW_GP(u8"Unsupported type NOT_SET"_sv); break;
+        }
+    }
+}
+
+void    GpDbQuery::_NextPropVecWrap
+(
+    const GpReflectProp&    aProp,
+    const void*             aDataPtr
+)
+{
+    switch (aProp.Type())
+    {
+        case GpReflectType::U_INT_8:
+        {
+            THROW_GP(u8"Unsupported type U_INT_8"_sv); break;
+        } break;
+        case GpReflectType::S_INT_8:
+        {
+            THROW_GP(u8"Unsupported type S_INT_8"_sv); break;
+        } break;
+        case GpReflectType::U_INT_16:
+        {
+            THROW_GP(u8"Unsupported type U_INT_16"_sv); break;
+        } break;
+        case GpReflectType::S_INT_16:
+        {
+            THROW_GP(u8"Unsupported type S_INT_16"_sv); break;
+        } break;
+        case GpReflectType::U_INT_32:
+        {
+            THROW_GP(u8"Unsupported type U_INT_32"_sv); break;
+        } break;
+        case GpReflectType::S_INT_32:
+        {
+            THROW_GP(u8"Unsupported type S_INT_32"_sv); break;
+        } break;
+        case GpReflectType::U_INT_64:
+        {
+            THROW_GP(u8"Unsupported type U_INT_64"_sv); break;
+        } break;
+        case GpReflectType::S_INT_64:
+        {
+            THROW_GP(u8"Unsupported type S_INT_64"_sv); break;
+        } break;
+        case GpReflectType::DOUBLE:
+        {
+            THROW_GP(u8"Unsupported type DOUBLE"_sv); break;
+        } break;
+        case GpReflectType::FLOAT:
+        {
+            THROW_GP(u8"Unsupported type FLOAT"_sv); break;
+        } break;
+        case GpReflectType::BOOLEAN:
+        {
+            THROW_GP(u8"Unsupported type BOOLEAN"_sv); break;
+        } break;
+        case GpReflectType::UUID:
+        {
+            THROW_GP(u8"Unsupported type UUID"_sv); break;
+        } break;
+        case GpReflectType::STRING:
+        {
+            THROW_GP(u8"Unsupported type STRING"_sv); break;
+        } break;
+        case GpReflectType::BLOB:
+        {
+            THROW_GP(u8"Unsupported type BLOB"_sv); break;
+        } break;
+        case GpReflectType::OBJECT:
+        {
+            const GpVectorReflectObjWrapBase& objectVecWrap = aProp.VecWrap_Object(aDataPtr);
+            NextJsonArray1D(objectVecWrap);
+        } break;
+        case GpReflectType::OBJECT_SP:
+        {
+            THROW_GP(u8"Unsupported type OBJECT_SP"_sv); break;
         } break;
         case GpReflectType::ENUM:
         {

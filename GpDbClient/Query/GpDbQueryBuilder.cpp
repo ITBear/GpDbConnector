@@ -78,6 +78,30 @@ const GpDbQueryBuilder::BindCacheT  GpDbQueryBuilder::sTypeBindVec =
     {u8"",          GpDbQueryValType::NULL_VAL}         //ENUM_FLAGS
 };
 
+const GpDbQueryBuilder::BindCacheT  GpDbQueryBuilder::sTypeBindVecWrap =
+{
+    std::tuple<std::u8string, GpDbQueryValType::EnumT>
+    {u8"",          GpDbQueryValType::NULL_VAL},        //NOT_SET
+    {u8"",          GpDbQueryValType::NULL_VAL},        //U_INT_8,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //S_INT_8,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //U_INT_16,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //S_INT_16,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //U_INT_32,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //S_INT_32,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //U_INT_64,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //S_INT_64,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //DOUBLE,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //FLOAT,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //BOOLEAN,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //UUID,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //STRING,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //BLOB,
+    {u8"::jsonb[]", GpDbQueryValType::JSON_ARRAY_1D},   //OBJECT,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //OBJECT_SP,
+    {u8"",          GpDbQueryValType::NULL_VAL},        //ENUM,
+    {u8"",          GpDbQueryValType::NULL_VAL}         //ENUM_FLAGS
+};
+
 const GpDbQueryBuilder::BindCacheT  GpDbQueryBuilder::sTypeBindMap =
 {
 };
@@ -1442,6 +1466,10 @@ std::vector<GpDbQueryBuilder::TypeInfo> GpDbQueryBuilder::_SFromModel
             case GpReflectContainerType::VECTOR:
             {
                 std::tie(valueBind, valueType) = sTypeBindVec.at(NumOps::SConvert<size_t>(GpEnum::value_type(propInfo.Type())));
+            } break;
+            case GpReflectContainerType::VECTOR_WRAP:
+            {
+                std::tie(valueBind, valueType) = sTypeBindVecWrap.at(NumOps::SConvert<size_t>(GpEnum::value_type(propInfo.Type())));
             } break;
             case GpReflectContainerType::MAP:
             {

@@ -143,7 +143,7 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::u8string_view aConnStr) const
     // Get done future
     GpTask::DoneFutureT::SP connectionTaskDoneFuture = connectionTask.Vn().GetDoneFuture();
 
-    GpTaskScheduler::S().NewToReady(connectionTask, 0.0_si_s);
+    GpTaskScheduler::S().NewToReady(connectionTask);
 
     // Wait for started
     while (!connectionTaskDoneFuture.Vn().IsReady())

@@ -89,6 +89,7 @@ public:
     GpDbQuery&                          NextJsonArray1D     (const std::vector<std::u8string>&      aValue);
     GpDbQuery&                          NextJsonArray1D     (std::vector<std::u8string>&&               aValue);
     GpDbQuery&                          NextJsonArray1D     (const std::vector<GpReflectObject::SP>& aValue);
+    GpDbQuery&                          NextJsonArray1D     (const GpVectorReflectObjWrapBase& aValue);
 
     GpDbQuery&                          NextUuid            (const GpUUID&                      aValue);
     GpDbQuery&                          NextUuidArray1D     (const std::vector<GpUUID>&         aValue);
@@ -186,6 +187,8 @@ private:
     void                                _NextProp           (const GpReflectProp&   aProp,
                                                              const void*            aDataPtr);
     void                                _NextPropVec        (const GpReflectProp&   aProp,
+                                                             const void*            aDataPtr);
+    void                                _NextPropVecWrap    (const GpReflectProp&   aProp,
                                                              const void*            aDataPtr);
     void                                _NextPropMap        (const GpReflectProp&   aProp,
                                                              const void*            aDataPtr);

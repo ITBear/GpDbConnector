@@ -223,6 +223,7 @@ private:
     static const BindStrsT          sBindStrs;
     static const BindCacheT         sTypeBind;
     static const BindCacheT         sTypeBindVec;
+    static const BindCacheT         sTypeBindVecWrap;
     static const BindCacheT         sTypeBindMap;
 };
 
