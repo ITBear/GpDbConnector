@@ -63,7 +63,7 @@ GpTaskRunRes::EnumT GpDbQueryAsyncTaskPgSql::OnReadyToRead (GpSocket& /*aSocket*
 
     // Get result
     PGresult* pgResult = PQgetResult(pgConn);
-    DonePromiseHolder().Fulfill(MakeSP<GpDbQueryResPgSql>(pgResult));
+    DonePromise().Fulfill(MakeSP<GpDbQueryResPgSql>(pgResult));
 
     return GpTaskRunRes::DONE;
 }

@@ -116,7 +116,7 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::u8string_view aConnStr) const
     GpDbConnectAsyncTaskPgSql::SP connectionTask = MakeSP<GpDbConnectAsyncTaskPgSql>(pgConn);
 
     // Add to event poller
-    const GpTask::IdT connectionTaskTaskId = connectionTask->Id();
+    const GpTaskId connectionTaskTaskId = connectionTask->Id();
 
     GpRAIIonDestruct onFinishRemoveEventPollerSubscription
     (
@@ -146,9 +146,9 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::u8string_view aConnStr) const
     GpTaskScheduler::S().NewToReady(connectionTask);
 
     // Wait for started
-    while (!connectionTaskDoneFuture.Vn().IsReady())
+    while (!connectionTaskDoneFuture.Vn().WaitFor(100.0_si_ms))
     {
-        connectionTaskDoneFuture.Vn().WaitFor(100.0_si_ms);
+        // NOP
     }
 
     // Check result

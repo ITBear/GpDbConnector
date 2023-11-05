@@ -32,20 +32,18 @@ public:
 
 protected:
     virtual void                                PreInit                 (const size_t aCount) override final;
-    virtual GpSP<GpDbConnection>                NewElement              (GpSpinlock& aLocked) override final;
+    virtual GpSP<GpDbConnection>                NewElement              (void) override final;
     virtual void                                OnClear                 (void) noexcept override final;
     virtual bool                                Validate                (GpSP<GpDbConnection>& aConnection) noexcept override final;
 
-    virtual void                                OnAcquire               (GpSP<GpDbConnection>& aDbConnection,
-                                                                         GpSpinlock& aLocked) override final;
-    virtual ReleaseAct                          OnRelease               (GpSP<GpDbConnection>& aDbConnection,
-                                                                         GpSpinlock& aLocked) override final;
-    virtual std::optional<GpSP<GpDbConnection>> OnAcquireNoElementsLeft (GpSpinlock& aLocked) override final;
+    virtual void                                OnAcquire               (GpSP<GpDbConnection>& aDbConnection) override final;
+    virtual ReleaseAct                          OnRelease               (GpSP<GpDbConnection>& aDbConnection) override final;
+    virtual std::optional<GpSP<GpDbConnection>> OnAcquireNoElementsLeft (void) override final;
 
 private:
     GpSP<GpDbDriver>                            iDriver;
     const std::u8string                         iConnStr;
-    const GpDbConnectionMode::EnumT             iMode;
+    [[maybe_unused]] const GpDbConnectionMode::EnumT            iMode;
     std::queue<ConnectItcPromiseT>              iConnWaitPromises;
 };
 

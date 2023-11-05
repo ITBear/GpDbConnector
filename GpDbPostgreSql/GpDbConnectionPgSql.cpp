@@ -211,7 +211,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
     GpTask::DoneFutureT::SP queryTaskDoneFuture = queryTask.Vn().GetDoneFuture();
 
     // Add to event poller
-    const GpTask::IdT queryTaskTaskId = queryTask.Vn().Id();
+    const GpTaskId queryTaskTaskId = queryTask.Vn().Id();
 
     GpRAIIonDestruct onFinishRemoveEventPollerSubscription
     (
@@ -239,9 +239,9 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
     GpTaskScheduler::S().NewToReady(queryTask);
 
     // Wait for started
-    while (!queryTaskDoneFuture.Vn().IsReady())
+    while (!queryTaskDoneFuture.Vn().WaitFor(100.0_si_ms))
     {
-        queryTaskDoneFuture.Vn().WaitFor(100.0_si_ms);
+        // NOP
     }
 
     // Check result
@@ -254,10 +254,6 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
         {
             LOG_INFO(u8"[GpDbConnectionPgSql::ExecuteAsync]: OK"_sv);
             res = std::move(aRes.Value<GpDbQueryResPgSql::SP>());
-        },
-        [&](void)//OnEmptyFnT
-        {
-            LOG_ERROR(u8"[GpDbConnectionPgSql::ExecuteAsync]: empty result: '"_sv + aQuery.QueryStr() + u8"', values "_sv + aQuery.ValuesToStr());
         },
         [](const GpException& aEx)//OnExceptionFnT
         {

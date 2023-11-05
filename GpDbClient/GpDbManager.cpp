@@ -1,7 +1,6 @@
 #include "GpDbManager.hpp"
 #include "GpDbDriver.hpp"
 #include "GpDbConnection.hpp"
-#include "../../GpCore2/GpUtils/SyncPrimitives/GpUnlockGuard.hpp"
 
 namespace GPlatform {
 
@@ -30,9 +29,9 @@ void    GpDbManager::PreInit (const size_t /*aCount*/)
 {
 }
 
-GpDbConnection::SP  GpDbManager::NewElement (GpSpinlock& aLocked)
+GpDbConnection::SP  GpDbManager::NewElement (void)
 {
-    GpUnlockGuard unlock(aLocked);
+    //GpUnlockGuard unlock(aLocked);
 
     return iDriver.V().NewConnection(iConnStr);
 }
@@ -49,8 +48,7 @@ bool    GpDbManager::Validate (GpSP<GpDbConnection>& aConnection) noexcept
 
 void    GpDbManager::OnAcquire
 (
-    GpSP<GpDbConnection>&   /*aDbConnection*/,
-    GpSpinlock&             /*aLocked*/
+    GpSP<GpDbConnection>&   /*aDbConnection*/
 )
 {
     // NOP
@@ -58,11 +56,13 @@ void    GpDbManager::OnAcquire
 
 GpDbManager::ReleaseAct GpDbManager::OnRelease
 (
-    GpSP<GpDbConnection>&   aDbConnection,
-    GpSpinlock&             aLocked
+    GpSP<GpDbConnection>&   /*aDbConnection*/
 )
 {
-    if (iMode == GpDbConnectionMode::ASYNC) [[likely]]
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    /*if (iMode == GpDbConnectionMode::ASYNC) [[likely]]
     {
         // Check if there are NO tasks waiting for connections
         if (iConnWaitPromises.empty()) [[likely]]
@@ -74,7 +74,7 @@ GpDbManager::ReleaseAct GpDbManager::OnRelease
         ConnectItcPromiseT promise(std::move(iConnWaitPromises.front()));
         iConnWaitPromises.pop();
 
-        GpUnlockGuard unlock(aLocked);
+        //GpUnlockGuard unlock(aLocked);
 
         promise.Fulfill(aDbConnection);
 
@@ -85,24 +85,27 @@ GpDbManager::ReleaseAct GpDbManager::OnRelease
     } else
     {
         THROW_GP(u8"Unknown DB connection mode"_sv);
-    }
+    }*/
 }
 
-std::optional<GpSP<GpDbConnection>> GpDbManager::OnAcquireNoElementsLeft (GpSpinlock& aLocked)
+std::optional<GpSP<GpDbConnection>> GpDbManager::OnAcquireNoElementsLeft (void)
 {
-    if (iMode == GpDbConnectionMode::ASYNC) [[likely]]
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    /*if (iMode == GpDbConnectionMode::ASYNC) [[likely]]
     {
         // Mode is ASYNC, wait for Release next connection
         ConnectItcPromiseT      promise;
         ConnectItcFutureT::SP   future = promise.Future();
         iConnWaitPromises.push(std::move(promise));
 
-        GpUnlockGuard unlock(aLocked);
+        //GpUnlockGuard unlock(aLocked);
 
         // Wait for future
-        while (!future.Vn().IsReady())
+        while (!future.Vn().WaitFor(250.0_si_ms))
         {
-            future.Vn().WaitFor(250.0_si_ms);
+            // NOP
         }
 
         std::optional<GpSP<GpDbConnection>> res;
@@ -132,7 +135,7 @@ std::optional<GpSP<GpDbConnection>> GpDbManager::OnAcquireNoElementsLeft (GpSpin
     } else
     {
         THROW_GP(u8"Unknown DB connection mode"_sv);
-    }
+    }*/
 }
 
 }// namespace GPlatform
