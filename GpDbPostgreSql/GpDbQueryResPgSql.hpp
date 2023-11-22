@@ -91,14 +91,14 @@ public:
                                                                  std::optional<std::vector<std::u8string_view>> aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual GpSpanPtrCharRW                 GetStrRW            (const size_t                   aRowId,
-                                                                 const size_t                   aColId,
-                                                                 std::optional<GpSpanPtrCharRW> aOnNullValue) override final;
+    virtual GpSpanPtrCharU8RW               GetStrRW            (const size_t                       aRowId,
+                                                                 const size_t                       aColId,
+                                                                 std::optional<GpSpanPtrCharU8RW>   aOnNullValue) override final;
 
      [[nodiscard]]
-    virtual std::vector<GpSpanPtrCharRW>    GetStrRWArray1D     (const size_t                                   aRowId,
+    virtual std::vector<GpSpanPtrCharU8RW>  GetStrRWArray1D     (const size_t                                   aRowId,
                                                                  const size_t                                   aColId,
-                                                                 std::optional<std::vector<GpSpanPtrCharRW>>    aOnNullValue) override final;
+                                                                 std::optional<std::vector<GpSpanPtrCharU8RW>>  aOnNullValue) override final;
 
     [[nodiscard]]
     virtual std::u8string_view              GetJson             (const size_t                       aRowId,
@@ -111,14 +111,14 @@ public:
                                                                  std::optional<std::vector<std::u8string_view>> aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual GpSpanPtrCharRW                 GetJsonRW           (const size_t                   aRowId,
-                                                                 const size_t                   aColId,
-                                                                 std::optional<GpSpanPtrCharRW> aOnNullValue) override final;
+    virtual GpSpanPtrCharU8RW               GetJsonRW           (const size_t                       aRowId,
+                                                                 const size_t                       aColId,
+                                                                 std::optional<GpSpanPtrCharU8RW>   aOnNullValue) override final;
 
      [[nodiscard]]
-    virtual std::vector<GpSpanPtrCharRW>    GetJsonRWArray1D    (const size_t                                   aRowId,
+    virtual std::vector<GpSpanPtrCharU8RW>  GetJsonRWArray1D    (const size_t                                   aRowId,
                                                                  const size_t                                   aColId,
-                                                                 std::optional<std::vector<GpSpanPtrCharRW>>    aOnNullValue) override final;
+                                                                 std::optional<std::vector<GpSpanPtrCharU8RW>>  aOnNullValue) override final;
 
     [[nodiscard]]
     virtual GpUUID                          GetUuid             (const size_t           aRowId,

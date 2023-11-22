@@ -1,13 +1,18 @@
 TEMPLATE        = lib
 #CONFIG         += staticlib
-VER_MAJ		    = 0
+VER_MAJ		    = 2
 VER_MIN		    = 1
-VER_PAT		    = 0
+VER_PAT		    = 4
 QMAKE_CXXFLAGS += -DGP_MODULE_UUID=c192f513-2e74-42f6-b3f9-c86c92d72624
 QMAKE_CXXFLAGS += -DGP_REFLECTION_STATIC_ADD_TO_MANAGER
-DEFINES		   += GP_DB_CLIENT_LIBRARY
 PACKET_NAME     = GpDbClient
 DIR_LEVEL       = ./../..
+
+DEFINES		   += GP_DB_CLIENT_LIBRARY
+DEFINES        += "GP_CURRENT_LIB_VER_MAJ=\\\"$$VER_MAJ\\\""
+DEFINES        += "GP_CURRENT_LIB_VER_MIN=\\\"$$VER_MIN\\\""
+DEFINES        += "GP_CURRENT_LIB_VER_PAT=\\\"$$VER_PAT\\\""
+DEFINES        += "GP_CURRENT_LIB_PACKET_NAME=\\\"$$PACKET_NAME\\\""
 
 include(../../../QtGlobalPro.pri)
 
@@ -20,6 +25,7 @@ os_linux{
 #------------------------------- LIBS END ----------------------------------
 
 HEADERS += \
+	GpDbClient.hpp \
 	GpDbClient_global.hpp \
 	GpDbConnection.hpp \
 	GpDbConnectionGuard.hpp \
@@ -46,6 +52,7 @@ HEADERS += \
 	Query/GpDbQueryValue.hpp
 
 SOURCES += \
+	GpDbClient.cpp \
 	GpDbConnection.cpp \
 	GpDbConnectionGuard.cpp \
 	GpDbConnectionHookManager.cpp \

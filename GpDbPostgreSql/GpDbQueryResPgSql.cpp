@@ -347,11 +347,11 @@ std::vector<std::u8string_view> GpDbQueryResPgSql::GetStrArray1D
     return GpDbQueryResPgSql_GetArray<std::u8string_view>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
-GpSpanPtrCharRW GpDbQueryResPgSql::GetStrRW
+GpSpanPtrCharU8RW   GpDbQueryResPgSql::GetStrRW
 (
-    const size_t                    aRowId,
-    const size_t                    aColId,
-    std::optional<GpSpanPtrCharRW>  aOnNullValue
+    const size_t                        aRowId,
+    const size_t                        aColId,
+    std::optional<GpSpanPtrCharU8RW>    aOnNullValue
 )
 {
     std::optional<std::u8string_view> defaultValue;
@@ -368,17 +368,17 @@ GpSpanPtrCharRW GpDbQueryResPgSql::GetStrRW
         defaultValue
     );
 
-    return GpSpanPtrCharRW(const_cast<char8_t*>(str.data()), str.size());
+    return GpSpanPtrCharU8RW(const_cast<char8_t*>(str.data()), str.size());
 }
 
-std::vector<GpSpanPtrCharRW>    GpDbQueryResPgSql::GetStrRWArray1D
+std::vector<GpSpanPtrCharU8RW>  GpDbQueryResPgSql::GetStrRWArray1D
 (
-    const size_t                                aRowId,
-    const size_t                                aColId,
-    std::optional<std::vector<GpSpanPtrCharRW>> aOnNullValue
+    const size_t                                    aRowId,
+    const size_t                                    aColId,
+    std::optional<std::vector<GpSpanPtrCharU8RW>>   aOnNullValue
 )
 {
-    return GpDbQueryResPgSql_GetArray<GpSpanPtrCharRW>(aRowId, aColId, aOnNullValue, iPgResult);
+    return GpDbQueryResPgSql_GetArray<GpSpanPtrCharU8RW>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 std::u8string_view  GpDbQueryResPgSql::GetJson
@@ -434,11 +434,11 @@ std::vector<std::u8string_view> GpDbQueryResPgSql::GetJsonArray1D
     return strArray;
 }
 
-GpSpanPtrCharRW GpDbQueryResPgSql::GetJsonRW
+GpSpanPtrCharU8RW   GpDbQueryResPgSql::GetJsonRW
 (
-    const size_t                    aRowId,
-    const size_t                    aColId,
-    std::optional<GpSpanPtrCharRW>  aOnNullValue
+    const size_t                        aRowId,
+    const size_t                        aColId,
+    std::optional<GpSpanPtrCharU8RW>    aOnNullValue
 )
 {
     std::optional<std::u8string_view> defaultValue;
@@ -455,19 +455,19 @@ GpSpanPtrCharRW GpDbQueryResPgSql::GetJsonRW
         defaultValue
     );
 
-    return GpSpanPtrCharRW(const_cast<char8_t*>(str.data()), str.size());
+    return GpSpanPtrCharU8RW(const_cast<char8_t*>(str.data()), str.size());
 }
 
-std::vector<GpSpanPtrCharRW>    GpDbQueryResPgSql::GetJsonRWArray1D
+std::vector<GpSpanPtrCharU8RW>  GpDbQueryResPgSql::GetJsonRWArray1D
 (
-    const size_t                                aRowId,
-    const size_t                                aColId,
-    std::optional<std::vector<GpSpanPtrCharRW>> aOnNullValue
+    const size_t                                    aRowId,
+    const size_t                                    aColId,
+    std::optional<std::vector<GpSpanPtrCharU8RW>>   aOnNullValue
 )
 {
-    std::vector<GpSpanPtrCharRW> strArray = GetStrRWArray1D(aRowId, aColId, aOnNullValue);
+    std::vector<GpSpanPtrCharU8RW> strArray = GetStrRWArray1D(aRowId, aColId, aOnNullValue);
 
-    for (GpSpanPtrCharRW& element: strArray)
+    for (GpSpanPtrCharU8RW& element: strArray)
     {
         THROW_COND_GP
         (
@@ -556,7 +556,7 @@ GpSpanPtrByteR  GpDbQueryResPgSql::GetBlob
     const char*     dataPtr     = PQgetvalue(iPgResult, rowId, colId);
     const size_t    dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
 
-    return GpSpanPtrCharR(dataPtr, dataSize);
+    return GpSpanPtrCharU8R(dataPtr, dataSize);
 }
 
 std::vector<GpSpanPtrByteR> GpDbQueryResPgSql::GetBlobArray1D

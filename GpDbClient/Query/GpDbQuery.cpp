@@ -1,6 +1,6 @@
 #include "GpDbQuery.hpp"
 #include "GpDbQueryMapperCache.hpp"
-#include "../../../GpJson/GpJson.hpp"
+#include "../../../GpJson/GpJsonSerializer.hpp"
 
 namespace GPlatform {
 

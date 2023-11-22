@@ -220,7 +220,7 @@ std::vector<T>  GpDbArrayUtilsPgSql::SRead (GpSpanPtrByteRW aData)
     } else if constexpr(std::is_same_v<T, std::u8string_view>)
     {
         return _SReadBytes<T>(aData, elementsCount);
-    } else if constexpr(std::is_same_v<T, GpSpanPtrCharRW>)
+    } else if constexpr(std::is_same_v<T, GpSpanPtrCharU8RW>)
     {
         return _SReadBytes<T>(aData, elementsCount);
     } else if constexpr(std::is_same_v<T, GpUUID>)
@@ -258,7 +258,7 @@ constexpr Oid   GpDbArrayUtilsPgSql::_SOidFromT (void)
     } else if constexpr(std::is_same_v<T, std::u8string_view>)
     {
         return TEXTOID;
-    } else if constexpr(std::is_same_v<T, GpSpanPtrCharRW>)
+    } else if constexpr(std::is_same_v<T, GpSpanPtrCharU8RW>)
     {
         return TEXTOID;
     } else if constexpr(std::is_same_v<T, GpUUID>)

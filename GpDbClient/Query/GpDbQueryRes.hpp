@@ -89,14 +89,14 @@ public:
                                                                      std::optional<std::vector<std::u8string_view>> aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual GpSpanPtrCharRW                 GetStrRW                (const size_t                   aRowId,
-                                                                     const size_t                   aColId,
-                                                                     std::optional<GpSpanPtrCharRW> aOnNullValue) = 0;
+    virtual GpSpanPtrCharU8RW               GetStrRW                (const size_t                       aRowId,
+                                                                     const size_t                       aColId,
+                                                                     std::optional<GpSpanPtrCharU8RW>   aOnNullValue) = 0;
 
     [[nodiscard]]
-    virtual std::vector<GpSpanPtrCharRW>    GetStrRWArray1D         (const size_t                                   aRowId,
+    virtual std::vector<GpSpanPtrCharU8RW>  GetStrRWArray1D         (const size_t                                   aRowId,
                                                                      const size_t                                   aColId,
-                                                                     std::optional<std::vector<GpSpanPtrCharRW>>    aOnNullValue) = 0;
+                                                                     std::optional<std::vector<GpSpanPtrCharU8RW>>  aOnNullValue) = 0;
 
     [[nodiscard]]
     virtual std::u8string_view              GetJson                 (const size_t                       aRowId,
@@ -109,14 +109,14 @@ public:
                                                                      std::optional<std::vector<std::u8string_view>> aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual GpSpanPtrCharRW                 GetJsonRW               (const size_t                   aRowId,
-                                                                     const size_t                   aColId,
-                                                                     std::optional<GpSpanPtrCharRW> aOnNullValue) = 0;
+    virtual GpSpanPtrCharU8RW               GetJsonRW               (const size_t                       aRowId,
+                                                                     const size_t                       aColId,
+                                                                     std::optional<GpSpanPtrCharU8RW>   aOnNullValue) = 0;
 
     [[nodiscard]]
-    virtual std::vector<GpSpanPtrCharRW>    GetJsonRWArray1D        (const size_t                                   aRowId,
+    virtual std::vector<GpSpanPtrCharU8RW>  GetJsonRWArray1D        (const size_t                                   aRowId,
                                                                      const size_t                                   aColId,
-                                                                     std::optional<std::vector<GpSpanPtrCharRW>>    aOnNullValue) = 0;
+                                                                     std::optional<std::vector<GpSpanPtrCharU8RW>>  aOnNullValue) = 0;
 
     [[nodiscard]]
     virtual GpUUID                          GetUuid                 (const size_t           aRowId,
