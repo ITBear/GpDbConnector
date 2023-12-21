@@ -1,10 +1,11 @@
 #include "GpDbDriverPgSql.hpp"
 #include "GpDbConnectionPgSql.hpp"
 #include "GpDbQueryPreparedPgSql.hpp"
-#include "../../GpCore2/GpUtils/Other/GpRAIIonDestruct.hpp"
-#include "../../GpCore2/GpTasks/Scheduler/GpTaskScheduler.hpp"
-#include "../../GpLog/GpLogCore/GpLog.hpp"
 #include "../GpDbClient/GpDbException.hpp"
+
+#include <GpCore2/GpUtils/Other/GpRAIIonDestruct.hpp>
+#include <GpCore2/GpTasks/Scheduler/GpTaskScheduler.hpp>
+#include <GpLog/GpLogCore/GpLog.hpp>
 
 namespace GPlatform {
 

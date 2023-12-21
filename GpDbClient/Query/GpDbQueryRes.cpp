@@ -1,6 +1,7 @@
 #include "GpDbQueryRes.hpp"
-#include "../../GpJson/GpJsonSerializer.hpp"
-#include "../../../GpCore2/GpReflection/GpReflectManager.hpp"
+
+#include <GpJson/GpJsonSerializer.hpp>
+#include <GpCore2/GpReflection/GpReflectManager.hpp>
 
 namespace GPlatform {
 

@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../GpDbClient_global.hpp"
-#include "../../../GpCore2/GpUtils/Types/Enums/GpEnum.hpp"
-#include "../../../GpCore2/GpUtils/Types/Strings/GpStringOps.hpp"
-#include "../../../GpCore2/GpReflection/GpReflectType.hpp"
+
+#include <GpCore2/GpUtils/Types/Enums/GpEnum.hpp>
+#include <GpCore2/GpUtils/Types/Strings/GpStringOps.hpp>
+#include <GpCore2/GpReflection/GpReflectType.hpp>
 
 namespace GPlatform {
 

@@ -2,9 +2,10 @@
 
 #include "GpDbQueryValType.hpp"
 #include "GpDbQueryValue.hpp"
-#include "../../../GpCore2/GpReflection/GpReflectModel.hpp"
-#include "../../../GpCore2/GpUtils/Types/Bool/GpBool.hpp"
 #include "../../GpDbDataModels/Search/GpDbSearchDesc.hpp"
+
+#include <GpCore2/GpReflection/GpReflectModel.hpp>
+#include <GpCore2/GpUtils/Types/Bool/GpBool.hpp>
 
 namespace GPlatform {
 

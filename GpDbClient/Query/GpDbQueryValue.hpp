@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../GpDbClient_global.hpp"
-#include "../../../GpCore2/GpUtils/Types/Containers/GpContainersT.hpp"
-#include "../../../GpCore2/GpUtils/Types/Containers/GpBytesArray.hpp"
-#include "../../../GpCore2/GpUtils/Types/Containers/GpTypeShell.hpp"
+
+#include <GpCore2/GpUtils/Types/Containers/GpContainersT.hpp>
+#include <GpCore2/GpUtils/Types/Containers/GpBytesArray.hpp>
+#include <GpCore2/GpUtils/Types/Containers/GpTypeShell.hpp>
 
 namespace GPlatform {
 

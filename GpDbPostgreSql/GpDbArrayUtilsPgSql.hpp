@@ -1,12 +1,13 @@
 #pragma once
 
 #include "GpDbPostgreSql_global.hpp"
-#include "../../GpCore2/GpUtils/Types/Numerics/GpNumericTypes.hpp"
-#include "../../GpCore2/GpUtils/Types/UIDs/GpUUID.hpp"
-#include "../../GpCore2/GpUtils/Types/Strings/GpStringOps.hpp"
-#include "../../GpCore2/GpUtils/Streams/GpByteWriter.hpp"
-#include "../../GpCore2/GpUtils/Streams/GpByteWriterStorageByteArray.hpp"
-#include "../../GpCore2/GpUtils/Macro/GpMacroClass.hpp"
+
+#include <GpCore2/GpUtils/Types/Numerics/GpNumericTypes.hpp>
+#include <GpCore2/GpUtils/Types/UIDs/GpUUID.hpp>
+#include <GpCore2/GpUtils/Types/Strings/GpStringOps.hpp>
+#include <GpCore2/GpUtils/Streams/GpByteWriter.hpp>
+#include <GpCore2/GpUtils/Streams/GpByteWriterStorageByteArray.hpp>
+#include <GpCore2/GpUtils/Macro/GpMacroClass.hpp>
 
 #include <postgresql/libpq-fe.h>
 #include <tuple>
@@ -311,7 +312,7 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
             arrayDataWriter.Bytes(&element, sizeof(T));
         }
 
-        //arrayDataWriter.ShrinkToFit();
+        arrayDataWriter.OnEnd();
     }
 
     return {aOidArray, std::move(arrayData)};
@@ -360,7 +361,7 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildBytes
             arrayDataWriter.Bytes(e.data(), elementDataSize);
         }
 
-        //arrayDataWriter.ShrinkToFit();
+        arrayDataWriter.OnEnd();
     }
 
     return {aOidArray, std::move(arrayData)};

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "GpDbSearchOrderType.hpp"
-#include "../../../GpCore2/GpReflection/GpReflectObject.hpp"
-#include "../../../GpCore2/GpReflection/GpReflectUtils.hpp"
+
+#include <GpCore2/GpReflection/GpReflectObject.hpp>
+#include <GpCore2/GpReflection/GpReflectUtils.hpp>
 
 namespace GPlatform {
 

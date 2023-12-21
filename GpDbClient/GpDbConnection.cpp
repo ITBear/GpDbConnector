@@ -1,6 +1,6 @@
 #include "GpDbConnection.hpp"
 #include "GpDbConnectionHookManager.hpp"
-#include "../../GpCore2/GpUtils/Other/GpRAIIonDestruct.hpp"
+#include <GpCore2/GpUtils/Other/GpRAIIonDestruct.hpp>
 
 namespace GPlatform {
 

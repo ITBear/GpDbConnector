@@ -25,20 +25,14 @@ void    GpDbManagerCatalog::Start
 {
     for (const GpDbManagerCfgDesc::SP& cfgDescSP: aCfgDescs)
     {
-        const GpDbManagerCfgDesc&   cfgDesc         = cfgDescSP.V();
-        const auto                  eventPollerOpt  = GpIOEventPollerCatalog::S().Get(cfgDesc.event_poller_name);
-
-        THROW_COND_GP
-        (
-            eventPollerOpt.has_value(),
-            [&cfgDesc](){return u8"Event poller not found by name '"_sv + cfgDesc.event_poller_name + u8"'"_sv;}
-        );
+        const GpDbManagerCfgDesc&   cfgDesc     = cfgDescSP.V();
+        GpIOEventPoller::SP         eventPoller = GpIOEventPollerCatalog::S().Get(cfgDesc.event_poller_name);
 
         const GpDbDriverFactory&    driverFactory   = aDbDriverCatalog.Find(cfgDesc.driver_name);
         GpDbDriver::SP              driverSP        = driverFactory.NewInstance
         (
             cfgDesc.mode.Value(),
-            eventPollerOpt.value()
+            eventPoller
         );
 
         GpDbManager::SP dbManager = MakeSP<GpDbManager>

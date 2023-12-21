@@ -2,9 +2,10 @@
 #include "GpDbManager.hpp"
 #include "GpDbConnection.hpp"
 #include "GpDbException.hpp"
-#include "../../GpLog/GpLogCore/GpLog.hpp"
-#include "../../GpCore2/GpUtils/Types/Strings/GpStringUtils.hpp"
-#include "../../GpCore2/GpTasks/GpTask.hpp"
+
+#include <GpLog/GpLogCore/GpLog.hpp>
+#include <GpCore2/GpUtils/Types/Strings/GpStringUtils.hpp>
+#include <GpCore2/GpTasks/GpTask.hpp>
 
 GP_WARNING_PUSH()
 GP_WARNING_DISABLE(shadow)

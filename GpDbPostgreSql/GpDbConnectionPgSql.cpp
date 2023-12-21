@@ -3,11 +3,11 @@
 #include "GpDbQueryPreparedPgSql.hpp"
 #include "GpDbQueryResPgSql.hpp"
 
-#include "../../GpCore2/GpTasks/GpTask.hpp"
-#include "../../GpCore2/GpTasks/Scheduler/GpTaskScheduler.hpp"
-#include "../../GpCore2/GpUtils/Other/GpRAIIonDestruct.hpp"
-#include "../../GpCore2/GpUtils/Other/GpCallHandler2.hpp"
-#include "../../GpLog/GpLogCore/GpLog.hpp"
+#include <GpCore2/GpTasks/GpTask.hpp>
+#include <GpCore2/GpTasks/Scheduler/GpTaskScheduler.hpp>
+#include <GpCore2/GpUtils/Other/GpRAIIonDestruct.hpp>
+#include <GpCore2/GpUtils/Other/GpCallHandler2.hpp>
+#include <GpLog/GpLogCore/GpLog.hpp>
 
 namespace GPlatform {
 
@@ -229,9 +229,9 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
     (
         PQsocket(iPgConn),
         queryTaskTaskId,
-        [queryTaskTaskId](const GpIOEventsTypes aIOEventsTypes)
+        [](const GpTaskId aTaskId, const GpIOEventsTypes aIOEventsTypes)
         {
-            GpTaskScheduler::S().MakeTaskReady(queryTaskTaskId, aIOEventsTypes);
+            GpTaskScheduler::S().MakeTaskReady(aTaskId, aIOEventsTypes);
         }
     );
 

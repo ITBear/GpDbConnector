@@ -75,21 +75,21 @@ public:
     GpDbQuery&                          NextFloatArray1D    (const std::vector<float>&      aValue);
     GpDbQuery&                          NextFloatArray1D    (std::vector<float>&&           aValue);
 
-    GpDbQuery&                          NextStr             (std::u8string_view             aValue);
-    GpDbQuery&                          NextStr             (std::u8string&&                    aValue);
+    GpDbQuery&                          NextStr             (std::u8string_view                     aValue);
+    GpDbQuery&                          NextStr             (std::u8string&&                        aValue);
     GpDbQuery&                          NextStrArray1D      (const std::vector<std::u8string_view>& aValue);
     GpDbQuery&                          NextStrArray1D      (const std::vector<std::u8string>&      aValue);
     GpDbQuery&                          NextStrArray1D      (std::vector<std::u8string>&&           aValue);
-    GpDbQuery&                          NextStrArray1D      (const GpEnumFlags&                 aValue);
+    GpDbQuery&                          NextStrArray1D      (const GpEnumFlags&                     aValue);
 
-    GpDbQuery&                          NextJson            (std::u8string_view         aValue);
-    GpDbQuery&                          NextJson            (std::u8string&&                aValue);
-    GpDbQuery&                          NextJson            (const GpReflectObject&     aValue);
+    GpDbQuery&                          NextJson            (std::u8string_view                     aValue);
+    GpDbQuery&                          NextJson            (std::u8string&&                        aValue);
+    GpDbQuery&                          NextJson            (const GpReflectObject&                 aValue);
     GpDbQuery&                          NextJsonArray1D     (const std::vector<std::u8string_view>& aValue);
     GpDbQuery&                          NextJsonArray1D     (const std::vector<std::u8string>&      aValue);
-    GpDbQuery&                          NextJsonArray1D     (std::vector<std::u8string>&&               aValue);
+    GpDbQuery&                          NextJsonArray1D     (std::vector<std::u8string>&&           aValue);
     GpDbQuery&                          NextJsonArray1D     (const std::vector<GpReflectObject::SP>& aValue);
-    GpDbQuery&                          NextJsonArray1D     (const GpVectorReflectObjWrapBase& aValue);
+    GpDbQuery&                          NextJsonArray1D     (const GpVectorReflectObjWrapBase&      aValue);
 
     GpDbQuery&                          NextUuid            (const GpUUID&                      aValue);
     GpDbQuery&                          NextUuidArray1D     (const std::vector<GpUUID>&         aValue);
@@ -129,19 +129,19 @@ public:
     GpDbQuery&                          AddFloatArray1D     (const std::vector<float>&      aValue);
     GpDbQuery&                          AddFloatArray1D     (std::vector<float>&&           aValue);
 
-    GpDbQuery&                          AddStr              (std::u8string_view             aValue);
-    GpDbQuery&                          AddStr              (std::u8string&&                    aValue);
+    GpDbQuery&                          AddStr              (std::u8string_view                     aValue);
+    GpDbQuery&                          AddStr              (std::u8string&&                        aValue);
     GpDbQuery&                          AddStrArray1D       (const std::vector<std::u8string_view>& aValue);
     GpDbQuery&                          AddStrArray1D       (const std::vector<std::u8string>&      aValue);
-    GpDbQuery&                          AddStrArray1D       (std::vector<std::u8string>&&       aValue);
-    GpDbQuery&                          AddStrArray1D       (const GpEnumFlags&             aValue);
+    GpDbQuery&                          AddStrArray1D       (std::vector<std::u8string>&&           aValue);
+    GpDbQuery&                          AddStrArray1D       (const GpEnumFlags&                     aValue);
 
-    GpDbQuery&                          AddJson             (std::u8string_view             aValue);
-    GpDbQuery&                          AddJson             (std::u8string&&                    aValue);
-    GpDbQuery&                          AddJson             (const GpReflectObject&         aValue);
-    GpDbQuery&                          AddJsonArray1D      (const std::vector<std::u8string_view>& aValue);
-    GpDbQuery&                          AddJsonArray1D      (const std::vector<std::u8string>&      aValue);
-    GpDbQuery&                          AddJsonArray1D      (std::vector<std::u8string>&&                   aValue);
+    GpDbQuery&                          AddJson             (std::u8string_view                         aValue);
+    GpDbQuery&                          AddJson             (std::u8string&&                            aValue);
+    GpDbQuery&                          AddJson             (const GpReflectObject&                     aValue);
+    GpDbQuery&                          AddJsonArray1D      (const std::vector<std::u8string_view>&     aValue);
+    GpDbQuery&                          AddJsonArray1D      (const std::vector<std::u8string>&          aValue);
+    GpDbQuery&                          AddJsonArray1D      (std::vector<std::u8string>&&               aValue);
     GpDbQuery&                          AddJsonArray1D      (const std::vector<GpReflectObject::SP>&    aValue);
 
     GpDbQuery&                          AddUuid             (const GpUUID&                      aValue);
@@ -447,4 +447,4 @@ std::vector<T>  GpDbQuery::_MakeNumArray (const auto& aVector) const
     return v;
 }
 
-}//GPlatform
+}// namespace GPlatform

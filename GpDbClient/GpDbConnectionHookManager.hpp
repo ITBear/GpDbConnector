@@ -1,8 +1,9 @@
 #pragma once
 
 #include "GpDbClient_global.hpp"
-#include "../../GpCore2/GpUtils/Macro/GpMacroTags.hpp"
-#include "../../GpCore2/GpUtils/SyncPrimitives/GpRWSpinLock.hpp"
+
+#include <GpCore2/GpUtils/Macro/GpMacroTags.hpp>
+#include <GpCore2/GpUtils/SyncPrimitives/GpRWSpinLock.hpp>
 #include <functional>
 #include <vector>
 

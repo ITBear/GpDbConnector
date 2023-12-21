@@ -1,7 +1,8 @@
 #include "GpDbQueryResPgSql.hpp"
-#include "../../GpCore2/GpUtils/Types/Bits/GpBitOps.hpp"
 #include "../GpDbClient/GpDbException.hpp"
 #include "GpDbArrayUtilsPgSql.hpp"
+
+#include <GpCore2/GpUtils/Types/Bits/GpBitOps.hpp>
 
 namespace GPlatform {
 

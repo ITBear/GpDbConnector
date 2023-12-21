@@ -3,8 +3,9 @@
 #include "GpDbConnectionMode.hpp"
 #include "Query/GpDbQueryPrepared.hpp"
 #include "Query/GpDbQuery.hpp"
-#include "../../GpCore2/GpUtils/Types/Containers/GpElementsPool.hpp"
-#include "../../GpCore2/GpTasks/ITC/GpItcSharedPromise.hpp"
+
+#include <GpCore2/GpUtils/Types/Containers/GpElementsPool.hpp>
+#include <GpCore2/GpTasks/ITC/GpItcSharedPromise.hpp>
 
 namespace GPlatform {
 

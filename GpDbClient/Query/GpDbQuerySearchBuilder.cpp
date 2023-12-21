@@ -1,6 +1,7 @@
 #include "GpDbQuerySearchBuilder.hpp"
 #include "GpDbQuery.hpp"
-#include "../../../GpCore2/GpUtils/Encoders/GpBase64.hpp"
+
+#include <GpCore2/GpUtils/Encoders/GpBase64.hpp>
 
 namespace GPlatform {
 
