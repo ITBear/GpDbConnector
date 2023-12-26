@@ -149,7 +149,7 @@ void    GpDbQueryPreparedPgSql::FillData
             std::u8string_view value = aQuery.Str(aValueId);
 
             iOIDs.emplace_back(0);
-            iValuesPtr.emplace_back(GpUTF::S_UTF8_To_STR(value).data());
+            iValuesPtr.emplace_back(GpUTF::S_As_STR(value).data());
             iValuesSize.emplace_back(NumOps::SConvert<int>(value.size()));
             iValuesIsBinary.emplace_back(1);
         } break;
@@ -170,8 +170,8 @@ void    GpDbQueryPreparedPgSql::FillData
             writer.UInt8(1);//Jsonb version
             writer.Bytes(value);
 
-            const u_int_8*  dataPtr     = jsonbData.data();
-            const size_t    dataSize    = jsonbData.size();
+            const std::byte*    dataPtr     = jsonbData.data();
+            const size_t        dataSize    = jsonbData.size();
 
             iBinaryDataVec.emplace_back(std::move(jsonbData));
 

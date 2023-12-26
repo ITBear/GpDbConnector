@@ -12,7 +12,7 @@ GpDbQueryAsyncTaskPgSql::GpDbQueryAsyncTaskPgSql
     const GpDbQuery&            aQuery,
     const GpDbQueryPrepared&    aQueryPrepared
 ):
-GpSocketTask
+GpSingleSocketTask
 (
     GpSocketTCP::SFromID
     (
@@ -31,7 +31,7 @@ GpDbQueryAsyncTaskPgSql::~GpDbQueryAsyncTaskPgSql (void) noexcept
 {
 }
 
-GpTaskRunRes::EnumT GpDbQueryAsyncTaskPgSql::OnReadyToRead (GpSocket& /*aSocket*/)
+void    GpDbQueryAsyncTaskPgSql::OnReadyToRead (GpSocket& /*aSocket*/)
 {
     // Get connection
     PGconn* pgConn = iDbConn.PgConn();
@@ -43,7 +43,7 @@ GpTaskRunRes::EnumT GpDbQueryAsyncTaskPgSql::OnReadyToRead (GpSocket& /*aSocket*
     (
         rc != 0,
         GpDbExceptionCode::CONNECTION_ERROR,
-        u8"PQconsumeInput return error: "_sv + GpUTF::S_STR_To_UTF8(PQerrorMessage(pgConn))
+        u8"PQconsumeInput return error: "_sv + GpUTF::S_As_UTF8(PQerrorMessage(pgConn))
     );
 
     // Consume and ignore PGnotify
@@ -58,21 +58,24 @@ GpTaskRunRes::EnumT GpDbQueryAsyncTaskPgSql::OnReadyToRead (GpSocket& /*aSocket*
     // Check if connection is busy (IO operations)
     if (PQisBusy(pgConn))
     {
-        return GpTaskRunRes::WAIT;
+        return;
+        //return GpTaskRunRes::WAIT;
     }
 
     // Get result
     PGresult* pgResult = PQgetResult(pgConn);
     DonePromise().Fulfill(MakeSP<GpDbQueryResPgSql>(pgResult));
 
-    return GpTaskRunRes::DONE;
+    // TODO: manualy call task stop request;
+    THROW_GP_NOT_IMPLEMENTED();
+    //return GpTaskRunRes::DONE;
 }
 
-GpTaskRunRes::EnumT GpDbQueryAsyncTaskPgSql::OnReadyToWrite (GpSocket& /*aSocket*/)
+void    GpDbQueryAsyncTaskPgSql::OnReadyToWrite (GpSocket& /*aSocket*/)
 {
     if (iIsSend)
     {
-        return GpTaskRunRes::WAIT;
+        return;// GpTaskRunRes::WAIT;
     }
 
     const GpDbQueryPreparedPgSql&   queryPrepared   = static_cast<const GpDbQueryPreparedPgSql&>(iQueryPrepared);
@@ -86,7 +89,7 @@ GpTaskRunRes::EnumT GpDbQueryAsyncTaskPgSql::OnReadyToWrite (GpSocket& /*aSocket
     const int sendRes = PQsendQueryParams
     (
         iDbConn.PgConn(),
-        GpUTF::S_UTF8_To_STR(queryZT).data(),
+        GpUTF::S_As_STR(queryZT).data(),
         int(iQuery.Values().size()),
         queryPrepared.OIDs().data(),
         queryPrepared.ValuesPtr().data(),
@@ -99,12 +102,12 @@ GpTaskRunRes::EnumT GpDbQueryAsyncTaskPgSql::OnReadyToWrite (GpSocket& /*aSocket
     (
         sendRes == 1,
         GpDbExceptionCode::QUERY_ERROR,
-        [&](){return u8"Failed to do SQL query: "_sv + GpUTF::S_STR_To_UTF8(PQerrorMessage(iDbConn.PgConn()));}
+        [&](){return u8"Failed to do SQL query: "_sv + GpUTF::S_As_UTF8(PQerrorMessage(iDbConn.PgConn()));}
     );
 
     iIsSend = true;
 
-    return GpTaskRunRes::WAIT;
+    return;// GpTaskRunRes::WAIT;
 }
 
 void    GpDbQueryAsyncTaskPgSql::OnClosed (GpSocket& /*aSocket*/)
@@ -125,4 +128,4 @@ void    GpDbQueryAsyncTaskPgSql::OnError (GpSocket& /*aSocket*/)
     );
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

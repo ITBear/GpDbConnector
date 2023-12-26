@@ -2,13 +2,13 @@
 
 #include "GpDbPostgreSql_global.hpp"
 #include "GpDbConnectionPgSql.hpp"
-#include "../../GpNetwork/GpNetworkCore/Tasks/GpSocketTask.hpp"
+#include "../../GpNetwork/GpNetworkCore/Tasks/GpSingleSocketTask.hpp"
 
 #include <postgresql/libpq-fe.h>
 
 namespace GPlatform {
 
-class GpDbQueryAsyncTaskPgSql final: public GpSocketTask
+class GpDbQueryAsyncTaskPgSql final: public GpSingleSocketTask
 {
 public:
     CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbQueryAsyncTaskPgSql)
@@ -21,8 +21,8 @@ public:
     virtual                     ~GpDbQueryAsyncTaskPgSql    (void) noexcept override final;
 
 protected:
-    virtual GpTaskRunRes::EnumT OnReadyToRead               (GpSocket& aSocket) override final;
-    virtual GpTaskRunRes::EnumT OnReadyToWrite              (GpSocket& aSocket) override final;
+    virtual void                OnReadyToRead               (GpSocket& aSocket) override final;
+    virtual void                OnReadyToWrite              (GpSocket& aSocket) override final;
     virtual void                OnClosed                    (GpSocket& aSocket) override final;
     virtual void                OnError                     (GpSocket& aSocket) override final;
 
@@ -33,4 +33,4 @@ private:
     bool                        iIsSend = false;
 };
 
-}//namespace GPlatform
+}// namespace GPlatform

@@ -78,4 +78,4 @@ iIOEventPoller(aIOEventPoller)
 {
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

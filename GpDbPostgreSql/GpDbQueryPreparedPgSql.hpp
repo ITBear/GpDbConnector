@@ -57,8 +57,8 @@ void    GpDbQueryPreparedPgSql::_FillArray (const T& aArray)
 
     const auto& ead = iBinaryDataVec[iBinaryDataVec.size() - 1];
 
-    const u_int_8*  dataPtr     = ead.data();
-    const size_t    dataSize    = ead.size();
+    const std::byte*    dataPtr     = ead.data();
+    const size_t        dataSize    = ead.size();
 
     iOIDs.emplace_back(oid);
     iValuesPtr.emplace_back(reinterpret_cast<const char*>(dataPtr));

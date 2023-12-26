@@ -105,7 +105,7 @@ void    GpDbQueryResPgSql::Process
     THROW_COND_GP
     (
         iPgResult != nullptr,
-        [&](){return u8"PGresult is null: "_sv + GpUTF::S_STR_To_UTF8(PQerrorMessage(aPgConn));}
+        [&](){return u8"PGresult is null: "_sv + GpUTF::S_As_UTF8(PQerrorMessage(aPgConn));}
     );
 
     const ExecStatusType    pgResStatus = PQresultStatus(iPgResult);
@@ -335,7 +335,7 @@ std::u8string_view  GpDbQueryResPgSql::GetStr
     const char*     strPtr  = PQgetvalue(iPgResult, rowId, colId);
     const size_t    strLen  = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
 
-    return GpUTF::S_STR_To_UTF8(strPtr, strLen);
+    return GpUTF::S_As_UTF8(strPtr, strLen);
 }
 
 std::vector<std::u8string_view> GpDbQueryResPgSql::GetStrArray1D
@@ -593,7 +593,7 @@ bool    GpDbQueryResPgSql::GetBoolean
     const char*     dataPtr     = PQgetvalue(iPgResult, rowId, colId);
     const size_t    dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
 
-    std::u8string_view str = GpUTF::S_STR_To_UTF8(dataPtr, dataSize);
+    std::u8string_view str = GpUTF::S_As_UTF8(dataPtr, dataSize);
     const char8_t v = str.at(0);
 
     return     (v == 0x01)
@@ -618,7 +618,7 @@ void    GpDbQueryResPgSql::ThrowDbEx
     PGconn*             aPgConn
 )
 {
-    std::u8string_view          message = GpUTF::S_STR_To_UTF8(PQerrorMessage(aPgConn));
+    std::u8string_view          message = GpUTF::S_As_UTF8(PQerrorMessage(aPgConn));
     GpDbExceptionCode::EnumT    code    = GpDbExceptionCode::QUERY_ERROR;
 
     if (message.find(u8"duplicate key"_sv) != std::u8string_view::npos)

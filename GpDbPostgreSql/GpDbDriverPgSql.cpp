@@ -53,13 +53,13 @@ GpDbQueryPrepared::CSP  GpDbDriverPgSql::Prepare (const GpDbQuery& aQuery) const
 PGconn* GpDbDriverPgSql::ConnectSync (std::u8string_view aConnStr) const
 {
     const std::u8string connStr(aConnStr);
-    PGconn* pgConn = PQconnectdb(GpUTF::S_UTF8_To_STR(connStr).data());
+    PGconn* pgConn = PQconnectdb(GpUTF::S_As_STR(connStr).data());
 
     THROW_COND_GP(pgConn != nullptr, "PQconnectdb return null"_sv);
 
     if (PQstatus(pgConn) == CONNECTION_BAD) [[unlikely]]
     {
-        const std::u8string errMsg(GpUTF::S_STR_To_UTF8(PQerrorMessage(pgConn)));
+        const std::u8string errMsg(GpUTF::S_As_UTF8(PQerrorMessage(pgConn)));
         PQfinish(pgConn);
         THROW_GP(u8"PQconnectdb return: "_sv + errMsg);
     }
@@ -80,7 +80,7 @@ PGconn* GpDbDriverPgSql::ConnectAsync (std::u8string_view aConnStr) const
     /*
     // Start
     const std::u8string connStr(aConnStr);
-    PGconn* pgConn              = PQconnectStart(GpUTF::S_UTF8_To_STR(connStr).data());
+    PGconn* pgConn              = PQconnectStart(GpUTF::S_As_STR(connStr).data());
     PGconn* pgConnToAutoFinish  = pgConn;
 
     GpRAIIonDestruct onFinish

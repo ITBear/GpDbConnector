@@ -82,8 +82,8 @@ std::u8string   GpDbConnectionPgSql::StrEscape (std::u8string_view aStr) const
         return std::u8string();
     }
 
-    char* escapedStrPtr = PQescapeLiteral(pgConn, GpUTF::S_UTF8_To_STR(aStr).data(), aStr.size());
-    std::u8string escapedStr(GpUTF::S_STR_To_UTF8(escapedStrPtr));
+    char* escapedStrPtr = PQescapeLiteral(pgConn, GpUTF::S_As_STR(aStr).data(), aStr.size());
+    std::u8string escapedStr(GpUTF::S_As_UTF8(escapedStrPtr));
     PQfreemem(escapedStrPtr);
 
     return escapedStr;
@@ -178,7 +178,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync
     PGresult* pgResult = PQexecParams
     (
         iPgConn,
-        GpUTF::S_UTF8_To_STR(queryZT).data(),
+        GpUTF::S_As_STR(queryZT).data(),
         NumOps::SConvert<int>(aQuery.Values().size()),
         queryPrepared.OIDs().data(),
         queryPrepared.ValuesPtr().data(),
@@ -229,7 +229,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
     (
         PQsocket(iPgConn),
         queryTaskTaskId,
-        [](const GpTaskId aTaskId, const GpIOEventsTypes aIOEventsTypes)
+        [](const GpTaskId aTaskId, const GpIOEventPoller::SubsriberResValT aIOEventsTypes)
         {
             GpTaskScheduler::S().MakeTaskReady(aTaskId, aIOEventsTypes);
         }
@@ -273,4 +273,4 @@ void    GpDbConnectionPgSql::ClosePgConn (void) noexcept
     SetStatus(StatusTE::CLOSED);
 }
 
-}//namespace GPlatform
+}// namespace GPlatform
