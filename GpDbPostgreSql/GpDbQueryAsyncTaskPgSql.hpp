@@ -1,9 +1,7 @@
 #pragma once
 
-#include "GpDbPostgreSql_global.hpp"
-#include "GpDbConnectionPgSql.hpp"
-#include "../../GpNetwork/GpNetworkCore/Tasks/GpSingleSocketTask.hpp"
-
+#include <GpDbConnector/GpDbPostgreSql/GpDbConnectionPgSql.hpp>
+#include <GpNetwork/GpNetworkCore/Tasks/GpSingleSocketTask.hpp>
 #include <postgresql/libpq-fe.h>
 
 namespace GPlatform {
@@ -17,7 +15,8 @@ public:
 public:
                                 GpDbQueryAsyncTaskPgSql     (GpDbConnectionPgSql&       aDbConn,
                                                              const GpDbQuery&           aQuery,
-                                                             const GpDbQueryPrepared&   aQueryPrepared);
+                                                             const GpDbQueryPrepared&   aQueryPrepared,
+                                                             GpIOEventPollerIdx         aIOEventPollerIdx);
     virtual                     ~GpDbQueryAsyncTaskPgSql    (void) noexcept override final;
 
 protected:
@@ -25,6 +24,7 @@ protected:
     virtual void                OnReadyToWrite              (GpSocket& aSocket) override final;
     virtual void                OnClosed                    (GpSocket& aSocket) override final;
     virtual void                OnError                     (GpSocket& aSocket) override final;
+    virtual void                ProcessOtherMessages        (GpAny& aMessage) override final;
 
 private:
     GpDbConnectionPgSql&        iDbConn;

@@ -38,4 +38,4 @@ public:
     static GpDbQueryValType::EnumT      SReflectToDbType    (const GpReflectType::EnumT aType);
 };
 
-}//namespace GPlatform
+}// namespace GPlatform

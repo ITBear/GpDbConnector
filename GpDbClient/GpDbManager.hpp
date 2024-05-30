@@ -25,7 +25,7 @@ public:
 
 public:
                                                 GpDbManager             (GpSP<GpDbDriver>                   aDriver,
-                                                                         std::u8string                      aConnectionStr,
+                                                                         std::string                        aConnectionStr,
                                                                          const GpDbConnectionMode::EnumT    aMode) noexcept;
     virtual                                     ~GpDbManager            (void) noexcept override final;
 
@@ -42,10 +42,10 @@ protected:
     virtual std::optional<GpSP<GpDbConnection>> OnAcquireNoElementsLeft (void) override final;
 
 private:
-    GpSP<GpDbDriver>                            iDriver;
-    const std::u8string                         iConnStr;
-    [[maybe_unused]] const GpDbConnectionMode::EnumT            iMode;
-    std::queue<ConnectItcPromiseT>              iConnWaitPromises;
+    GpSP<GpDbDriver>                                    iDriver;
+    const std::string                                   iConnStr;
+    [[maybe_unused]] const GpDbConnectionMode::EnumT    iMode;
+    std::queue<ConnectItcPromiseT>                      iConnWaitPromises;
 };
 
 }// GPlatform

@@ -16,4 +16,4 @@ GP_ENUM(GP_DB_CLIENT_API, GpDbExceptionCode,
     ROWS_COUNT_OUT_OF_RANGE
 );
 
-}//namespace GPlatform
+}// namespace GPlatform

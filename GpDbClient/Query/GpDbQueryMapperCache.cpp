@@ -4,4 +4,4 @@ namespace GPlatform {
 
 GpDbQueryMapperCache    GpDbQueryMapperCache::sInstance;
 
-}//namespace GPlatform
+}// namespace GPlatform

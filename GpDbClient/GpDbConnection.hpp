@@ -21,8 +21,8 @@ public:
     using PreExecuteHookFnT     = std::function<void(GpDbConnection& aConn)>;
 
 protected:
-    inline                      GpDbConnection          (const StatusTE aStatus,
-                                                         const ModeTE   aMode) noexcept;
+    inline                      GpDbConnection          (StatusTE   aStatus,
+                                                         ModeTE     aMode) noexcept;
 
 public:
     virtual                     ~GpDbConnection         (void) noexcept;
@@ -39,16 +39,16 @@ public:
     virtual void                Close                   (void) = 0;
     GpDbQueryRes::SP            Execute                 (const GpDbQuery&           aQuery,
                                                          const GpDbQueryPrepared&   aQueryPrepared,
-                                                         const size_t               aMinResultRowsCount);
+                                                         size_t                     aMinResultRowsCount);
 
-    virtual std::u8string       StrEscape               (std::u8string_view aStr) const = 0;
+    virtual std::string         StrEscape               (std::string_view aStr) const = 0;
     virtual bool                Validate                (void) const noexcept = 0;
-    virtual void                SetEnv                  (const std::vector<std::tuple<std::u8string, std::u8string>>& aValues) = 0;
+    virtual void                SetEnv                  (const std::vector<std::tuple<std::string, std::string>>& aValues) = 0;
 
 protected:
     virtual GpDbQueryRes::SP    _Execute                (const GpDbQuery&           aQuery,
                                                          const GpDbQueryPrepared&   aQueryPrepared,
-                                                         const size_t               aMinResultRowsCount) = 0;
+                                                         size_t                     aMinResultRowsCount) = 0;
 
     void                        SetStatus               (StatusTE aStatus) noexcept {iStatus = aStatus;}
 
@@ -66,12 +66,12 @@ private:
 
 GpDbConnection::GpDbConnection
 (
-    const StatusTE      aStatus,
-    const ModeTE        aMode
+    const StatusTE  aStatus,
+    const ModeTE    aMode
 ) noexcept:
-iStatus     (aStatus),
-iMode       (aMode)
+iStatus{aStatus},
+iMode  {aMode}
 {
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

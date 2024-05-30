@@ -34,28 +34,28 @@ private:
 
 private:
     size_t                      FindAndParseStr         (const size_t       aStartId,
-                                                         std::u8string_view aStr,
-                                                         const char8_t      aStopChar,
-                                                         const char8_t      aEscapeChar,
+                                                         std::string_view   aStr,
+                                                         const char         aStopChar,
+                                                         const char         aEscapeChar,
                                                          const bool         aIsPropName,
                                                          GpDbQueryBuilder&  aBuilder);
     size_t                      ParseStr                (const size_t       aStartId,
-                                                         std::u8string_view aStr,
-                                                         const char8_t      aStopChar,
-                                                         const char8_t      aEscapeChar,
+                                                         std::string_view   aStr,
+                                                         const char         aStopChar,
+                                                         const char         aEscapeChar,
                                                          const bool         aIsPropName,
                                                          GpDbQueryBuilder&  aBuilder);
 
     size_t                      ParseNum                (const size_t       aStartId,
-                                                         std::u8string_view aStr,
+                                                         std::string_view   aStr,
                                                          GpDbQueryBuilder&  aBuilder);
 
     std::tuple<GpDbQueryValType::EnumT, size_t>
                                 DetectType              (const size_t       aStartId,
-                                                         std::u8string_view aStr);
+                                                         std::string_view   aStr);
 
 private:
-    std::u8string               iLastPropName;
+    std::string                 iLastPropName;
 };
 
-}//namespace GPlatform
+}// namespace GPlatform

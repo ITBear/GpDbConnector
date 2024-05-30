@@ -4,4 +4,4 @@ namespace GPlatform {
 
 GP_ENUM_IMPL(GpDbQueryResState)
 
-}//namespace GPlatform
+}// namespace GPlatform

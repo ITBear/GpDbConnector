@@ -4,4 +4,4 @@ namespace GPlatform {
 
 GP_ENUM_IMPL(GpDbConnectionStatus)
 
-}//GPlatform
+}// namespace GPlatform

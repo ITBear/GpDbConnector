@@ -8,20 +8,20 @@ class GP_DB_DATA_MODELS_API GpDbSearchDesc final: public GpReflectObject
 {
 public:
     CLASS_DD(GpDbSearchDesc)
-    REFLECT_DECLARE(u8"6cd0aa57-3ea6-4c1c-8886-8519164566b1"_uuid)
+    REFLECT_DECLARE("6cd0aa57-3ea6-4c1c-8886-8519164566b1"_uuid)
 
 public:
                                     GpDbSearchDesc  (void) noexcept = default;
     inline                          GpDbSearchDesc  (const GpDbSearchDesc& aDesc);
     inline                          GpDbSearchDesc  (GpDbSearchDesc&& aDesc) noexcept;
-    inline                          GpDbSearchDesc  (std::u8string                      aFilter,
+    inline                          GpDbSearchDesc  (std::string                        aFilter,
                                                      const u_int_32                     aLimit,
                                                      const u_int_32                     aMinId,
                                                      GpDbSearchOrderDesc::C::Vec::SP    aOrder) noexcept;
     virtual                         ~GpDbSearchDesc (void) noexcept override final;
 
 public:
-    std::u8string                   filter;
+    std::string                     filter;
     u_int_32                        limit   = 0;
     u_int_32                        min_id  = 0;
     GpDbSearchOrderDesc::C::Vec::SP order;
@@ -47,7 +47,7 @@ order (std::move(aDesc.order))
 
 GpDbSearchDesc::GpDbSearchDesc
 (
-    std::u8string                   aFilter,
+    std::string                     aFilter,
     const u_int_32                  aLimit,
     const u_int_32                  aMinId,
     GpDbSearchOrderDesc::C::Vec::SP aOrder
@@ -59,4 +59,4 @@ order (std::move(aOrder))
 {
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

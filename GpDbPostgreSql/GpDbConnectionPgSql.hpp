@@ -1,10 +1,8 @@
 #pragma once
 
-#include "GpDbPostgreSql_global.hpp"
-#include "../GpDbClient/GpDbConnection.hpp"
-#include "../../GpNetwork/GpNetworkCore/GpIOObjectId.hpp"
-#include "../../GpNetwork/GpNetworkCore/Pollers/GpIOEventPoller.hpp"
-
+#include <GpDbConnector/GpDbClient/GpDbConnection.hpp>
+#include <GpNetwork/GpNetworkCore/Pollers/GpIOEventPollerCatalog.hpp>
+#include <GpNetwork/GpNetworkCore/Pollers/GpIOEventPoller.hpp>
 #include <postgresql/libpq-fe.h>
 
 namespace GPlatform {
@@ -21,22 +19,22 @@ public:
     CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbConnectionPgSql)
     CLASS_DD(GpDbConnectionPgSql)
 
-    using IsolationLevelNamesT = std::array<std::u8string_view, GpDbTransactionIsolation::SCount()>;
+    using IsolationLevelNamesT = std::array<std::string_view, GpDbTransactionIsolation::SCount()>;
 
 public:
     inline                      GpDbConnectionPgSql     (PGconn*            aPgConn,
                                                          const ModeTE       aMode,
-                                                         GpIOEventPoller*   aIOEventPoller) noexcept;
+                                                         GpIOEventPollerIdx aIOEventPollerIdx) noexcept;
     virtual                     ~GpDbConnectionPgSql    (void) noexcept override final;
 
-    GpIOObjectId                SocketId                (void) const {return PQsocket(iPgConn);}
+    GpSocketId                  SocketId                (void) const {return PQsocket(iPgConn);}
     PGconn*                     PgConn                  (void) noexcept {return iPgConn;}
-    GpIOEventPoller*            IOEventPoller           (void) noexcept {return iIOEventPoller;}
+    GpIOEventPollerIdx          IOEventPollerIdx        (void) noexcept {return iIOEventPollerIdx;}
 
     virtual void                Close                   (void) override final;
-    virtual std::u8string       StrEscape               (std::u8string_view aStr) const override final;
+    virtual std::string         StrEscape               (std::string_view aStr) const override final;
     virtual bool                Validate                (void) const noexcept override final;
-    virtual void                SetEnv                  (const std::vector<std::tuple<std::u8string, std::u8string>>& aValues) override final;
+    virtual void                SetEnv                  (const std::vector<std::tuple<std::string, std::string>>& aValues) override final;
 
 protected:
     virtual GpDbQueryRes::SP    _Execute                (const GpDbQuery&           aQuery,
@@ -58,7 +56,8 @@ private:
 
 private:
     PGconn*                     iPgConn         = nullptr;
-    GpIOEventPoller*            iIOEventPoller  = nullptr;
+    const GpIOEventPollerIdx    iIOEventPollerIdx;
+
     static IsolationLevelNamesT sIsolationLevelNames;
 };
 
@@ -66,15 +65,15 @@ GpDbConnectionPgSql::GpDbConnectionPgSql
 (
     PGconn*             aPgConn,
     const ModeTE        aMode,
-    GpIOEventPoller*    aIOEventPoller
+    GpIOEventPollerIdx  aIOEventPollerIdx
 ) noexcept:
 GpDbConnection
 (
     StatusTE::CONNECTED,
     aMode
 ),
-iPgConn       (aPgConn),
-iIOEventPoller(aIOEventPoller)
+iPgConn          {aPgConn},
+iIOEventPollerIdx{aIOEventPollerIdx}
 {
 }
 

@@ -1,4 +1,4 @@
-#include "GpDbPostgreSql.hpp"
+#include "GpDbPostgreSqlLib.hpp"
 
 namespace GPlatform {
 

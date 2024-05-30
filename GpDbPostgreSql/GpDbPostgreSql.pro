@@ -1,36 +1,30 @@
+# ----------- Config -----------
 TEMPLATE        = lib
-#CONFIG         += staticlib
-VER_MAJ		    = 2
-VER_MIN		    = 1
-VER_PAT		    = 4
-QMAKE_CXXFLAGS += -DGP_MODULE_UUID=ba443106-9992-4c29-93db-6e29aef8c576
+#CONFIG        += staticlib
 QMAKE_CXXFLAGS += -DGP_REFLECTION_STATIC_ADD_TO_MANAGER
+QMAKE_CXXFLAGS += -DGP_MODULE_UUID=ba443106-9992-4c29-93db-6e29aef8c576
 PACKET_NAME     = GpDbPostgreSql
+DEFINES        += GP_DB_POSTGRESQL_LIBRARY
+_VER_MAJ        = 2
+_VER_MIN        = 1
+_VER_PAT        = 5
 DIR_LEVEL       = ./../..
 
-DEFINES		   += GP_DB_POSTGRESQL_LIBRARY
-DEFINES        += "GP_CURRENT_LIB_VER_MAJ=\\\"$$VER_MAJ\\\""
-DEFINES        += "GP_CURRENT_LIB_VER_MIN=\\\"$$VER_MIN\\\""
-DEFINES        += "GP_CURRENT_LIB_VER_PAT=\\\"$$VER_PAT\\\""
-DEFINES        += "GP_CURRENT_LIB_PACKET_NAME=\\\"$$PACKET_NAME\\\""
+include($$DIR_LEVEL/../QtGlobalPro.pri)
 
-include(../../../QtGlobalPro.pri)
-
-#------------------------------ LIBS BEGIN ---------------------------------
+# ----------- Libraries -----------
 os_windows{
 }
 
 os_linux{
 }
 
-LIBS += -lpq
-#------------------------------- LIBS END ----------------------------------
-
+# ----------- Sources and headers -----------
 SOURCES += \
 	GpDbConnectionPgSql.cpp \
 	GpDbDriverFactoryPgSql.cpp \
 	GpDbDriverPgSql.cpp \
-	GpDbPostgreSql.cpp \
+	GpDbPostgreSqlLib.cpp \
 	GpDbQueryAsyncTaskPgSql.cpp \
 	GpDbQueryPreparedPgSql.cpp \
 	GpDbQueryResPgSql.cpp
@@ -40,7 +34,7 @@ HEADERS += \
 	GpDbConnectionPgSql.hpp \
 	GpDbDriverFactoryPgSql.hpp \
 	GpDbDriverPgSql.hpp \
-	GpDbPostgreSql.hpp \
+	GpDbPostgreSqlLib.hpp \
 	GpDbPostgreSql_global.hpp \
 	GpDbQueryAsyncTaskPgSql.hpp \
 	GpDbQueryPreparedPgSql.hpp \

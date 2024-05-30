@@ -8,11 +8,11 @@ namespace GPlatform {
 bool    _TestChar
 (
     const size_t        aCharId,
-    std::u8string_view  aStr,
-    const char8_t       aChar
+    std::string_view    aStr,
+    const char          aChar
 )
 {
-    const size_t strLength = aStr.size();
+    const size_t strLength = std::size(aStr);
     if (aCharId >= strLength)
     {
         return false;
@@ -64,7 +64,7 @@ void    GpDbQuerySearchBuilder::ProcessFilter
     const GpDbSearchDesc&           aSearchDesc
 )
 {
-    std::u8string_view  filter          = aSearchDesc.filter;
+    std::string_view    filter          = aSearchDesc.filter;
     const size_t        filterLength    = filter.length();
 
     if (filterLength == 0)
@@ -74,7 +74,7 @@ void    GpDbQuerySearchBuilder::ProcessFilter
 
     for (size_t id = 0; id < filterLength; id++)
     {
-        const char8_t ch = filter[id];
+        const char ch = filter[id];
 
         if (ch == u8'(')
         {
@@ -159,7 +159,7 @@ void    GpDbQuerySearchBuilder::ProcessFilter
                 //IN (SELECT language.find_item_ids_like('xxxxx%'))
 
                 aBuilder.IN().BRACE_BEGIN()
-                    .SELECT().RAW(u8"language.find_item_ids_like"_sv).BRACE_BEGIN();
+                    .SELECT().RAW("language.find_item_ids_like"_sv).BRACE_BEGIN();
 
                 id = FindAndParseStr(id+1, filter, u8'\'', u8'\\', false, aBuilder);//STRING CONSTANT
 
@@ -184,7 +184,7 @@ void    GpDbQuerySearchBuilder::ProcessFilter
             //Skip
         } else
         {
-            THROW_GP(u8"Parsing error: unexpected character '"_sv + ch + u8"' at position "_sv + id);
+            THROW_GP("Parsing error: unexpected character '"_sv + ch + "' at position "_sv + id);
         }
     }
 }
@@ -219,7 +219,7 @@ void    GpDbQuerySearchBuilder::ProcessOrderByCond
         const GpDbSearchOrderDesc& orderDesc = o.V();
         aBuilder.COL(orderDesc.name);
 
-        switch (orderDesc.type.Value())
+        switch (orderDesc.type)
         {
             case GpDbSearchOrderType::DESC:
             {
@@ -231,7 +231,7 @@ void    GpDbQuerySearchBuilder::ProcessOrderByCond
             } break;
             default:
             {
-                THROW_GP(u8"Unknown oerder type"_sv);
+                THROW_GP("Unknown oerder type"_sv);
             }
         }
     }
@@ -256,9 +256,9 @@ void    GpDbQuerySearchBuilder::ProcessLimitCond
 size_t  GpDbQuerySearchBuilder::FindAndParseStr
 (
     const size_t        aStartId,
-    std::u8string_view  aStr,
-    const char8_t       aStopChar,
-    const char8_t       aEscapeChar,
+    std::string_view    aStr,
+    const char          aStopChar,
+    const char          aEscapeChar,
     const bool          aIsPropName,
     GpDbQueryBuilder&   aBuilder
 )
@@ -268,7 +268,7 @@ size_t  GpDbQuerySearchBuilder::FindAndParseStr
 
     for (id = aStartId; id < filterLength; id++)
     {
-        const char8_t ch = aStr[id];
+        const char ch = aStr[id];
 
         if (ch == '\'')
         {
@@ -287,7 +287,7 @@ size_t  GpDbQuerySearchBuilder::FindAndParseStr
             //Skip
         } else
         {
-            THROW_GP(u8"Parsing error: unexpected character '"_sv + ch + u8"' at position "_sv + id);
+            THROW_GP("Parsing error: unexpected character '"_sv + ch + "' at position "_sv + id);
         }
     }
 
@@ -297,20 +297,20 @@ size_t  GpDbQuerySearchBuilder::FindAndParseStr
 size_t  GpDbQuerySearchBuilder::ParseStr
 (
     const size_t        aStartId,
-    std::u8string_view  aStr,
-    const char8_t       aStopChar,
-    const char8_t       aEscapeChar,
+    std::string_view    aStr,
+    const char          aStopChar,
+    const char          aEscapeChar,
     const bool          aIsPropName,
     GpDbQueryBuilder&   aBuilder
 )
 {
-    const size_t    strLength   = aStr.size();
+    const size_t    strLength   = std::size(aStr);
     size_t          id          = 0;
-    std::u8string   strBuffer;
+    std::string     strBuffer;
 
     for (id = aStartId; id < strLength; ++id)
     {
-        const char8_t ch = aStr[id];
+        const char ch = aStr[id];
 
         if (ch == aStopChar)
         {
@@ -335,7 +335,7 @@ size_t  GpDbQuerySearchBuilder::ParseStr
                 else if (valueType == GpDbQueryValType::INT_64) aBuilder.VALUE(GpDbQueryValue(NumOps::SConvert<s_int_64>(StrOps::SToSI64(strBuffer))));
                 else if (valueType == GpDbQueryValType::FLOAT)  aBuilder.VALUE(GpDbQueryValue(float(StrOps::SToDouble(strBuffer))));
                 else if (valueType == GpDbQueryValType::DOUBLE) aBuilder.VALUE(GpDbQueryValue(double(StrOps::SToDouble(strBuffer))));
-                else THROW_GP(u8"Unsupported value type '"_sv + GpDbQueryValType::SToString(valueType) + u8"' for text"_sv);
+                else THROW_GP("Unsupported value type '"_sv + GpDbQueryValType::SToString(valueType) + "' for text"_sv);
             }
 
             return id;
@@ -343,7 +343,7 @@ size_t  GpDbQuerySearchBuilder::ParseStr
         {
             if (id < (strLength-1))
             {
-                const char8_t nextCh = aStr[++id];
+                const char nextCh = aStr[++id];
 
                 if (nextCh == aStopChar)
                 {
@@ -353,12 +353,12 @@ size_t  GpDbQuerySearchBuilder::ParseStr
                     strBuffer += aEscapeChar;
                 } else
                 {
-                    THROW_GP(u8"Parsing error: unexpected character '"_sv + nextCh + u8"' at position "_sv + id + u8". Expected characters '"_sv + aStopChar
-                     + u8"' or '"_sv + aEscapeChar + u8"' after escape character '"_sv + aEscapeChar + u8"'"_sv);
+                    THROW_GP("Parsing error: unexpected character '"_sv + nextCh + "' at position "_sv + id + ". Expected characters '"_sv + aStopChar
+                     + "' or '"_sv + aEscapeChar + "' after escape character '"_sv + aEscapeChar + "'"_sv);
                 }
             } else
             {
-                THROW_GP(u8"Parsing error: unexpected end of string at position "_sv + (id+1));
+                THROW_GP("Parsing error: unexpected end of string at position "_sv + (id+1));
             }
         } else
         {
@@ -366,13 +366,13 @@ size_t  GpDbQuerySearchBuilder::ParseStr
         }
     }
 
-    THROW_GP(u8"Parsing error: unexpected end of string at position "_sv + id);
+    THROW_GP("Parsing error: unexpected end of string at position "_sv + id);
 }
 
 size_t  GpDbQuerySearchBuilder::ParseNum
 (
     const size_t        aStartId,
-    std::u8string_view  aStr,
+    std::string_view    aStr,
     GpDbQueryBuilder&   aBuilder
 )
 {
@@ -405,7 +405,7 @@ size_t  GpDbQuerySearchBuilder::ParseNum
             aBuilder.VALUE(GpDbQueryValue(double(val)));
         } else
         {
-            THROW_GP(u8"Parsing error: Can`t convert number to "_sv + GpDbQueryValType::SToString(valueType));
+            THROW_GP("Parsing error: Can`t convert number to "_sv + GpDbQueryValType::SToString(valueType));
         }
     } else//double
     {
@@ -420,7 +420,7 @@ size_t  GpDbQuerySearchBuilder::ParseNum
             aBuilder.VALUE(GpDbQueryValue(float(val)));
         } else
         {
-            THROW_GP(u8"Parsing error: Can`t convert real number to "_sv + GpDbQueryValType::SToString(valueType));
+            THROW_GP("Parsing error: Can`t convert real number to "_sv + GpDbQueryValType::SToString(valueType));
         }
     }
 
@@ -430,7 +430,7 @@ size_t  GpDbQuerySearchBuilder::ParseNum
 std::tuple<GpDbQueryValType::EnumT, size_t> GpDbQuerySearchBuilder::DetectType
 (
     const size_t        aStartId,
-    std::u8string_view  aStr
+    std::string_view    aStr
 )
 {
     if (!_TestChar(aStartId, aStr, ':'))
@@ -438,40 +438,40 @@ std::tuple<GpDbQueryValType::EnumT, size_t> GpDbQuerySearchBuilder::DetectType
         return {GpDbQueryValType::NULL_VAL, aStartId};
     }
 
-    const size_t            strLength   = aStr.size();
+    const size_t            strLength   = std::size(aStr);
     GpDbQueryValType::EnumT type        = GpDbQueryValType::NULL_VAL;
-    std::u8string_view      typeName;
+    std::string_view        typeName;
 
     for (size_t id = aStartId + 1; id < strLength; id++)
     {
-        const char8_t ch = aStr[id];
+        const char ch = aStr[id];
 
         const bool isPermissibleChar =    ((u8'a' <= ch) || (ch >= u8'z'))
                                        || ((u8'0' <= ch) || (ch >= u8'9'));
 
         if (!isPermissibleChar)
         {
-            typeName = std::u8string_view(aStr.data() + aStartId + 1, (id - 1) - aStartId);
+            typeName = std::string_view(std::data(aStr) + aStartId + 1, (id - 1) - aStartId);
             break;
         } else if (id >= (strLength-1))
         {
-            typeName = std::u8string_view(aStr.data() + aStartId + 1, id - aStartId);
+            typeName = std::string_view(std::data(aStr) + aStartId + 1, id - aStartId);
             break;
         }
     }
 
-    if      (typeName == u8"str"_sv)    type = GpDbQueryValType::STRING;
-    else if (typeName == u8"json"_sv)   type = GpDbQueryValType::JSON;
-    else if (typeName == u8"uuid"_sv)   type = GpDbQueryValType::UUID;
-    else if (typeName == u8"base64"_sv) type = GpDbQueryValType::BLOB;
-    else if (typeName == u8"i16"_sv)    type = GpDbQueryValType::INT_16;
-    else if (typeName == u8"i32"_sv)    type = GpDbQueryValType::INT_32;
-    else if (typeName == u8"i64"_sv)    type = GpDbQueryValType::INT_64;
-    else if (typeName == u8"float"_sv)  type = GpDbQueryValType::FLOAT;
-    else if (typeName == u8"double"_sv) type = GpDbQueryValType::DOUBLE;
-    else THROW_GP(u8"Parsing error: unknown type '"_sv + typeName + u8"' at position "_sv + (aStartId + 1));
+    if      (typeName == "str"_sv)  type = GpDbQueryValType::STRING;
+    else if (typeName == "json"_sv) type = GpDbQueryValType::JSON;
+    else if (typeName == "uuid"_sv) type = GpDbQueryValType::UUID;
+    else if (typeName == "base64"_sv)   type = GpDbQueryValType::BLOB;
+    else if (typeName == "i16"_sv)  type = GpDbQueryValType::INT_16;
+    else if (typeName == "i32"_sv)  type = GpDbQueryValType::INT_32;
+    else if (typeName == "i64"_sv)  type = GpDbQueryValType::INT_64;
+    else if (typeName == "float"_sv)    type = GpDbQueryValType::FLOAT;
+    else if (typeName == "double"_sv)   type = GpDbQueryValType::DOUBLE;
+    else THROW_GP("Parsing error: unknown type '"_sv + typeName + "' at position "_sv + (aStartId + 1));
 
     return {type, aStartId + typeName.length()};
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

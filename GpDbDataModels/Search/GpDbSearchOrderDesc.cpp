@@ -1,6 +1,7 @@
 #include "GpDbSearchOrderDesc.hpp"
 
 #include <GpCore2/GpReflection/GpReflectManager.hpp>
+#include <GpCore2/GpReflection/GpReflectPropUtils.hpp>
 
 namespace GPlatform {
 
@@ -10,10 +11,10 @@ GpDbSearchOrderDesc::~GpDbSearchOrderDesc (void) noexcept
 {
 }
 
-void    GpDbSearchOrderDesc::_SReflectCollectProps (GpReflectProp::C::Vec::Val& aPropsOut)
+void    GpDbSearchOrderDesc::_SReflectCollectProps (GpReflectProp::SmallVecVal& aPropsOut)
 {
     PROP(name);
     PROP(type);
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

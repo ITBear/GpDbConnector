@@ -4,7 +4,7 @@
 namespace GPlatform {
 
 GpDbDriverFactoryPgSql::GpDbDriverFactoryPgSql (void):
-GpDbDriverFactory(u8"postgresql")
+GpDbDriverFactory{"postgresql"}
 {
 }
 
@@ -15,14 +15,14 @@ GpDbDriverFactoryPgSql::~GpDbDriverFactoryPgSql (void) noexcept
 GpDbDriver::SP  GpDbDriverFactoryPgSql::NewInstance
 (
     const GpDbConnectionMode::EnumT aMode,
-    GpIOEventPoller::SP             aEventPoller
+    const GpIOEventPollerIdx        aIOEventPollerIdx
 ) const
 {
     return MakeSP<GpDbDriverPgSql>
     (
         aMode,
-        std::move(aEventPoller)
+        aIOEventPollerIdx
     );
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

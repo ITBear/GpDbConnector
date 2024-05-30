@@ -13,10 +13,10 @@ namespace GPlatform {
 
 GpDbConnectionPgSql::IsolationLevelNamesT   GpDbConnectionPgSql::sIsolationLevelNames =
 {
-    u8"SERIALIZABLE"_sv,
-    u8"REPEATABLE READ"_sv,
-    u8"READ COMMITTED"_sv,
-    u8"READ UNCOMMITTED"_sv
+    "SERIALIZABLE"_sv,
+    "REPEATABLE READ"_sv,
+    "READ COMMITTED"_sv,
+    "READ UNCOMMITTED"_sv
 };
 
 GpDbConnectionPgSql::~GpDbConnectionPgSql (void) noexcept
@@ -44,18 +44,18 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::_Execute
         THROW_COND_GP
         (
             currentTaskOpt.has_value(),
-            u8"Ensure that the DB connection executes inside the task"_sv
+            "Ensure that the DB connection executes inside the task"_sv
         );
 
-        const GpUUID        currentTaskGuid = currentTaskOpt.value().get().IdAsUUID();
-        const std::u8string dbQueryValues   = aQuery.ValuesToStr();
+        const GpUUID        currentTaskGuid = currentTaskOpt.value().get().TaskIdAsUUID();
+        const std::string   dbQueryValues   = aQuery.ValuesToStr();
 
         if (dbQueryValues.length() > 0)
         {
-            LOG_INFO(u8"[GpDbConnectionPgSql::_Execute]: SQL '"_sv + aQuery.QueryStr() + u8"', values:\n"_sv + dbQueryValues, currentTaskGuid);
+            LOG_INFO("[GpDbConnectionPgSql::_Execute]: SQL '"_sv + aQuery.QueryStr() + "', values:\n"_sv + dbQueryValues, currentTaskGuid);
         } else
         {
-            LOG_INFO(u8"[GpDbConnectionPgSql::_Execute]: SQL '"_sv + aQuery.QueryStr() + u8"'"_sv, currentTaskGuid);
+            LOG_INFO("[GpDbConnectionPgSql::_Execute]: SQL '"_sv + aQuery.QueryStr() + "'"_sv, currentTaskGuid);
         }
     }
 
@@ -69,21 +69,21 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::_Execute
         return ExecuteSync(aQuery, aQueryPrepared, aMinResultRowsCount);
     } else
     {
-        THROW_GP(u8"Unknown connection mode"_sv);
+        THROW_GP("Unknown connection mode"_sv);
     }
 }
 
-std::u8string   GpDbConnectionPgSql::StrEscape (std::u8string_view aStr) const
+std::string GpDbConnectionPgSql::StrEscape (std::string_view aStr) const
 {
     PGconn* pgConn = static_cast<PGconn*>(iPgConn);
 
     if (pgConn == nullptr)
     {
-        return std::u8string();
+        return {};
     }
 
-    char* escapedStrPtr = PQescapeLiteral(pgConn, GpUTF::S_As_STR(aStr).data(), aStr.size());
-    std::u8string escapedStr(GpUTF::S_As_UTF8(escapedStrPtr));
+    char* escapedStrPtr = PQescapeLiteral(pgConn, std::data(aStr), std::size(aStr));
+    std::string escapedStr(escapedStrPtr);
     PQfreemem(escapedStrPtr);
 
     return escapedStr;
@@ -100,14 +100,14 @@ bool    GpDbConnectionPgSql::Validate (void) const noexcept
     return connectionStatus != CONNECTION_BAD;
 }
 
-void    GpDbConnectionPgSql::SetEnv (const std::vector<std::tuple<std::u8string, std::u8string>>& aValues)
+void    GpDbConnectionPgSql::SetEnv (const std::vector<std::tuple<std::string, std::string>>& aValues)
 {
-    if (aValues.size() == 0) [[likely]]
+    if (aValues.empty()) [[likely]]
     {
         return;
     }
 
-    size_t sqlStrLen = 7 + (aValues.size() * 26);
+    size_t sqlStrLen = 7 + (std::size(aValues) * 26);
 
     for (const auto& [a, b]: aValues)
     {
@@ -115,16 +115,16 @@ void    GpDbConnectionPgSql::SetEnv (const std::vector<std::tuple<std::u8string,
         sqlStrLen += b.length();
     }
 
-    std::u8string sql;
+    std::string sql;
     sql.reserve(sqlStrLen);
-    sql.append(u8"select ");
+    sql.append("select ");
 
     GpCallHandler2 callOnce;
 
     for (const auto& [a, b]: aValues)
     {
-        callOnce.CallIfNonFirst([&sql](){sql.append(u8",");});
-        sql.append(u8"set_config('").append(a).append(u8"', '").append(b).append(u8"', false)");
+        callOnce.CallIfNonFirst([&sql](){sql.append(",");});
+        sql.append("set_config('").append(a).append("', '").append(b).append("', false)");
     }
 
     GpDbQuery               query(sql);
@@ -136,7 +136,7 @@ void    GpDbConnectionPgSql::SetEnv (const std::vector<std::tuple<std::u8string,
 
 void    GpDbConnectionPgSql::OnBeginTransaction (GpDbTransactionIsolation::EnumT aIsolationLevel)
 {
-    GpDbQuery               query(u8"BEGIN ISOLATION LEVEL "_sv + sIsolationLevelNames.at(size_t(aIsolationLevel)));
+    GpDbQuery               query("BEGIN ISOLATION LEVEL "_sv + sIsolationLevelNames.at(size_t(aIsolationLevel)));
     GpDbQueryPreparedPgSql  queryPrepared;
     queryPrepared.Prepare(query);
 
@@ -145,7 +145,7 @@ void    GpDbConnectionPgSql::OnBeginTransaction (GpDbTransactionIsolation::EnumT
 
 void    GpDbConnectionPgSql::OnCommitTransaction (void)
 {
-    GpDbQuery               query(u8"COMMIT"_s);
+    GpDbQuery               query("COMMIT"_s);
     GpDbQueryPreparedPgSql  queryPrepared;
     queryPrepared.Prepare(query);
 
@@ -154,7 +154,7 @@ void    GpDbConnectionPgSql::OnCommitTransaction (void)
 
 void    GpDbConnectionPgSql::OnRollbackTransaction (void)
 {
-    GpDbQuery               query(u8"ROLLBACK"_s);
+    GpDbQuery               query("ROLLBACK"_s);
     GpDbQueryPreparedPgSql  queryPrepared;
     queryPrepared.Prepare(query);
 
@@ -169,21 +169,21 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteSync
 )
 {
     const GpDbQueryPreparedPgSql&   queryPrepared   = static_cast<const GpDbQueryPreparedPgSql&>(aQueryPrepared);
-    std::u8string_view              queryStr        = aQuery.QueryStr();
-    std::u8string                   queryZT;
+    std::string_view                queryStr        = aQuery.QueryStr();
+    std::string                     queryZT;
 
     queryZT.reserve(NumOps::SAdd<size_t>(queryStr.length(), 1));
-    queryZT.append(queryStr).append(u8"\0"_sv);
+    queryZT.append(queryStr).append("\0"_sv);
 
     PGresult* pgResult = PQexecParams
     (
         iPgConn,
-        GpUTF::S_As_STR(queryZT).data(),
-        NumOps::SConvert<int>(aQuery.Values().size()),
-        queryPrepared.OIDs().data(),
-        queryPrepared.ValuesPtr().data(),
-        queryPrepared.ValuesSize().data(),
-        queryPrepared.ValuesIsBinary().data(),
+        std::data(queryZT),
+        NumOps::SConvert<int>(std::size(aQuery.Values())),
+        std::data(queryPrepared.OIDs()),
+        std::data(queryPrepared.ValuesPtr()),
+        std::data(queryPrepared.ValuesSize()),
+        std::data(queryPrepared.ValuesIsBinary()),
         int(GpPosrgresQueryResultType::BINARY)
     );
 
@@ -205,19 +205,20 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
     (
         *this,
         aQuery,
-        aQueryPrepared
+        aQueryPrepared,
+        iIOEventPollerIdx
     );
 
     GpTask::DoneFutureT::SP queryTaskDoneFuture = queryTask.Vn().GetDoneFuture();
 
     // Add to event poller
-    const GpTaskId queryTaskTaskId = queryTask.Vn().Id();
+    const GpTaskId queryTaskTaskId = queryTask.Vn().TaskId();
 
     GpRAIIonDestruct onFinishRemoveEventPollerSubscription
     (
         [&]()
         {
-            IOEventPoller()->RemoveSubscription
+            GpIOEventPollerCatalog::S().GetByIdx(iIOEventPollerIdx)->RemoveSubscription
             (
                 PQsocket(iPgConn),
                 queryTaskTaskId
@@ -225,7 +226,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
         }
     );
 
-    IOEventPoller()->AddSubscription
+    GpIOEventPollerCatalog::S().GetByIdx(iIOEventPollerIdx)->AddSubscription
     (
         PQsocket(iPgConn),
         queryTaskTaskId,
@@ -252,7 +253,7 @@ GpDbQueryRes::SP    GpDbConnectionPgSql::ExecuteAsync
         queryTaskDoneFuture.V(),
         [&](typename GpTaskFiber::StartFutureT::value_type& aRes)//OnSuccessFnT
         {
-            LOG_INFO(u8"[GpDbConnectionPgSql::ExecuteAsync]: OK"_sv);
+            LOG_INFO("[GpDbConnectionPgSql::ExecuteAsync]: OK"_sv);
             res = std::move(aRes.Value<GpDbQueryResPgSql::SP>());
         },
         [](const GpException& aEx)//OnExceptionFnT

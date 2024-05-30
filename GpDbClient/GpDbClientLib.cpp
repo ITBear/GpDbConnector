@@ -1,4 +1,4 @@
-#include "GpDbClient.hpp"
+#include "GpDbClientLib.hpp"
 
 namespace GPlatform {
 

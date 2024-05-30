@@ -1,5 +1,6 @@
-#include "GpDbConnection.hpp"
-#include "GpDbConnectionHookManager.hpp"
+#include <GpDbConnector/GpDbClient/GpDbConnection.hpp>
+#include <GpDbConnector/GpDbClient/GpDbConnectionHookManager.hpp>
+#include <GpDbConnector/GpDbClient/GpDbConnectionHookManager.hpp>
 #include <GpCore2/GpUtils/Other/GpRAIIonDestruct.hpp>
 
 namespace GPlatform {
@@ -13,7 +14,7 @@ void    GpDbConnection::BeginTransaction (GpDbTransactionIsolation::EnumT aIsola
     THROW_COND_GP
     (
         iIsTransactionOpen == false,
-        u8"Transaction already open"_sv
+        "Transaction already open"_sv
     );
 
     OnBeginTransaction(aIsolationLevel);
@@ -27,7 +28,7 @@ void    GpDbConnection::CommitTransaction (void)
     THROW_COND_GP
     (
         iIsTransactionOpen == true,
-        u8"Transaction not open"_sv
+        "Transaction not open"_sv
     );
 
     try
@@ -115,4 +116,4 @@ GpDbQueryRes::SP    GpDbConnection::Execute
     return res;
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

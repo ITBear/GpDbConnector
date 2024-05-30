@@ -17,7 +17,7 @@ public:
 
 public:
     inline                      GpDbConnectionGuard     (GpDbManager& aManager) noexcept;
-    inline                      GpDbConnectionGuard     (std::u8string_view aManagerName);
+    inline                      GpDbConnectionGuard     (std::string_view aManagerName);
                                 ~GpDbConnectionGuard    (void) noexcept;
 
     inline void                 BeginTransaction        (GpDbTransactionIsolation::EnumT aIsolationLevel);
@@ -26,7 +26,7 @@ public:
 
     virtual GpDbQueryRes::SP    Execute                 (const GpDbQuery&   aQuery,
                                                          const size_t       aMinResultRowsCount);
-    virtual GpDbQueryRes::SP    Execute                 (std::u8string_view aSQL,
+    virtual GpDbQueryRes::SP    Execute                 (std::string_view   aSQL,
                                                          const size_t       aMinResultRowsCount);
 
 private:
@@ -40,11 +40,11 @@ private:
 };
 
 GpDbConnectionGuard::GpDbConnectionGuard (GpDbManager& aManager) noexcept:
-iManager(aManager)
+iManager{aManager}
 {
 }
 
-GpDbConnectionGuard::GpDbConnectionGuard (std::u8string_view aManagerName):
+GpDbConnectionGuard::GpDbConnectionGuard (std::string_view aManagerName):
 GpDbConnectionGuard(GpDbManagerCatalog::S().Find(aManagerName))
 {
 }
@@ -54,4 +54,4 @@ void    GpDbConnectionGuard::BeginTransaction (GpDbTransactionIsolation::EnumT a
     ConnectionAcquire().BeginTransaction(aIsolationLevel);
 }
 
-}//GPlatform
+}// namespace GPlatform

@@ -56,13 +56,13 @@ public:
     inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<s_int_64>& aArray);
     inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<double>& aArray);
     inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<float>& aArray);
-    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<std::u8string>& aArray);
+    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<std::string>& aArray);
     inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<GpUUID>& aArray);
     inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<GpBytesArray>& aArray);
     inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<bool>& aArray);
 
     template<typename T>
-    static std::vector<T>                       SRead           (GpSpanPtrByteRW aData);
+    static std::vector<T>                       SRead           (GpSpanByteRW aData);
 
 private:
     template<typename T>
@@ -79,12 +79,12 @@ private:
                                                                  const std::vector<T>&  aArray);
 
     template<typename T, bool IsN2H>
-    static std::vector<T>                       _SReadPod       (GpSpanPtrByteR aData,
+    static std::vector<T>                       _SReadPod       (GpSpanByteR    aData,
                                                                  const size_t   aElementsCount);
 
     template<typename T>
-    static std::vector<T>                       _SReadBytes     (GpSpanPtrByteRW    aData,
-                                                                 const size_t       aElementsCount);
+    static std::vector<T>                       _SReadBytes     (GpSpanByteRW   aData,
+                                                                 const size_t   aElementsCount);
 };
 
 std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<s_int_16>& aArray)
@@ -112,9 +112,9 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<f
     return _SBuildPod<float, true>(FLOAT4OID, FLOAT4ARRAYOID, aArray);
 }
 
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<std::u8string>& aArray)
+std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<std::string>& aArray)
 {
-    return _SBuildBytes<std::u8string>(TEXTOID, TEXTARRAYOID, aArray);
+    return _SBuildBytes<std::string>(TEXTOID, TEXTARRAYOID, aArray);
 }
 
 std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<GpUUID>& aArray)
@@ -129,25 +129,25 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<G
 
 std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<bool>& aArray)
 {
-    std::vector<std::u8string> strs;
+    std::vector<std::string> strs;
     for (const bool v: aArray)
     {
-        if (v) strs.emplace_back(u8"true");
-        else strs.emplace_back(u8"false");
+        if (v) strs.emplace_back("true");
+        else strs.emplace_back("false");
     }
 
-    return _SBuildBytes<std::u8string>(BOOLOID, BOOLARRAYOID, strs);
+    return _SBuildBytes<std::string>(BOOLOID, BOOLARRAYOID, strs);
 }
 
 template<typename T>
-std::vector<T>  GpDbArrayUtilsPgSql::SRead (GpSpanPtrByteRW aData)
+std::vector<T>  GpDbArrayUtilsPgSql::SRead (GpSpanByteRW aData)
 
 {
     // Check data size
     THROW_COND_GP
     (
         aData.Count() >= sizeof(PgArrayHeaderT),
-        u8"Data size is less than PgArrayHeaderT header size"_sv
+        "Data size is less than PgArrayHeaderT header size"_sv
     );
 
     PgArrayHeaderT& header = *reinterpret_cast<PgArrayHeaderT*>(aData.Ptr());
@@ -162,14 +162,14 @@ std::vector<T>  GpDbArrayUtilsPgSql::SRead (GpSpanPtrByteRW aData)
     THROW_COND_GP
     (
         header.dimensions == 1,
-        u8"Array must be 1D"_sv
+        "Array must be 1D"_sv
     );
 
     // Check header.dataOffset
     THROW_COND_GP
     (
         header.dataOffset == 0,
-        u8"Data offset must be 0"_sv
+        "Data offset must be 0"_sv
     );
 
     const Oid oid = _SOidFromT<T>();
@@ -178,21 +178,21 @@ std::vector<T>  GpDbArrayUtilsPgSql::SRead (GpSpanPtrByteRW aData)
     THROW_COND_GP
     (
         header.oid == oid,
-        [](){return u8"OID "_sv + StrOps::SToString(oid) + u8" doesn't match type T"_sv;}
+        [](){return "OID "_sv + std::to_string(oid) + " doesn't match type T"_sv;}
     );
 
     // Check header.elementsCount
     THROW_COND_GP
     (
         header.elementsCount >= 0,
-        u8"Elements count must be 0"_sv
+        "Elements count must be 0"_sv
     );
 
     // Check header.lowerBoundary
     THROW_COND_GP
     (
         header.lowerBoundary == 1,
-        u8"Lower boundary must be 1"_sv
+        "Lower boundary must be 1"_sv
     );
 
     if (header.elementsCount == 0)
@@ -218,21 +218,21 @@ std::vector<T>  GpDbArrayUtilsPgSql::SRead (GpSpanPtrByteRW aData)
     } else if constexpr(std::is_same_v<T, float>)
     {
         return _SReadPod<T, true>(aData, elementsCount);
-    } else if constexpr(std::is_same_v<T, std::u8string_view>)
+    } else if constexpr(std::is_same_v<T, std::string_view>)
     {
         return _SReadBytes<T>(aData, elementsCount);
-    } else if constexpr(std::is_same_v<T, GpSpanPtrCharU8RW>)
+    } else if constexpr(std::is_same_v<T, GpSpanCharRW>)
     {
         return _SReadBytes<T>(aData, elementsCount);
     } else if constexpr(std::is_same_v<T, GpUUID>)
     {
         return _SReadPod<T, false>(aData, elementsCount);
-    } else if constexpr(std::is_same_v<T, GpSpanPtrByteR>)
+    } else if constexpr(std::is_same_v<T, GpSpanByteR>)
     {
         return _SReadBytes<T>(aData, elementsCount);
     } else
     {
-        GpThrowCe<GpException>(u8"Unknown type");
+        GpThrowCe<GpException>("Unknown type");
     }
 
     return {};
@@ -256,21 +256,21 @@ constexpr Oid   GpDbArrayUtilsPgSql::_SOidFromT (void)
     } else if constexpr(std::is_same_v<T, float>)
     {
         return FLOAT4OID;
-    } else if constexpr(std::is_same_v<T, std::u8string_view>)
+    } else if constexpr(std::is_same_v<T, std::string_view>)
     {
         return TEXTOID;
-    } else if constexpr(std::is_same_v<T, GpSpanPtrCharU8RW>)
+    } else if constexpr(std::is_same_v<T, GpSpanCharRW>)
     {
         return TEXTOID;
     } else if constexpr(std::is_same_v<T, GpUUID>)
     {
         return UUIDOID;
-    } else if constexpr(std::is_same_v<T, GpSpanPtrByteR>)
+    } else if constexpr(std::is_same_v<T, GpSpanByteR>)
     {
         return BYTEAOID;
     } else
     {
-        GpThrowCe<GpException>(u8"Unknown type");
+        GpThrowCe<GpException>("Unknown type");
     }
 }
 
@@ -284,7 +284,7 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
 {
     GpBytesArray arrayData;
     {
-        const size_t elementsCount = aArray.size();
+        const size_t elementsCount = std::size(aArray);
 
         arrayData.resize(sizeof(PgArrayHeaderT) + elementsCount*(sizeof(s_int_32) + sizeof(T)));
         GpByteWriterStorageByteArray    arrayDataStorage(arrayData);
@@ -328,12 +328,12 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildBytes
 {
     GpBytesArray arrayData;
     {
-        const size_t    elementsCount   = aArray.size();
+        const size_t    elementsCount   = std::size(aArray);
         size_t          totalSize       = sizeof(PgArrayHeaderT) + elementsCount * sizeof(s_int_32)/*element data size*/;
 
         for (const T& e: aArray)
         {
-            const size_t elementDataSize = e.size();
+            const size_t elementDataSize = std::size(e);
             totalSize += elementDataSize;
         }
 
@@ -352,13 +352,13 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildBytes
 
         for (const T& e: aArray)
         {
-            const size_t elementDataSize = e.size();
+            const size_t elementDataSize = std::size(e);
 
             // Element data size
-            arrayDataWriter.SInt32(BitOps::H2N<s_int_32>(NumOps::SConvert<s_int_32>(elementDataSize)));
+            arrayDataWriter.SI32(BitOps::H2N<s_int_32>(NumOps::SConvert<s_int_32>(elementDataSize)));
 
             // Element data
-            arrayDataWriter.Bytes(e.data(), elementDataSize);
+            arrayDataWriter.Bytes(std::data(e), elementDataSize);
         }
 
         arrayDataWriter.OnEnd();
@@ -370,7 +370,7 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildBytes
 template<typename T, bool IsN2H>
 std::vector<T>  GpDbArrayUtilsPgSql::_SReadPod
 (
-    GpSpanPtrByteR  aData,
+    GpSpanByteR     aData,
     const size_t    aElementsCount
 )
 {
@@ -382,7 +382,7 @@ std::vector<T>  GpDbArrayUtilsPgSql::_SReadPod
         dataSize == expectedSize,
         [dataSize, expectedSize]()
         {
-            return u8"Size "_sv + StrOps::SToString(dataSize) + u8" of the result doesn't match the expected size "_sv + StrOps::SToString(expectedSize);
+            return "Size "_sv + std::to_string(dataSize) + " of the result doesn't match the expected size "_sv + std::to_string(expectedSize);
         }
     );
 
@@ -413,7 +413,7 @@ std::vector<T>  GpDbArrayUtilsPgSql::_SReadPod
 template<typename T>
 std::vector<T>  GpDbArrayUtilsPgSql::_SReadBytes
 (
-    GpSpanPtrByteRW aData,
+    GpSpanByteRW    aData,
     const size_t    aElementsCount
 )
 {
@@ -421,7 +421,7 @@ std::vector<T>  GpDbArrayUtilsPgSql::_SReadBytes
     size_t expectedSize     = aElementsCount * sizeof(s_int_32);
 
     {
-        GpSpanPtrByteR d = aData;
+        GpSpanByteR d = aData;
         for (size_t id = 0; id < aElementsCount; id++)
         {
             // Element size
@@ -438,7 +438,7 @@ std::vector<T>  GpDbArrayUtilsPgSql::_SReadBytes
         dataSize == expectedSize,
         [dataSize, expectedSize]()
         {
-            return u8"Size "_sv + StrOps::SToString(dataSize) + u8" of the result doesn't match the expected size "_sv + StrOps::SToString(expectedSize);
+            return "Size "_sv + std::to_string(dataSize) + " of the result doesn't match the expected size "_sv + std::to_string(expectedSize);
         }
     );
 
@@ -461,4 +461,4 @@ std::vector<T>  GpDbArrayUtilsPgSql::_SReadBytes
     return res;
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

@@ -1,6 +1,7 @@
 #include "GpDbManagerCfgDesc.hpp"
 
 #include <GpCore2/GpReflection/GpReflectManager.hpp>
+#include <GpCore2/GpReflection/GpReflectPropUtils.hpp>
 
 namespace GPlatform {
 
@@ -10,7 +11,7 @@ GpDbManagerCfgDesc::~GpDbManagerCfgDesc (void) noexcept
 {
 }
 
-void    GpDbManagerCfgDesc::_SReflectCollectProps (GpReflectProp::C::Vec::Val& aPropsOut)
+void    GpDbManagerCfgDesc::_SReflectCollectProps (GpReflectProp::SmallVecVal& aPropsOut)
 {
     PROP(aliases);
     PROP(driver_name);

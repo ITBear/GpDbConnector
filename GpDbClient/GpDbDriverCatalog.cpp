@@ -1,5 +1,5 @@
-#include "GpDbDriverCatalog.hpp"
-#include "GpDbDriverFactory.hpp"
+#include <GpDbConnector/GpDbClient/GpDbDriverCatalog.hpp>
+#include <GpDbConnector/GpDbClient/GpDbDriverFactory.hpp>
 
 namespace GPlatform {
 
@@ -15,24 +15,31 @@ void    GpDbDriverCatalog::Add (GpSP<GpDbDriverFactory> aFactory)
 {
     const GpDbDriverFactory& driverFactory = aFactory.V();
 
-    iCatalog.Set
+    iCatalog.SetOrUpdate
     (
-        std::u8string(driverFactory.Name()),
+        std::string(driverFactory.Name()),
         std::move(aFactory)
     );
 }
 
-const GpDbDriverFactory&    GpDbDriverCatalog::Find (std::u8string_view aName) const
+GpDbDriverFactory::SP   GpDbDriverCatalog::Find (std::string_view aName) const
 {
     auto res = iCatalog.GetOpt(aName);
 
     THROW_COND_GP
     (
         res.has_value(),
-        [&](){return u8"DB driver factory not found by name '"_sv + aName + u8"'"_sv;}
+        [aName]()
+        {
+            return fmt::format
+            (
+                "DB driver factory not found by name '{}'",
+                aName
+            );
+        }
     );
 
-    return res.value().get().V();
+    return res.value();
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

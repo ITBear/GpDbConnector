@@ -3,7 +3,7 @@
 #include "GpDbClient_global.hpp"
 
 #include <GpCore2/GpUtils/Macro/GpMacroTags.hpp>
-#include <GpCore2/GpUtils/SyncPrimitives/GpRWSpinLock.hpp>
+#include <GpCore2/GpUtils/SyncPrimitives/GpSpinLockRW.hpp>
 #include <functional>
 #include <vector>
 
@@ -24,7 +24,7 @@ public:
 
     using HookFnT       = std::function<void(GpDbConnection& aConn)>;
     using HookFnVecT    = std::vector<HookFnT>;
-    using HooksByModeT  = std::array<std::tuple<GpRWSpinLock, HookFnVecT>, 2>;
+    using HooksByModeT  = std::array<std::tuple<GpSpinLockRW, HookFnVecT>, 2>;
 
 private:
                                         GpDbConnectionHookManager   (void) = default;
@@ -44,4 +44,4 @@ private:
     static GpDbConnectionHookManager    sInstance;
 };
 
-}//namespace GPlatform
+}// namespace GPlatform

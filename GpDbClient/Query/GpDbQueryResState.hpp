@@ -15,4 +15,4 @@ GP_ENUM(GP_DB_CLIENT_API, GpDbQueryResState,
     ERROR_OCCURRED
 );
 
-}//namespace GPlatform
+}// namespace GPlatform

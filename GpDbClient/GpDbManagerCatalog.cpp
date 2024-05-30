@@ -1,8 +1,8 @@
-#include "GpDbManagerCatalog.hpp"
-#include "GpDbManager.hpp"
-#include "GpDbDriverFactory.hpp"
-#include "GpDbDriver.hpp"
-#include "../../GpNetwork/GpNetworkCore/Pollers/GpIOEventPollerCatalog.hpp"
+#include <GpDbConnector/GpDbClient/GpDbManagerCatalog.hpp>
+#include <GpDbConnector/GpDbClient/GpDbManager.hpp>
+#include <GpDbConnector/GpDbClient/GpDbDriverFactory.hpp>
+#include <GpDbConnector/GpDbClient/GpDbDriver.hpp>
+#include <GpNetwork/GpNetworkCore/Pollers/GpIOEventPollerCatalog.hpp>
 
 namespace GPlatform {
 
@@ -25,21 +25,21 @@ void    GpDbManagerCatalog::Start
 {
     for (const GpDbManagerCfgDesc::SP& cfgDescSP: aCfgDescs)
     {
-        const GpDbManagerCfgDesc&   cfgDesc     = cfgDescSP.V();
-        GpIOEventPoller::SP         eventPoller = GpIOEventPollerCatalog::S().Get(cfgDesc.event_poller_name);
+        const GpDbManagerCfgDesc&   cfgDesc         = cfgDescSP.V();
+        const GpIOEventPollerIdx    eventPollerIdx  = GpIOEventPollerCatalog::S().IdxByName(cfgDesc.event_poller_name);
 
-        const GpDbDriverFactory&    driverFactory   = aDbDriverCatalog.Find(cfgDesc.driver_name);
-        GpDbDriver::SP              driverSP        = driverFactory.NewInstance
+        GpDbDriverFactory::SP   driverFactorySP = aDbDriverCatalog.Find(cfgDesc.driver_name);
+        GpDbDriver::SP          driverSP        = driverFactorySP->NewInstance
         (
-            cfgDesc.mode.Value(),
-            eventPoller
+            cfgDesc.mode,
+            eventPollerIdx
         );
 
         GpDbManager::SP dbManager = MakeSP<GpDbManager>
         (
             driverSP,
             cfgDesc.connection_str,
-            cfgDesc.mode.Value()
+            cfgDesc.mode
         );
 
         dbManager.Vn().Init(0, cfgDesc.max_conn_pool_size);
@@ -55,27 +55,34 @@ void    GpDbManagerCatalog::StopAndClear (void)
 
 void    GpDbManagerCatalog::Add
 (
-    GpDbManager::SP                     aManager,
-    const std::vector<std::u8string>&   aAliases
+    GpDbManager::SP                 aManager,
+    const std::vector<std::string>& aAliases
 )
 {
     for (const auto& alias: aAliases)
     {
-        iManagers.Set(alias, aManager);
+        iManagers.SetOrUpdate(alias, aManager);
     }
 }
 
-GpDbManager&    GpDbManagerCatalog::Find (std::u8string_view aName)
+GpDbManager&    GpDbManagerCatalog::Find (std::string_view aName)
 {
     auto res = iManagers.GetOpt(aName);
 
     THROW_COND_GP
     (
         res.has_value(),
-        [&](){return u8"DB manager not found by name '"_sv + aName + u8"'"_sv;}
+        [aName]()
+        {
+            return fmt::format
+            (
+                "DB manager not found by name '{}'",
+                aName
+            );
+        }
     );
 
-    return res.value().get().V();
+    return res.value().Vn();
 }
 
 }// namespace GPlatform

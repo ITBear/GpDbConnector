@@ -116,7 +116,7 @@ GpDbQueryRes::SP    GpDbConnectionGuard::Execute
 
 GpDbQueryRes::SP    GpDbConnectionGuard::Execute
 (
-    std::u8string_view  aSQL,
+    std::string_view    aSQL,
     const size_t        aMinResultRowsCount
 )
 {
@@ -163,7 +163,7 @@ void    GpDbConnectionGuard::ConnectionRelease (void)
 
             if (currentTaskOpt.has_value())
             {
-                LOG_EXCEPTION(e, currentTaskOpt.value().get().IdAsUUID());
+                LOG_EXCEPTION(e, currentTaskOpt.value().get().TaskIdAsUUID());
             } else
             {
                 LOG_EXCEPTION(e);
@@ -178,7 +178,7 @@ void    GpDbConnectionGuard::ConnectionRelease (void)
 
             if (currentTaskOpt.has_value())
             {
-                LOG_EXCEPTION(currentTaskOpt.value().get().IdAsUUID());
+                LOG_EXCEPTION(currentTaskOpt.value().get().TaskIdAsUUID());
             } else
             {
                 LOG_EXCEPTION();
@@ -189,4 +189,4 @@ void    GpDbConnectionGuard::ConnectionRelease (void)
     Manager().Release(std::move(iConnection));
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

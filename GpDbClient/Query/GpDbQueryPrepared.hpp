@@ -19,4 +19,4 @@ public:
     virtual void            Prepare             (const GpDbQuery& aQuery) = 0;
 };
 
-}//namespace GPlatform
+}// namespace GPlatform

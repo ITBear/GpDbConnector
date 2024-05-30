@@ -81,44 +81,44 @@ public:
                                                                  std::optional<std::vector<float>>  aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual std::u8string_view              GetStr              (const size_t                       aRowId,
+    virtual std::string_view                GetStr              (const size_t                       aRowId,
                                                                  const size_t                       aColId,
-                                                                 std::optional<std::u8string_view>  aOnNullValue) const override final;
+                                                                 std::optional<std::string_view>    aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual std::vector<std::u8string_view> GetStrArray1D       (const size_t                                   aRowId,
+    virtual std::vector<std::string_view>   GetStrArray1D       (const size_t                                   aRowId,
                                                                  const size_t                                   aColId,
-                                                                 std::optional<std::vector<std::u8string_view>> aOnNullValue) const override final;
+                                                                 std::optional<std::vector<std::string_view>>   aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual GpSpanPtrCharU8RW               GetStrRW            (const size_t                       aRowId,
-                                                                 const size_t                       aColId,
-                                                                 std::optional<GpSpanPtrCharU8RW>   aOnNullValue) override final;
+    virtual GpSpanCharRW                    GetStrRW            (const size_t                   aRowId,
+                                                                 const size_t                   aColId,
+                                                                 std::optional<GpSpanCharRW>    aOnNullValue) override final;
 
      [[nodiscard]]
-    virtual std::vector<GpSpanPtrCharU8RW>  GetStrRWArray1D     (const size_t                                   aRowId,
-                                                                 const size_t                                   aColId,
-                                                                 std::optional<std::vector<GpSpanPtrCharU8RW>>  aOnNullValue) override final;
+    virtual std::vector<GpSpanCharRW>       GetStrRWArray1D     (const size_t                               aRowId,
+                                                                 const size_t                               aColId,
+                                                                 std::optional<std::vector<GpSpanCharRW>>   aOnNullValue) override final;
 
     [[nodiscard]]
-    virtual std::u8string_view              GetJson             (const size_t                       aRowId,
+    virtual std::string_view                GetJson             (const size_t                       aRowId,
                                                                  const size_t                       aColId,
-                                                                 std::optional<std::u8string_view>  aOnNullValue) const override final;
+                                                                 std::optional<std::string_view>    aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual std::vector<std::u8string_view> GetJsonArray1D      (const size_t                                   aRowId,
+    virtual std::vector<std::string_view>   GetJsonArray1D      (const size_t                                   aRowId,
                                                                  const size_t                                   aColId,
-                                                                 std::optional<std::vector<std::u8string_view>> aOnNullValue) const override final;
+                                                                 std::optional<std::vector<std::string_view>>   aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual GpSpanPtrCharU8RW               GetJsonRW           (const size_t                       aRowId,
-                                                                 const size_t                       aColId,
-                                                                 std::optional<GpSpanPtrCharU8RW>   aOnNullValue) override final;
+    virtual GpSpanCharRW                    GetJsonRW           (const size_t                   aRowId,
+                                                                 const size_t                   aColId,
+                                                                 std::optional<GpSpanCharRW>    aOnNullValue) override final;
 
      [[nodiscard]]
-    virtual std::vector<GpSpanPtrCharU8RW>  GetJsonRWArray1D    (const size_t                                   aRowId,
-                                                                 const size_t                                   aColId,
-                                                                 std::optional<std::vector<GpSpanPtrCharU8RW>>  aOnNullValue) override final;
+    virtual std::vector<GpSpanCharRW>       GetJsonRWArray1D    (const size_t                               aRowId,
+                                                                 const size_t                               aColId,
+                                                                 std::optional<std::vector<GpSpanCharRW>>   aOnNullValue) override final;
 
     [[nodiscard]]
     virtual GpUUID                          GetUuid             (const size_t           aRowId,
@@ -131,14 +131,14 @@ public:
                                                                  std::optional<std::vector<GpUUID>> aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual GpSpanPtrByteR                  GetBlob             (const size_t                   aRowId,
-                                                                 const size_t                   aColId,
-                                                                 std::optional<GpSpanPtrByteR>  aOnNullValue) const override final;
+    virtual GpSpanByteR                     GetBlob             (const size_t               aRowId,
+                                                                 const size_t               aColId,
+                                                                 std::optional<GpSpanByteR> aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual std::vector<GpSpanPtrByteR>     GetBlobArray1D      (const size_t                               aRowId,
+    virtual std::vector<GpSpanByteR>        GetBlobArray1D      (const size_t                               aRowId,
                                                                  const size_t                               aColId,
-                                                                 std::optional<std::vector<GpSpanPtrByteR>> aOnNullValue) const override final;
+                                                                 std::optional<std::vector<GpSpanByteR>>    aOnNullValue) const override final;
 
     [[nodiscard]]
     virtual bool                            GetBoolean          (const size_t           aRowId,
@@ -147,11 +147,11 @@ public:
 
 private:
     void                                    ClearPgSql          (void) noexcept;
-    void                                    ThrowDbEx           (std::u8string_view aMsg,
+    void                                    ThrowDbEx           (std::string_view   aMsg,
                                                                  PGconn*            aPgConn);
 
 private:
     PGresult*                               iPgResult = nullptr;
 };
 
-}//namespace GPlatform
+}// namespace GPlatform

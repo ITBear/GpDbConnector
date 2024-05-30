@@ -32,4 +32,4 @@ GpDbQueryValType::EnumT GpDbQueryValTypeUtils::SReflectToDbType (const GpReflect
     return s.at(size_t(aType));
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

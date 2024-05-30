@@ -1,8 +1,8 @@
-#include "GpDbQueryAsyncTaskPgSql.hpp"
-#include "../../GpNetwork/GpNetworkCore/Sockets/GpSocketTCP.hpp"
-#include "../GpDbClient/GpDbException.hpp"
-#include "GpDbQueryResPgSql.cpp"
-#include "GpDbQueryPreparedPgSql.hpp"
+#include <GpDbConnector/GpDbPostgreSql/GpDbQueryAsyncTaskPgSql.hpp>
+#include <GpDbConnector/GpDbClient/GpDbException.hpp>
+#include <GpDbConnector/GpDbPostgreSql/GpDbQueryResPgSql.hpp>
+#include <GpDbConnector/GpDbPostgreSql/GpDbQueryPreparedPgSql.hpp>
+#include <GpNetwork/GpNetworkCore/Sockets/GpSocketTCP.hpp>
 
 namespace GPlatform {
 
@@ -10,20 +10,22 @@ GpDbQueryAsyncTaskPgSql::GpDbQueryAsyncTaskPgSql
 (
     GpDbConnectionPgSql&        aDbConn,
     const GpDbQuery&            aQuery,
-    const GpDbQueryPrepared&    aQueryPrepared
+    const GpDbQueryPrepared&    aQueryPrepared,
+    const GpIOEventPollerIdx    aIOEventPollerIdx
 ):
 GpSingleSocketTask
-(
+{
     GpSocketTCP::SFromID
     (
         aDbConn.SocketId(),
         GpSocket::CloseModeT::KEEP_ON_DESTRUCT,
         GpSocketTCP::StateT::INCOMING
-    )
-),
-iDbConn       (aDbConn),
-iQuery        (aQuery),
-iQueryPrepared(aQueryPrepared)
+    ),
+    aIOEventPollerIdx
+},
+iDbConn       {aDbConn},
+iQuery        {aQuery},
+iQueryPrepared{aQueryPrepared}
 {
 }
 
@@ -43,7 +45,7 @@ void    GpDbQueryAsyncTaskPgSql::OnReadyToRead (GpSocket& /*aSocket*/)
     (
         rc != 0,
         GpDbExceptionCode::CONNECTION_ERROR,
-        u8"PQconsumeInput return error: "_sv + GpUTF::S_As_UTF8(PQerrorMessage(pgConn))
+        "PQconsumeInput return error: "_sv + PQerrorMessage(pgConn)
     );
 
     // Consume and ignore PGnotify
@@ -79,22 +81,22 @@ void    GpDbQueryAsyncTaskPgSql::OnReadyToWrite (GpSocket& /*aSocket*/)
     }
 
     const GpDbQueryPreparedPgSql&   queryPrepared   = static_cast<const GpDbQueryPreparedPgSql&>(iQueryPrepared);
-    std::u8string_view              queryStr        = iQuery.QueryStr();
-    std::u8string                   queryZT;
+    std::string_view                queryStr        = iQuery.QueryStr();
+    std::string                     queryZT;
 
     queryZT.reserve(NumOps::SAdd<size_t>(queryStr.length(), 1));
-    queryZT.append(queryStr).append(u8"\0"_sv);
+    queryZT.append(queryStr).append("\0"_sv);
 
     // NOTE: Can be blocked until all data is written to the socket
     const int sendRes = PQsendQueryParams
     (
         iDbConn.PgConn(),
-        GpUTF::S_As_STR(queryZT).data(),
-        int(iQuery.Values().size()),
-        queryPrepared.OIDs().data(),
-        queryPrepared.ValuesPtr().data(),
-        queryPrepared.ValuesSize().data(),
-        queryPrepared.ValuesIsBinary().data(),
+        std::data(queryZT),
+        int(std::size(iQuery.Values())),
+        std::data(queryPrepared.OIDs()),
+        std::data(queryPrepared.ValuesPtr()),
+        std::data(queryPrepared.ValuesSize()),
+        std::data(queryPrepared.ValuesIsBinary()),
         int(GpPosrgresQueryResultType::BINARY)
     );
 
@@ -102,12 +104,10 @@ void    GpDbQueryAsyncTaskPgSql::OnReadyToWrite (GpSocket& /*aSocket*/)
     (
         sendRes == 1,
         GpDbExceptionCode::QUERY_ERROR,
-        [&](){return u8"Failed to do SQL query: "_sv + GpUTF::S_As_UTF8(PQerrorMessage(iDbConn.PgConn()));}
+        [&](){return "Failed to do SQL query: "_sv + PQerrorMessage(iDbConn.PgConn());}
     );
 
     iIsSend = true;
-
-    return;// GpTaskRunRes::WAIT;
 }
 
 void    GpDbQueryAsyncTaskPgSql::OnClosed (GpSocket& /*aSocket*/)
@@ -115,7 +115,7 @@ void    GpDbQueryAsyncTaskPgSql::OnClosed (GpSocket& /*aSocket*/)
     THROW_DB
     (
         GpDbExceptionCode::QUERY_ERROR,
-        u8"Failed to do SQL query: socket closed"_sv
+        "Failed to do SQL query: socket closed"_sv
     );
 }
 
@@ -124,7 +124,19 @@ void    GpDbQueryAsyncTaskPgSql::OnError (GpSocket& /*aSocket*/)
     THROW_DB
     (
         GpDbExceptionCode::QUERY_ERROR,
-        u8"Failed to do SQL query: socket error"_sv
+        "Failed to do SQL query: socket error"_sv
+    );
+}
+
+void    GpDbQueryAsyncTaskPgSql::ProcessOtherMessages (GpAny& aMessage)
+{
+    THROW_GP
+    (
+        fmt::format
+        (
+            "Get not socket message {}",
+            aMessage.TypeInfo().name()
+        )
     );
 }
 

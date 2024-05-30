@@ -1,5 +1,4 @@
-#include "GpDbQueryRes.hpp"
-
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryRes.hpp>
 #include <GpJson/GpJsonSerializer.hpp>
 #include <GpCore2/GpReflection/GpReflectManager.hpp>
 
@@ -11,7 +10,7 @@ GpReflectObject::SP GpDbQueryRes::ColToObject
     const size_t aColId
 ) const
 {
-    std::u8string_view jsonStr = GetJson(aRowId, aColId, std::nullopt);
+    std::string_view jsonStr = GetJson(aRowId, aColId, std::nullopt);
     return GpJsonSerializer::SFromStr(jsonStr, {});
 }
 
@@ -21,11 +20,11 @@ GpReflectObject::C::Vec::SP GpDbQueryRes::ColToObjectArray1D
     const size_t    aColId
 ) const
 {
-    GpReflectObject::C::Vec::SP             res;
-    const std::vector<std::u8string_view>   jsonStrs = GetJsonArray1D(aRowId, aColId, std::nullopt);
-    res.reserve(jsonStrs.size());
+    GpReflectObject::C::Vec::SP         res;
+    const std::vector<std::string_view> jsonStrs = GetJsonArray1D(aRowId, aColId, std::nullopt);
+    res.reserve(std::size(jsonStrs));
 
-    for (std::u8string_view jsonStr: jsonStrs)
+    for (std::string_view jsonStr: jsonStrs)
     {
         res.emplace_back(GpJsonSerializer::SFromStr(jsonStr, {}));
     }
@@ -40,7 +39,7 @@ GpReflectObject::SP GpDbQueryRes::ColToObject
     const GpReflectModel&   aModel
 ) const
 {
-    std::u8string_view jsonStr = GetJson(aRowId, aColId, std::nullopt);
+    std::string_view jsonStr = GetJson(aRowId, aColId, std::nullopt);
     return GpJsonSerializer::SFromStr(jsonStr, aModel, {});
 }
 
@@ -52,10 +51,10 @@ GpReflectObject::C::Vec::SP GpDbQueryRes::ColToObjectArray1D
 ) const
 {
     GpReflectObject::C::Vec::SP             res;
-    const std::vector<std::u8string_view>   jsonStrs = GetJsonArray1D(aRowId, aColId, std::nullopt);
-    res.reserve(jsonStrs.size());
+    const std::vector<std::string_view> jsonStrs = GetJsonArray1D(aRowId, aColId, std::nullopt);
+    res.reserve(std::size(jsonStrs));
 
-    for (std::u8string_view jsonStr: jsonStrs)
+    for (std::string_view jsonStr: jsonStrs)
     {
         res.emplace_back(GpJsonSerializer::SFromStr(jsonStr, aModel, {}));
     }
@@ -99,7 +98,7 @@ GpReflectObject::SP GpDbQueryRes::RowToObject
             } break;
             default:
             {
-                THROW_GP(u8"Unknown container type "_sv + GpReflectContainerType::SToString(propContainer));
+                THROW_GP("Unknown container type "_sv + GpReflectContainerType::SToString(propContainer));
             }
         }
 
@@ -140,35 +139,35 @@ void    GpDbQueryRes::_RowToObjectProp
     {
         case GpReflectType::U_INT_8:
         {
-            aProp.Value_UInt8(aDataPtr) = NumOps::SConvert<u_int_8>(GetInt16(aRowId, aColId, s_int_16(0)));
+            aProp.Value_UI8(aDataPtr) = NumOps::SConvert<u_int_8>(GetInt16(aRowId, aColId, s_int_16(0)));
         } break;
         case GpReflectType::S_INT_8:
         {
-            aProp.Value_SInt8(aDataPtr) = NumOps::SConvert<s_int_8>(GetInt16(aRowId, aColId, s_int_16(0)));
+            aProp.Value_SI8(aDataPtr) = NumOps::SConvert<s_int_8>(GetInt16(aRowId, aColId, s_int_16(0)));
         } break;
         case GpReflectType::U_INT_16:
         {
-            aProp.Value_UInt16(aDataPtr) = NumOps::SConvert<u_int_16>(GetInt16(aRowId, aColId, s_int_16(0)));
+            aProp.Value_UI16(aDataPtr) = NumOps::SConvert<u_int_16>(GetInt16(aRowId, aColId, s_int_16(0)));
         } break;
         case GpReflectType::S_INT_16:
         {
-            aProp.Value_SInt16(aDataPtr) = NumOps::SConvert<s_int_16>(GetInt16(aRowId, aColId, s_int_16(0)));
+            aProp.Value_SI16(aDataPtr) = NumOps::SConvert<s_int_16>(GetInt16(aRowId, aColId, s_int_16(0)));
         } break;
         case GpReflectType::U_INT_32:
         {
-            aProp.Value_UInt32(aDataPtr) = NumOps::SConvert<u_int_32>(GetInt32(aRowId, aColId, s_int_32(0)));
+            aProp.Value_UI32(aDataPtr) = NumOps::SConvert<u_int_32>(GetInt32(aRowId, aColId, s_int_32(0)));
         } break;
         case GpReflectType::S_INT_32:
         {
-            aProp.Value_SInt32(aDataPtr) = NumOps::SConvert<s_int_32>(GetInt32(aRowId, aColId, s_int_32(0)));
+            aProp.Value_SI32(aDataPtr) = NumOps::SConvert<s_int_32>(GetInt32(aRowId, aColId, s_int_32(0)));
         } break;
         case GpReflectType::U_INT_64:
         {
-            aProp.Value_UInt64(aDataPtr) = NumOps::SConvert<u_int_64>(GetInt64(aRowId, aColId, s_int_64(0)));
+            aProp.Value_UI64(aDataPtr) = NumOps::SConvert<u_int_64>(GetInt64(aRowId, aColId, s_int_64(0)));
         } break;
         case GpReflectType::S_INT_64:
         {
-            aProp.Value_SInt64(aDataPtr) = NumOps::SConvert<s_int_64>(GetInt64(aRowId, aColId, s_int_64(0)));
+            aProp.Value_SI64(aDataPtr) = NumOps::SConvert<s_int_64>(GetInt64(aRowId, aColId, s_int_64(0)));
         } break;
         case GpReflectType::DOUBLE:
         {
@@ -196,7 +195,7 @@ void    GpDbQueryRes::_RowToObjectProp
         } break;
         case GpReflectType::OBJECT:
         {
-            std::u8string_view  jsonStr     = GetJson(aRowId, aColId, {});
+            std::string_view    jsonStr     = GetJson(aRowId, aColId, {});
             auto&               objectVal   = aProp.Value_Object(aDataPtr);
 
             if (jsonStr.length() > 0)
@@ -206,12 +205,13 @@ void    GpDbQueryRes::_RowToObjectProp
         } break;
         case GpReflectType::OBJECT_SP:
         {
-            std::u8string_view  jsonStr     = GetJson(aRowId, aColId, {});
+            std::string_view    jsonStr     = GetJson(aRowId, aColId, {});
             auto&               objectVal   = aProp.Value_ObjectSP(aDataPtr);
 
             if (jsonStr.length() > 0)
             {
-                const GpReflectModel& model = GpReflectManager::S().Find(aProp.ModelUid());
+                GpReflectModel::CSP     modelSCP    = GpReflectManager::S().Find(aProp.ModelUid());
+                const GpReflectModel&   model       = modelSCP.Vn();
                 objectVal = GpJsonSerializer::SFromStr(jsonStr, model, {});
             } else
             {
@@ -229,7 +229,7 @@ void    GpDbQueryRes::_RowToObjectProp
         case GpReflectType::NOT_SET:[[fallthrough]];
         default:
         {
-            THROW_GP(u8"Unsupported type NOT_SET"_sv); break;
+            THROW_GP("Unsupported type NOT_SET"_sv); break;
         }
     }
 }
@@ -246,35 +246,35 @@ void    GpDbQueryRes::_RowToObjectPropVec
     {
         case GpReflectType::U_INT_8:
         {
-            aProp.Vec_UInt8(aDataPtr) = _SConvertArrayNum<u_int_8>(GetInt16Array1D(aRowId, aColId, {}));
+            aProp.Vec_UI8(aDataPtr) = _SConvertArrayNum<u_int_8>(GetInt16Array1D(aRowId, aColId, {}));
         } break;
         case GpReflectType::S_INT_8:
         {
-            aProp.Vec_SInt8(aDataPtr) = _SConvertArrayNum<s_int_8>(GetInt16Array1D(aRowId, aColId, {}));
+            aProp.Vec_SI8(aDataPtr) = _SConvertArrayNum<s_int_8>(GetInt16Array1D(aRowId, aColId, {}));
         } break;
         case GpReflectType::U_INT_16:
         {
-            aProp.Vec_UInt16(aDataPtr) = _SConvertArrayNum<u_int_16>(GetInt16Array1D(aRowId, aColId, {}));
+            aProp.Vec_UI16(aDataPtr) = _SConvertArrayNum<u_int_16>(GetInt16Array1D(aRowId, aColId, {}));
         } break;
         case GpReflectType::S_INT_16:
         {
-            aProp.Vec_SInt16(aDataPtr) = GetInt16Array1D(aRowId, aColId, {});
+            aProp.Vec_SI16(aDataPtr) = GetInt16Array1D(aRowId, aColId, {});
         } break;
         case GpReflectType::U_INT_32:
         {
-            aProp.Vec_UInt32(aDataPtr) = _SConvertArrayNum<u_int_32>(GetInt32Array1D(aRowId, aColId, {}));
+            aProp.Vec_UI32(aDataPtr) = _SConvertArrayNum<u_int_32>(GetInt32Array1D(aRowId, aColId, {}));
         } break;
         case GpReflectType::S_INT_32:
         {
-            aProp.Vec_SInt32(aDataPtr) = GetInt32Array1D(aRowId, aColId, {});
+            aProp.Vec_SI32(aDataPtr) = GetInt32Array1D(aRowId, aColId, {});
         } break;
         case GpReflectType::U_INT_64:
         {
-            aProp.Vec_UInt64(aDataPtr) = _SConvertArrayNum<u_int_64>(GetInt64Array1D(aRowId, aColId, {}));
+            aProp.Vec_UI64(aDataPtr) = _SConvertArrayNum<u_int_64>(GetInt64Array1D(aRowId, aColId, {}));
         } break;
         case GpReflectType::S_INT_64:
         {
-            aProp.Vec_SInt64(aDataPtr) = GetInt64Array1D(aRowId, aColId, {});
+            aProp.Vec_SI64(aDataPtr) = GetInt64Array1D(aRowId, aColId, {});
         } break;
         case GpReflectType::DOUBLE:
         {
@@ -286,7 +286,7 @@ void    GpDbQueryRes::_RowToObjectPropVec
         } break;
         case GpReflectType::BOOLEAN:
         {
-            THROW_GP(u8"Unsupported type vector of booleans"_sv); break;
+            THROW_GP("Unsupported type vector of booleans"_sv); break;
         } break;
         case GpReflectType::UUID:
         {
@@ -294,17 +294,17 @@ void    GpDbQueryRes::_RowToObjectPropVec
         } break;
         case GpReflectType::STRING:
         {
-            std::vector<std::u8string_view> v = GetStrArray1D(aRowId, aColId, {});
-            aProp.Vec_String(aDataPtr) = _SConvertArrayBytes<std::u8string>(v);
+            std::vector<std::string_view> v = GetStrArray1D(aRowId, aColId, {});
+            aProp.Vec_String(aDataPtr) = _SConvertArrayBytes<std::string>(v);
         } break;
         case GpReflectType::BLOB:
         {
-            std::vector<GpSpanPtrByteR> v = GetBlobArray1D(aRowId, aColId, {});
+            std::vector<GpSpanByteR> v = GetBlobArray1D(aRowId, aColId, {});
             aProp.Vec_BLOB(aDataPtr) = _SConvertArrayBytes<GpBytesArray>(v);
         } break;
         case GpReflectType::OBJECT:
         {
-            THROW_GP(u8"Unsupported type Object vector"_sv); break;
+            THROW_GP("Unsupported type Object vector"_sv); break;
         } break;
         case GpReflectType::OBJECT_SP:
         {
@@ -314,16 +314,16 @@ void    GpDbQueryRes::_RowToObjectPropVec
         } break;
         case GpReflectType::ENUM:
         {
-            THROW_GP(u8"Unsupported type ENUM vector"_sv); break;
+            THROW_GP("Unsupported type ENUM vector"_sv); break;
         } break;
         case GpReflectType::ENUM_FLAGS:
         {
-            THROW_GP(u8"Unsupported type ENUM_FLAGS vector"_sv); break;
+            THROW_GP("Unsupported type ENUM_FLAGS vector"_sv); break;
         } break;
         case GpReflectType::NOT_SET:[[fallthrough]];
         default:
         {
-            THROW_GP(u8"Unsupported type NOT_SET"_sv); break;
+            THROW_GP("Unsupported type NOT_SET"_sv); break;
         }
     }
 }
@@ -339,7 +339,7 @@ void    GpDbQueryRes::_RowToObjectPropVecWrap
     THROW_COND_GP
     (
         aProp.Type() == GpReflectType::OBJECT,
-        u8"Unsupported type"_sv
+        "Unsupported type"_sv
     );
 
     // TODO: implement
@@ -359,4 +359,4 @@ void    GpDbQueryRes::_RowToObjectPropMap
     THROW_GP_NOT_IMPLEMENTED();
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

@@ -7,7 +7,7 @@ namespace GPlatform {
 GpDbManager::GpDbManager
 (
     GpSP<GpDbDriver>                aDriver,
-    std::u8string                   aConnectionStr,
+    std::string                     aConnectionStr,
     const GpDbConnectionMode::EnumT aMode
 ) noexcept:
 iDriver (std::move(aDriver)),
@@ -84,7 +84,7 @@ GpDbManager::ReleaseAct GpDbManager::OnRelease
         return ReleaseAct::PUSH_TO_ELEMENTS;
     } else
     {
-        THROW_GP(u8"Unknown DB connection mode"_sv);
+        THROW_GP("Unknown DB connection mode"_sv);
     }*/
 }
 
@@ -134,7 +134,7 @@ std::optional<GpSP<GpDbConnection>> GpDbManager::OnAcquireNoElementsLeft (void)
         return std::nullopt;
     } else
     {
-        THROW_GP(u8"Unknown DB connection mode"_sv);
+        THROW_GP("Unknown DB connection mode"_sv);
     }*/
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "GpDbQueryResState.hpp"
-
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryResState.hpp>
 #include <GpCore2/GpReflection/GpReflectObject.hpp>
 
 namespace GPlatform {
@@ -80,44 +79,44 @@ public:
                                                                      std::optional<std::vector<float>>  aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::u8string_view              GetStr                  (const size_t                       aRowId,
+    virtual std::string_view                GetStr                  (const size_t                       aRowId,
                                                                      const size_t                       aColId,
-                                                                     std::optional<std::u8string_view>  aOnNullValue) const = 0;
+                                                                     std::optional<std::string_view>    aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<std::u8string_view> GetStrArray1D           (const size_t                                   aRowId,
+    virtual std::vector<std::string_view>   GetStrArray1D           (const size_t                                   aRowId,
                                                                      const size_t                                   aColId,
-                                                                     std::optional<std::vector<std::u8string_view>> aOnNullValue) const = 0;
+                                                                     std::optional<std::vector<std::string_view>>   aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual GpSpanPtrCharU8RW               GetStrRW                (const size_t                       aRowId,
+    virtual GpSpanCharRW                    GetStrRW                (const size_t                   aRowId,
+                                                                     const size_t                   aColId,
+                                                                     std::optional<GpSpanCharRW>    aOnNullValue) = 0;
+
+    [[nodiscard]]
+    virtual std::vector<GpSpanCharRW>       GetStrRWArray1D         (const size_t                               aRowId,
+                                                                     const size_t                               aColId,
+                                                                     std::optional<std::vector<GpSpanCharRW>>   aOnNullValue) = 0;
+
+    [[nodiscard]]
+    virtual std::string_view                GetJson                 (const size_t                       aRowId,
                                                                      const size_t                       aColId,
-                                                                     std::optional<GpSpanPtrCharU8RW>   aOnNullValue) = 0;
+                                                                     std::optional<std::string_view>    aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<GpSpanPtrCharU8RW>  GetStrRWArray1D         (const size_t                                   aRowId,
+    virtual std::vector<std::string_view>   GetJsonArray1D          (const size_t                                   aRowId,
                                                                      const size_t                                   aColId,
-                                                                     std::optional<std::vector<GpSpanPtrCharU8RW>>  aOnNullValue) = 0;
+                                                                     std::optional<std::vector<std::string_view>>   aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::u8string_view              GetJson                 (const size_t                       aRowId,
-                                                                     const size_t                       aColId,
-                                                                     std::optional<std::u8string_view>  aOnNullValue) const = 0;
+    virtual GpSpanCharRW                    GetJsonRW               (const size_t                   aRowId,
+                                                                     const size_t                   aColId,
+                                                                     std::optional<GpSpanCharRW>    aOnNullValue) = 0;
 
     [[nodiscard]]
-    virtual std::vector<std::u8string_view> GetJsonArray1D          (const size_t                                   aRowId,
-                                                                     const size_t                                   aColId,
-                                                                     std::optional<std::vector<std::u8string_view>> aOnNullValue) const = 0;
-
-    [[nodiscard]]
-    virtual GpSpanPtrCharU8RW               GetJsonRW               (const size_t                       aRowId,
-                                                                     const size_t                       aColId,
-                                                                     std::optional<GpSpanPtrCharU8RW>   aOnNullValue) = 0;
-
-    [[nodiscard]]
-    virtual std::vector<GpSpanPtrCharU8RW>  GetJsonRWArray1D        (const size_t                                   aRowId,
-                                                                     const size_t                                   aColId,
-                                                                     std::optional<std::vector<GpSpanPtrCharU8RW>>  aOnNullValue) = 0;
+    virtual std::vector<GpSpanCharRW>       GetJsonRWArray1D        (const size_t                               aRowId,
+                                                                     const size_t                               aColId,
+                                                                     std::optional<std::vector<GpSpanCharRW>>   aOnNullValue) = 0;
 
     [[nodiscard]]
     virtual GpUUID                          GetUuid                 (const size_t           aRowId,
@@ -130,14 +129,14 @@ public:
                                                                      std::optional<std::vector<GpUUID>> aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual GpSpanPtrByteR                  GetBlob                 (const size_t                   aRowId,
-                                                                     const size_t                   aColId,
-                                                                     std::optional<GpSpanPtrByteR>  aOnNullValue) const = 0;
+    virtual GpSpanByteR                     GetBlob                 (const size_t               aRowId,
+                                                                     const size_t               aColId,
+                                                                     std::optional<GpSpanByteR> aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<GpSpanPtrByteR>     GetBlobArray1D          (const size_t                               aRowId,
+    virtual std::vector<GpSpanByteR>        GetBlobArray1D          (const size_t                               aRowId,
                                                                      const size_t                               aColId,
-                                                                     std::optional<std::vector<GpSpanPtrByteR>> aOnNullValue) const = 0;
+                                                                     std::optional<std::vector<GpSpanByteR>>    aOnNullValue) const = 0;
 
     [[nodiscard]]
     virtual bool                            GetBoolean              (const size_t           aRowId,
@@ -223,14 +222,22 @@ template<typename T>
     std::optional<typename T::EnumT>    aOnNullValue
 ) const
 {
-    std::u8string_view strVal = GetStr(aRowId, aColId, {});
+    std::string_view strVal = GetStr(aRowId, aColId, {});
 
     if (strVal.length() == 0)
     {
         THROW_COND_GP
         (
             aOnNullValue.has_value(),
-            [&](){return u8"Value on ["_sv + aRowId + u8", "_sv + aColId + u8"] is empty"_sv;}
+            [&]()
+            {
+                return fmt::format
+                (
+                    "Value on [{}, {}] is empty",
+                    aRowId,
+                    aColId
+                );
+            }
         );
         return aOnNullValue.value();
     }
@@ -294,7 +301,7 @@ template<typename T>
 template<typename TO, typename  FROM>
 std::vector<TO> GpDbQueryRes::_SConvertArrayNum (const std::vector<FROM>& aVec)
 {
-    const size_t size = aVec.size();
+    const size_t size = std::size(aVec);
     std::vector<TO> res(size);
 
     for (size_t id = 0; id < size; ++id)
@@ -314,15 +321,26 @@ std::vector<TO> GpDbQueryRes::_SConvertArrayNum (const std::vector<FROM>& aVec)
 template<typename TO, typename  FROM>
 std::vector<TO> GpDbQueryRes::_SConvertArrayBytes (std::vector<FROM>& aVec)
 {
-    const size_t size = aVec.size();
-    std::vector<TO> res(size);
+    const size_t size = std::size(aVec);
+    std::vector<TO> res;
+    res.resize(size);
 
     for (size_t id = 0; id < size; ++id)
     {
-        res[id] = static_cast<TO>(aVec[id]);
+        const auto&     fromElement     = aVec[id];
+        auto&           toElement       = res[id];
+        const size_t    fromElementSize = std::size(fromElement);
+
+        if (fromElementSize == 0)
+        {
+            continue;
+        }
+
+        toElement.resize(fromElementSize);
+        std::memcpy(std::data(toElement), std::data(fromElement), fromElementSize);
     }
 
     return res;
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

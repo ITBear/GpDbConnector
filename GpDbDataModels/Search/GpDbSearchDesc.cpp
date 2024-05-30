@@ -1,6 +1,7 @@
 #include "GpDbSearchDesc.hpp"
 
 #include <GpCore2/GpReflection/GpReflectManager.hpp>
+#include <GpCore2/GpReflection/GpReflectPropUtils.hpp>
 
 namespace GPlatform {
 
@@ -10,7 +11,7 @@ GpDbSearchDesc::~GpDbSearchDesc (void) noexcept
 {
 }
 
-void    GpDbSearchDesc::_SReflectCollectProps (GpReflectProp::C::Vec::Val& aPropsOut)
+void    GpDbSearchDesc::_SReflectCollectProps (GpReflectProp::SmallVecVal& aPropsOut)
 {
     PROP(filter);
     PROP(limit);
@@ -18,4 +19,4 @@ void    GpDbSearchDesc::_SReflectCollectProps (GpReflectProp::C::Vec::Val& aProp
     PROP(order);
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

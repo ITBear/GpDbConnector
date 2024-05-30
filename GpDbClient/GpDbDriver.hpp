@@ -1,8 +1,9 @@
 #pragma once
 
-#include "GpDbConnectionMode.hpp"
-#include "Query/GpDbQueryPrepared.hpp"
-#include "../../GpNetwork/GpNetworkCore/Pollers/GpIOEventPoller.hpp"
+#include <GpDbConnector/GpDbClient/GpDbConnectionMode.hpp>
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryPrepared.hpp>
+#include <GpNetwork/GpNetworkCore/Pollers/GpIOEventPoller.hpp>
+#include <GpNetwork/GpNetworkCore/Pollers/GpIOEventPollerCatalog.hpp>
 
 namespace GPlatform {
 
@@ -16,36 +17,36 @@ public:
     TAG_SET(THREAD_SAFE)
 
 protected:
-    inline                          GpDbDriver      (std::u8string                      aName,
-                                                     const GpDbConnectionMode::EnumT    aMode,
-                                                     GpIOEventPoller::SP                aEventPoller) noexcept;
+    inline                          GpDbDriver          (std::string                aName,
+                                                         GpDbConnectionMode::EnumT  aMode,
+                                                         GpIOEventPollerIdx         aIOEventPollerIdx) noexcept;
 
 public:
-    virtual                         ~GpDbDriver     (void) noexcept = default;
+    virtual                         ~GpDbDriver         (void) noexcept = default;
 
-    std::u8string_view              Name            (void) const noexcept {return iName;}
-    GpDbConnectionMode::EnumT       Mode            (void) const noexcept {return iMode;}
-    GpIOEventPoller::SP             EventPoller     (void) const noexcept {return iEventPoller;}
+    std::string_view                Name                (void) const noexcept {return iName;}
+    GpDbConnectionMode::EnumT       Mode                (void) const noexcept {return iMode;}
+    GpIOEventPollerIdx              IOEventPollerIdx    (void) const noexcept {return iIOEventPollerIdx;}
 
-    virtual GpSP<GpDbConnection>    NewConnection   (std::u8string_view aConnStr) const = 0;
-    virtual GpDbQueryPrepared::CSP  Prepare         (const GpDbQuery& aQuery) const = 0;
+    virtual GpSP<GpDbConnection>    NewConnection       (std::string_view aConnStr) const = 0;
+    virtual GpDbQueryPrepared::CSP  Prepare             (const GpDbQuery& aQuery) const = 0;
 
 private:
-    const std::u8string             iName;
+    const std::string               iName;
     const GpDbConnectionMode::EnumT iMode;
-    GpIOEventPoller::SP             iEventPoller;
+    const GpIOEventPollerIdx        iIOEventPollerIdx;
 };
 
 GpDbDriver::GpDbDriver
 (
-    std::u8string                   aName,
+    std::string                     aName,
     const GpDbConnectionMode::EnumT aMode,
-    GpIOEventPoller::SP             aEventPoller
+    const GpIOEventPollerIdx        aIOEventPollerIdx
 ) noexcept:
-iName       (std::move(aName)),
-iMode       (aMode),
-iEventPoller(std::move(aEventPoller))
+iName            {std::move(aName)},
+iMode            {aMode},
+iIOEventPollerIdx{aIOEventPollerIdx}
 {
 }
 
-}//GPlatform
+}// namespace GPlatform

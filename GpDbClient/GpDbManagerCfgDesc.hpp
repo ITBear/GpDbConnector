@@ -11,21 +11,21 @@ class GP_DB_CLIENT_API GpDbManagerCfgDesc final: public GpReflectObject
 {
 public:
     CLASS_DD(GpDbManagerCfgDesc)
-    REFLECT_DECLARE(u8"e200f131-8953-43f6-9ecb-c321b7b00e97"_uuid)
+    REFLECT_DECLARE("e200f131-8953-43f6-9ecb-c321b7b00e97"_uuid)
 
 public:
-                                    GpDbManagerCfgDesc  (void) noexcept = default;
-    inline                          GpDbManagerCfgDesc  (const GpDbManagerCfgDesc& aDesc);
-    inline                          GpDbManagerCfgDesc  (GpDbManagerCfgDesc&& aDesc) noexcept;
-    virtual                         ~GpDbManagerCfgDesc (void) noexcept override final;
+                                GpDbManagerCfgDesc  (void) noexcept = default;
+    inline                      GpDbManagerCfgDesc  (const GpDbManagerCfgDesc& aDesc);
+    inline                      GpDbManagerCfgDesc  (GpDbManagerCfgDesc&& aDesc) noexcept;
+    virtual                     ~GpDbManagerCfgDesc (void) noexcept override final;
 
 public:
-    std::vector<std::u8string>      aliases;
-    std::u8string                   driver_name;
-    size_t                          max_conn_pool_size;
-    std::u8string                   connection_str;
-    GpDbConnectionMode              mode;
-    std::u8string                   event_poller_name;
+    std::vector<std::string>    aliases;
+    std::string                 driver_name;
+    size_t                      max_conn_pool_size;
+    std::string                 connection_str;
+    GpDbConnectionMode          mode;
+    std::string                 event_poller_name;
 };
 
 GpDbManagerCfgDesc::GpDbManagerCfgDesc (const GpDbManagerCfgDesc& aDesc):

@@ -16,8 +16,8 @@ void    GpDbQueryPreparedPgSql::Prepare (const GpDbQuery& aQuery)
 {
     const GpDbQuery::TypeVecT& types = aQuery.Types();
 
-    const size_t typesCount     = types.size();
-    const size_t valuesCount    = aQuery.Values().size();
+    const size_t typesCount     = std::size(types);
+    const size_t valuesCount    = std::size(aQuery.Values());
 
 
     if (   (typesCount == valuesCount)
@@ -29,7 +29,7 @@ void    GpDbQueryPreparedPgSql::Prepare (const GpDbQuery& aQuery)
     THROW_COND_GP
     (
         typesCount == valuesCount,
-        [&aQuery](){return u8"valuesTypesCount != valuesCount. SQL '"_sv + aQuery.QueryStr() + u8"'"_sv;}
+        [&aQuery](){return "valuesTypesCount != valuesCount. SQL '"_sv + aQuery.QueryStr() + "'"_sv;}
     );
 
     iOIDs.reserve(valuesCount);
@@ -59,7 +59,7 @@ void    GpDbQueryPreparedPgSql::FillData
             const s_int_16 value = BitOps::N2H(aQuery.Int16(aValueId));
             iSInt64Vec.emplace_back(0);
 
-            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            char* ptr = reinterpret_cast<char*>(std::data(iSInt64Vec) + (std::size(iSInt64Vec) - 1));
             std::memcpy(ptr, &value, sizeof(decltype(value)));
 
             iOIDs.emplace_back(0);
@@ -77,7 +77,7 @@ void    GpDbQueryPreparedPgSql::FillData
             const s_int_32 value = BitOps::N2H(aQuery.Int32(aValueId));
             iSInt64Vec.emplace_back(0);
 
-            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            char* ptr = reinterpret_cast<char*>(std::data(iSInt64Vec) + (std::size(iSInt64Vec) - 1));
             std::memcpy(ptr, &value, sizeof(decltype(value)));
 
             iOIDs.emplace_back(0);
@@ -95,7 +95,7 @@ void    GpDbQueryPreparedPgSql::FillData
             const s_int_64 value = BitOps::N2H(aQuery.Int64(aValueId));
             iSInt64Vec.emplace_back(0);
 
-            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            char* ptr = reinterpret_cast<char*>(std::data(iSInt64Vec) + (std::size(iSInt64Vec) - 1));
             std::memcpy(ptr, &value, sizeof(decltype(value)));
 
             iOIDs.emplace_back(0);
@@ -113,7 +113,7 @@ void    GpDbQueryPreparedPgSql::FillData
             const double value = BitOps::N2H(aQuery.Double(aValueId));
             iSInt64Vec.emplace_back(0);
 
-            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            char* ptr = reinterpret_cast<char*>(std::data(iSInt64Vec) + (std::size(iSInt64Vec) - 1));
             std::memcpy(ptr, &value, sizeof(decltype(value)));
 
             iOIDs.emplace_back(0);
@@ -131,7 +131,7 @@ void    GpDbQueryPreparedPgSql::FillData
             const float value = BitOps::N2H(aQuery.Float(aValueId));
             iSInt64Vec.emplace_back(0);
 
-            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            char* ptr = reinterpret_cast<char*>(std::data(iSInt64Vec) + (std::size(iSInt64Vec) - 1));
             std::memcpy(ptr, &value, sizeof(decltype(value)));
 
             iOIDs.emplace_back(0);
@@ -146,36 +146,36 @@ void    GpDbQueryPreparedPgSql::FillData
         } break;
         case GpDbQueryValType::STRING:
         {
-            std::u8string_view value = aQuery.Str(aValueId);
+            std::string_view value = aQuery.Str(aValueId);
 
             iOIDs.emplace_back(0);
-            iValuesPtr.emplace_back(GpUTF::S_As_STR(value).data());
-            iValuesSize.emplace_back(NumOps::SConvert<int>(value.size()));
+            iValuesPtr.emplace_back(std::data(value));
+            iValuesSize.emplace_back(NumOps::SConvert<int>(std::size(value)));
             iValuesIsBinary.emplace_back(1);
         } break;
         case GpDbQueryValType::STRING_ARRAY_1D:
         {
-            const std::vector<std::u8string>& value = aQuery.StrArray1D(aValueId);
+            const std::vector<std::string>& value = aQuery.StrArray1D(aValueId);
             _FillArray(value);
         } break;
         case GpDbQueryValType::JSON:
         {
-            std::u8string_view value = aQuery.Json(aValueId);
+            std::string_view value = aQuery.Json(aValueId);
 
             GpBytesArray jsonbData;
-            jsonbData.resize(NumOps::SAdd(value.size(), size_t(1)));
+            jsonbData.resize(NumOps::SAdd(std::size(value), size_t(1)));
             GpByteWriterStorageFixedSize    writerStorage(jsonbData);
             GpByteWriter                    writer(writerStorage);
 
-            writer.UInt8(1);//Jsonb version
+            writer.UI8(1);//Jsonb version
             writer.Bytes(value);
 
-            const std::byte*    dataPtr     = jsonbData.data();
-            const size_t        dataSize    = jsonbData.size();
+            const std::byte*    dataPtr     = reinterpret_cast<const std::byte*>(std::data(jsonbData));
+            const size_t        dataSize    = std::size(jsonbData);
 
             iBinaryDataVec.emplace_back(std::move(jsonbData));
 
-            //---------------------------
+            // ---------------------------
             iOIDs.emplace_back(0);
             iValuesPtr.emplace_back(reinterpret_cast<const char*>(dataPtr));
             iValuesSize.emplace_back(NumOps::SConvert<int>(dataSize));
@@ -183,7 +183,7 @@ void    GpDbQueryPreparedPgSql::FillData
         } break;
         case GpDbQueryValType::JSON_ARRAY_1D:
         {
-            const std::vector<std::u8string>& value = aQuery.JsonArray1D(aValueId);
+            const std::vector<std::string>& value = aQuery.JsonArray1D(aValueId);
             _FillArray(value);
         } break;
         case GpDbQueryValType::UUID:
@@ -193,7 +193,7 @@ void    GpDbQueryPreparedPgSql::FillData
             if (value.IsNotZero())
             {
                 iOIDs.emplace_back(0);
-                iValuesPtr.emplace_back(reinterpret_cast<const char*>(value.Data().data()));
+                iValuesPtr.emplace_back(reinterpret_cast<const char*>(std::data(value.Data())));
                 iValuesSize.emplace_back(NumOps::SConvert<int>(sizeof(GpUUID::DataT)));
                 iValuesIsBinary.emplace_back(1);
             } else
@@ -214,8 +214,8 @@ void    GpDbQueryPreparedPgSql::FillData
             const GpBytesArray& value = aQuery.Blob(aValueId);
 
             iOIDs.emplace_back(0);
-            iValuesPtr.emplace_back(reinterpret_cast<const char*>(value.data()));
-            iValuesSize.emplace_back(NumOps::SConvert<int>(value.size()));
+            iValuesPtr.emplace_back(reinterpret_cast<const char*>(std::data(value)));
+            iValuesSize.emplace_back(NumOps::SConvert<int>(std::size(value)));
             iValuesIsBinary.emplace_back(1);
         } break;
         case GpDbQueryValType::BLOB_ARRAY_1D:
@@ -227,7 +227,7 @@ void    GpDbQueryPreparedPgSql::FillData
         {
             const bool value = aQuery.Boolean(aValueId);
             iSInt64Vec.emplace_back(0);
-            char* ptr = reinterpret_cast<char*>(iSInt64Vec.data() + (iSInt64Vec.size() - 1));
+            char* ptr = reinterpret_cast<char*>(std::data(iSInt64Vec) + (std::size(iSInt64Vec) - 1));
             *ptr = (value ? 1: 0);
 
             iOIDs.emplace_back(0);
@@ -249,9 +249,9 @@ void    GpDbQueryPreparedPgSql::FillData
         } break;
         default:
         {
-            THROW_GP(u8"Unknown value type"_sv);
+            THROW_GP("Unknown value type"_sv);
         };
     }
 }
 
-}//GPlatform
+}// namespace GPlatform

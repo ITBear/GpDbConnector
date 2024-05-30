@@ -13,11 +13,11 @@ public:
     CLASS_DD(GpDbDriverFactoryPgSql)
 
 public:
-                                    GpDbDriverFactoryPgSql  (void);
-    virtual                         ~GpDbDriverFactoryPgSql (void) noexcept override final;
+                            GpDbDriverFactoryPgSql  (void);
+    virtual                 ~GpDbDriverFactoryPgSql (void) noexcept override final;
 
-    virtual GpDbDriver::SP          NewInstance             (const GpDbConnectionMode::EnumT    aMode,
-                                                             GpIOEventPoller::SP                aEventPoller) const override final;
+    virtual GpDbDriver::SP  NewInstance             (GpDbConnectionMode::EnumT  aMode,
+                                                     GpIOEventPollerIdx         aIOEventPollerIdx) const override final;
 };
 
-}//namespace GPlatform
+}// namespace GPlatform

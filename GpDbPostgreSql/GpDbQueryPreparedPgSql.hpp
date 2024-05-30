@@ -55,10 +55,10 @@ void    GpDbQueryPreparedPgSql::_FillArray (const T& aArray)
 
     iBinaryDataVec.emplace_back(std::move(arrayData));
 
-    const auto& ead = iBinaryDataVec[iBinaryDataVec.size() - 1];
+    const auto& ead = iBinaryDataVec[std::size(iBinaryDataVec) - 1];
 
-    const std::byte*    dataPtr     = ead.data();
-    const size_t        dataSize    = ead.size();
+    const std::byte*    dataPtr     = reinterpret_cast<const std::byte*>(std::data(ead));
+    const size_t        dataSize    = std::size(ead);
 
     iOIDs.emplace_back(oid);
     iValuesPtr.emplace_back(reinterpret_cast<const char*>(dataPtr));
@@ -66,4 +66,4 @@ void    GpDbQueryPreparedPgSql::_FillArray (const T& aArray)
     iValuesIsBinary.emplace_back(1);
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

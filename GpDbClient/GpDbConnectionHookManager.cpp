@@ -41,4 +41,4 @@ void    GpDbConnectionHookManager::OnExecute
     }
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

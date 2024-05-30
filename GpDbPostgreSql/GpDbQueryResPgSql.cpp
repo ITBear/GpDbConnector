@@ -25,7 +25,7 @@ T   GpDbQueryResPgSql_GetPOD
         THROW_COND_GP
         (
             aOnNullValue.has_value(),
-            [&](){return u8"Value on ["_sv + aRowId + u8", "_sv + aColId + u8"] is NULL"_sv;}
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
 
         return aOnNullValue.value();
@@ -38,7 +38,7 @@ T   GpDbQueryResPgSql_GetPOD
         size_t(len) == sizeof(T),
         [&]()
         {
-            return u8"Length must be "_sv + sizeof(T) + u8" bytes"_sv;
+            return "Length must be "_sv + sizeof(T) + " bytes"_sv;
         }
     );
 
@@ -64,14 +64,14 @@ std::vector<T>  GpDbQueryResPgSql_GetArray
         THROW_COND_GP
         (
             aOnNullValue.has_value(),
-            [&](){return u8"Value on ["_sv + aRowId + u8", "_sv + aColId + u8"] is NULL"_sv;}
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
 
         return aOnNullValue.value();
     }
 
     const int       dataSize = PQgetlength(aPgResult, rowId, colId);
-    GpSpanPtrByteRW data{reinterpret_cast<u_int_8*>(PQgetvalue(aPgResult, rowId, colId)), size_t(dataSize)};
+    GpSpanByteRW    data{reinterpret_cast<u_int_8*>(PQgetvalue(aPgResult, rowId, colId)), size_t(dataSize)};
 
     return GpDbArrayUtilsPgSql::SRead<T>(data);
 }
@@ -105,11 +105,11 @@ void    GpDbQueryResPgSql::Process
     THROW_COND_GP
     (
         iPgResult != nullptr,
-        [&](){return u8"PGresult is null: "_sv + GpUTF::S_As_UTF8(PQerrorMessage(aPgConn));}
+        [&](){return "PGresult is null: "_sv + PQerrorMessage(aPgConn);}
     );
 
     const ExecStatusType    pgResStatus = PQresultStatus(iPgResult);
-    std::u8string_view      errMsg;
+    std::string_view        errMsg;
 
     switch (pgResStatus)
     {
@@ -117,7 +117,7 @@ void    GpDbQueryResPgSql::Process
         {
             if (aMinResultRowsCount > 0)
             {
-                THROW_DB(GpDbExceptionCode::QUERY_RESULT_COUNT_LOW, u8""_sv);
+                THROW_DB(GpDbExceptionCode::QUERY_RESULT_COUNT_LOW, ""_sv);
             }
         } break;
         case PGRES_COMMAND_OK:      // a query command that doesn't return anything was executed properly by the backend
@@ -129,35 +129,35 @@ void    GpDbQueryResPgSql::Process
         } break;
         case PGRES_COPY_OUT:        // copy Out data transfer in progress
         {
-            errMsg = u8"copy Out data transfer in progress"_sv;
+            errMsg = "copy Out data transfer in progress"_sv;
         } break;
         case PGRES_COPY_IN:         // copy In data transfer in progress
         {
-            errMsg = u8"copy In data transfer in progress"_sv;
+            errMsg = "copy In data transfer in progress"_sv;
         } break;
         case PGRES_BAD_RESPONSE:    // an unexpected response was recv'd from the backend
         {
-            errMsg = u8"an unexpected response was recv'd from the backend"_sv;
+            errMsg = "an unexpected response was recv'd from the backend"_sv;
         } break;
         case PGRES_FATAL_ERROR:     // query failed
         {
-            errMsg = u8"query failed"_sv;
+            errMsg = "query failed"_sv;
         } break;
         case PGRES_COPY_BOTH:       // Copy In/Out data transfer in progress
         {
-            errMsg = u8"Copy In/Out data transfer in progress"_sv;
+            errMsg = "Copy In/Out data transfer in progress"_sv;
         } break;
         case PGRES_PIPELINE_SYNC:
         {
-            errMsg = u8"single tuple from larger resultset pipeline synchronization point"_sv;
+            errMsg = "single tuple from larger resultset pipeline synchronization point"_sv;
         } break;
         case PGRES_PIPELINE_ABORTED:
         {
-            errMsg = u8"Command didn't run because of an abort earlier in a pipeline"_sv;
+            errMsg = "Command didn't run because of an abort earlier in a pipeline"_sv;
         } break;
         default:
         {
-            errMsg = u8"Unknown error"_sv;
+            errMsg = "Unknown error"_sv;
         }
     }
 
@@ -311,11 +311,11 @@ std::vector<float>  GpDbQueryResPgSql::GetFloatArray1D
     return GpDbQueryResPgSql_GetArray<float>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
-std::u8string_view  GpDbQueryResPgSql::GetStr
+std::string_view    GpDbQueryResPgSql::GetStr
 (
-    const size_t                        aRowId,
-    const size_t                        aColId,
-    std::optional<std::u8string_view>   aOnNullValue
+    const size_t                    aRowId,
+    const size_t                    aColId,
+    std::optional<std::string_view> aOnNullValue
 ) const
 {
     const int rowId = NumOps::SConvert<int>(aRowId);
@@ -326,7 +326,7 @@ std::u8string_view  GpDbQueryResPgSql::GetStr
         THROW_COND_GP
         (
             aOnNullValue.has_value(),
-            [&](){return u8"Value on ["_sv + aRowId + u8", "_sv + aColId + u8"] is NULL"_sv;}
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
 
         return aOnNullValue.value();
@@ -335,61 +335,61 @@ std::u8string_view  GpDbQueryResPgSql::GetStr
     const char*     strPtr  = PQgetvalue(iPgResult, rowId, colId);
     const size_t    strLen  = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
 
-    return GpUTF::S_As_UTF8(strPtr, strLen);
+    return std::string_view(strPtr, strLen);
 }
 
-std::vector<std::u8string_view> GpDbQueryResPgSql::GetStrArray1D
+std::vector<std::string_view>   GpDbQueryResPgSql::GetStrArray1D
 (
     const size_t                                    aRowId,
     const size_t                                    aColId,
-    std::optional<std::vector<std::u8string_view>>  aOnNullValue
+    std::optional<std::vector<std::string_view>>    aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetArray<std::u8string_view>(aRowId, aColId, aOnNullValue, iPgResult);
+    return GpDbQueryResPgSql_GetArray<std::string_view>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
-GpSpanPtrCharU8RW   GpDbQueryResPgSql::GetStrRW
+GpSpanCharRW    GpDbQueryResPgSql::GetStrRW
 (
-    const size_t                        aRowId,
-    const size_t                        aColId,
-    std::optional<GpSpanPtrCharU8RW>    aOnNullValue
+    const size_t                aRowId,
+    const size_t                aColId,
+    std::optional<GpSpanCharRW> aOnNullValue
 )
 {
-    std::optional<std::u8string_view> defaultValue;
+    std::optional<std::string_view> defaultValue;
 
     if (aOnNullValue.has_value())
     {
-        defaultValue = aOnNullValue.value().AsStringViewU8();
+        defaultValue = aOnNullValue.value().AsStringView();
     }
 
-    std::u8string_view str = std::as_const(*this).GetStr
+    std::string_view str = std::as_const(*this).GetStr
     (
         aRowId,
         aColId,
         defaultValue
     );
 
-    return GpSpanPtrCharU8RW(const_cast<char8_t*>(str.data()), str.size());
+    return GpSpanCharRW(const_cast<char*>(std::data(str)), std::size(str));
 }
 
-std::vector<GpSpanPtrCharU8RW>  GpDbQueryResPgSql::GetStrRWArray1D
+std::vector<GpSpanCharRW>   GpDbQueryResPgSql::GetStrRWArray1D
 (
-    const size_t                                    aRowId,
-    const size_t                                    aColId,
-    std::optional<std::vector<GpSpanPtrCharU8RW>>   aOnNullValue
+    const size_t                                aRowId,
+    const size_t                                aColId,
+    std::optional<std::vector<GpSpanCharRW>>    aOnNullValue
 )
 {
-    return GpDbQueryResPgSql_GetArray<GpSpanPtrCharU8RW>(aRowId, aColId, aOnNullValue, iPgResult);
+    return GpDbQueryResPgSql_GetArray<GpSpanCharRW>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
-std::u8string_view  GpDbQueryResPgSql::GetJson
+std::string_view    GpDbQueryResPgSql::GetJson
 (
-    const size_t                        aRowId,
-    const size_t                        aColId,
-    std::optional<std::u8string_view>   aOnNullValue
+    const size_t                    aRowId,
+    const size_t                    aColId,
+    std::optional<std::string_view> aOnNullValue
 ) const
 {
-    std::u8string_view str = GetStr(aRowId, aColId, aOnNullValue);
+    std::string_view str = GetStr(aRowId, aColId, aOnNullValue);
 
     THROW_COND_GP
     (
@@ -399,23 +399,23 @@ std::u8string_view  GpDbQueryResPgSql::GetJson
 
     THROW_COND_GP
     (
-        std::bit_cast<u_int_8>(str.data()[0]) == 1,
+        std::bit_cast<u_int_8>(std::data(str)[0]) == 1,
         "Wrong pgJson format version"_sv
     );
 
     return str.substr(1, str.length() - 1);
 }
 
-std::vector<std::u8string_view> GpDbQueryResPgSql::GetJsonArray1D
+std::vector<std::string_view>   GpDbQueryResPgSql::GetJsonArray1D
 (
     const size_t                                    aRowId,
     const size_t                                    aColId,
-    std::optional<std::vector<std::u8string_view>>  aOnNullValue
+    std::optional<std::vector<std::string_view>>    aOnNullValue
 ) const
 {
-    std::vector<std::u8string_view> strArray = GetStrArray1D(aRowId, aColId, aOnNullValue);
+    std::vector<std::string_view> strArray = GetStrArray1D(aRowId, aColId, aOnNullValue);
 
-    for (std::u8string_view& element: strArray)
+    for (std::string_view& element: strArray)
     {
         THROW_COND_GP
         (
@@ -425,7 +425,7 @@ std::vector<std::u8string_view> GpDbQueryResPgSql::GetJsonArray1D
 
         THROW_COND_GP
         (
-            std::bit_cast<u_int_8>(element.data()[0]) == 1,
+            std::bit_cast<u_int_8>(std::data(element)[0]) == 1,
             "Wrong pgJson format version"_sv
         );
 
@@ -435,40 +435,40 @@ std::vector<std::u8string_view> GpDbQueryResPgSql::GetJsonArray1D
     return strArray;
 }
 
-GpSpanPtrCharU8RW   GpDbQueryResPgSql::GetJsonRW
+GpSpanCharRW    GpDbQueryResPgSql::GetJsonRW
 (
-    const size_t                        aRowId,
-    const size_t                        aColId,
-    std::optional<GpSpanPtrCharU8RW>    aOnNullValue
+    const size_t                aRowId,
+    const size_t                aColId,
+    std::optional<GpSpanCharRW> aOnNullValue
 )
 {
-    std::optional<std::u8string_view> defaultValue;
+    std::optional<std::string_view> defaultValue;
 
     if (aOnNullValue.has_value())
     {
-        defaultValue = aOnNullValue.value().AsStringViewU8();
+        defaultValue = aOnNullValue.value().AsStringView();
     }
 
-    std::u8string_view str = std::as_const(*this).GetJson
+    std::string_view str = std::as_const(*this).GetJson
     (
         aRowId,
         aColId,
         defaultValue
     );
 
-    return GpSpanPtrCharU8RW(const_cast<char8_t*>(str.data()), str.size());
+    return GpSpanCharRW(const_cast<char*>(std::data(str)), std::size(str));
 }
 
-std::vector<GpSpanPtrCharU8RW>  GpDbQueryResPgSql::GetJsonRWArray1D
+std::vector<GpSpanCharRW>   GpDbQueryResPgSql::GetJsonRWArray1D
 (
-    const size_t                                    aRowId,
-    const size_t                                    aColId,
-    std::optional<std::vector<GpSpanPtrCharU8RW>>   aOnNullValue
+    const size_t                                aRowId,
+    const size_t                                aColId,
+    std::optional<std::vector<GpSpanCharRW>>    aOnNullValue
 )
 {
-    std::vector<GpSpanPtrCharU8RW> strArray = GetStrRWArray1D(aRowId, aColId, aOnNullValue);
+    std::vector<GpSpanCharRW> strArray = GetStrRWArray1D(aRowId, aColId, aOnNullValue);
 
-    for (GpSpanPtrCharU8RW& element: strArray)
+    for (GpSpanCharRW& element: strArray)
     {
         THROW_COND_GP
         (
@@ -503,7 +503,7 @@ GpUUID  GpDbQueryResPgSql::GetUuid
         THROW_COND_GP
         (
             aOnNullValue.has_value(),
-            [&](){return u8"Value on ["_sv + aRowId + u8", "_sv + aColId + u8"] is NULL"_sv;}
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
 
         return aOnNullValue.value();
@@ -519,7 +519,7 @@ GpUUID  GpDbQueryResPgSql::GetUuid
     );
 
     GpUUID uuid;
-    std::memcpy(uuid.Data().data(), dataPtr, sizeof(GpUUID::DataT));
+    std::memcpy(std::data(uuid.Data()), dataPtr, sizeof(GpUUID::DataT));
 
     return uuid;
 }
@@ -534,11 +534,11 @@ std::vector<GpUUID> GpDbQueryResPgSql::GetUuidArray1D
     return GpDbQueryResPgSql_GetArray<GpUUID>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
-GpSpanPtrByteR  GpDbQueryResPgSql::GetBlob
+GpSpanByteR GpDbQueryResPgSql::GetBlob
 (
-    const size_t                    aRowId,
-    const size_t                    aColId,
-    std::optional<GpSpanPtrByteR>   aOnNullValue
+    const size_t                aRowId,
+    const size_t                aColId,
+    std::optional<GpSpanByteR>  aOnNullValue
 ) const
 {
     const int rowId = NumOps::SConvert<int>(aRowId);
@@ -549,7 +549,7 @@ GpSpanPtrByteR  GpDbQueryResPgSql::GetBlob
         THROW_COND_GP
         (
             aOnNullValue.has_value(),
-            [&](){return u8"Value on ["_sv + aRowId + u8", "_sv + aColId + u8"] is NULL"_sv;}
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
         return aOnNullValue.value();
     }
@@ -557,17 +557,17 @@ GpSpanPtrByteR  GpDbQueryResPgSql::GetBlob
     const char*     dataPtr     = PQgetvalue(iPgResult, rowId, colId);
     const size_t    dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
 
-    return GpSpanPtrCharU8R(dataPtr, dataSize);
+    return GpSpanCharR(dataPtr, dataSize);
 }
 
-std::vector<GpSpanPtrByteR> GpDbQueryResPgSql::GetBlobArray1D
+std::vector<GpSpanByteR>    GpDbQueryResPgSql::GetBlobArray1D
 (
-    const size_t                                aRowId,
-    const size_t                                aColId,
-    std::optional<std::vector<GpSpanPtrByteR>>  aOnNullValue
+    const size_t                            aRowId,
+    const size_t                            aColId,
+    std::optional<std::vector<GpSpanByteR>> aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetArray<GpSpanPtrByteR>(aRowId, aColId, aOnNullValue, iPgResult);
+    return GpDbQueryResPgSql_GetArray<GpSpanByteR>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 bool    GpDbQueryResPgSql::GetBoolean
@@ -585,7 +585,7 @@ bool    GpDbQueryResPgSql::GetBoolean
         THROW_COND_GP
         (
             aOnNullValue.has_value(),
-            [&](){return u8"Value on ["_sv + aRowId + u8", "_sv + aColId + u8"] is NULL"_sv;}
+            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
         );
         return aOnNullValue.value();
     }
@@ -593,8 +593,8 @@ bool    GpDbQueryResPgSql::GetBoolean
     const char*     dataPtr     = PQgetvalue(iPgResult, rowId, colId);
     const size_t    dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
 
-    std::u8string_view str = GpUTF::S_As_UTF8(dataPtr, dataSize);
-    const char8_t v = str.at(0);
+    std::string_view str{dataPtr, dataSize};
+    const char v = str.at(0);
 
     return     (v == 0x01)
             || (v == 't')
@@ -614,14 +614,14 @@ void    GpDbQueryResPgSql::ClearPgSql (void) noexcept
 
 void    GpDbQueryResPgSql::ThrowDbEx
 (
-    std::u8string_view  aMsg,
+    std::string_view    aMsg,
     PGconn*             aPgConn
 )
 {
-    std::u8string_view          message = GpUTF::S_As_UTF8(PQerrorMessage(aPgConn));
-    GpDbExceptionCode::EnumT    code    = GpDbExceptionCode::QUERY_ERROR;
+    std::string_view            message{PQerrorMessage(aPgConn)};
+    GpDbExceptionCode::EnumT    code = GpDbExceptionCode::QUERY_ERROR;
 
-    if (message.find(u8"duplicate key"_sv) != std::u8string_view::npos)
+    if (message.find("duplicate key"_sv) != std::string_view::npos)
     {
         code = GpDbExceptionCode::QUERY_DUPLICATE_KEY;
     }
@@ -629,8 +629,8 @@ void    GpDbQueryResPgSql::ThrowDbEx
     THROW_DB
     (
         code,
-        aMsg + u8": "_sv + message
+        aMsg + ": "_sv + message
     );
 }
 
-}//namespace GPlatform
+}// namespace GPlatform

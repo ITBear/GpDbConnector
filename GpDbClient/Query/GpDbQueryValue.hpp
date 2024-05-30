@@ -5,14 +5,15 @@
 #include <GpCore2/GpUtils/Types/Containers/GpContainersT.hpp>
 #include <GpCore2/GpUtils/Types/Containers/GpBytesArray.hpp>
 #include <GpCore2/GpUtils/Types/Containers/GpTypeShell.hpp>
+#include <variant>
 
 namespace GPlatform {
 
 class GpDbQueryValueJson_TypeShell;
 class GpDbQueryValueJsonVec1D_TypeShell;
 
-using GpDbQueryValueJson        = GpTypeShell<std::u8string,                GpDbQueryValueJson_TypeShell>;
-using GpDbQueryValueJsonVec1D   = GpTypeShell<std::vector<std::u8string>,   GpDbQueryValueJsonVec1D_TypeShell>;
+using GpDbQueryValueJson        = GpTypeShell<std::string,              GpDbQueryValueJson_TypeShell>;
+using GpDbQueryValueJsonVec1D   = GpTypeShell<std::vector<std::string>, GpDbQueryValueJsonVec1D_TypeShell>;
 
 using GpDbQueryValue = std::variant
 <
@@ -26,8 +27,8 @@ using GpDbQueryValue = std::variant
     std::vector<double>,        //DOUBLE_ARRAY_1D,
     float,                      //FLOAT,
     std::vector<float>,         //FLOAT_ARRAY_1D,
-    std::u8string,              //STRING,
-    std::vector<std::u8string>, //STRING_ARRAY_1D,
+    std::string,                //STRING,
+    std::vector<std::string>,   //STRING_ARRAY_1D,
     GpDbQueryValueJson,         //JSON,
     GpDbQueryValueJsonVec1D,    //JSON_ARRAY_1D,
     GpUUID,                     //UUID,
@@ -39,4 +40,4 @@ using GpDbQueryValue = std::variant
     std::nullopt_t              //NULL_VAL
 >;
 
-}//namespace GPlatform
+}// namespace GPlatform

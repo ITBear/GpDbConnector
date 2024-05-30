@@ -12,4 +12,4 @@ GP_ENUM(GP_DB_DATA_MODELS_API, GpDbSearchOrderType,
     ASC
 );
 
-}//namespace GPlatform
+}// namespace GPlatform

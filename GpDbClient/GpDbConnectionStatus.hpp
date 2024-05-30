@@ -12,4 +12,4 @@ GP_ENUM(GP_DB_CLIENT_API, GpDbConnectionStatus,
     CONNECTED
 );
 
-}//GPlatform
+}// namespace GPlatform
