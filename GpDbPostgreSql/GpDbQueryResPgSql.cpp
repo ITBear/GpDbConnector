@@ -1,12 +1,12 @@
-#include "GpDbQueryResPgSql.hpp"
-#include "../GpDbClient/GpDbException.hpp"
-#include "GpDbArrayUtilsPgSql.hpp"
+#include <GpDbConnector/GpDbPostgreSql/GpDbQueryResPgSql.hpp>
+#include <GpDbConnector/GpDbClient/GpDbException.hpp>
+#include <GpDbConnector/GpDbPostgreSql/GpDbArrayUtilsPgSql.hpp>
 
 #include <GpCore2/GpUtils/Types/Bits/GpBitOps.hpp>
 
 namespace GPlatform {
 
-template<typename T, size_t ExpectedSizeT>
+/*template<typename T, size_t ExpectedSizeT>
 T   GpDbQueryResPgSql_GetPOD
 (
     const size_t        aRowId,
@@ -74,21 +74,20 @@ std::vector<T>  GpDbQueryResPgSql_GetArray
     GpSpanByteRW    data{reinterpret_cast<u_int_8*>(PQgetvalue(aPgResult, rowId, colId)), size_t(dataSize)};
 
     return GpDbArrayUtilsPgSql::SRead<T>(data);
-}
+}*/
 
-GpDbQueryResPgSql::GpDbQueryResPgSql (PGresult* aPgResult):
-iPgResult(aPgResult)
+GpDbQueryResPgSql::GpDbQueryResPgSql (void)
 {
-    static_assert(PGRES_EMPTY_QUERY     == 0, "PGRES_EMPTY_QUERY    != 0");
-    static_assert(PGRES_COMMAND_OK      == 1, "PGRES_COMMAND_OK     != 1");
-    static_assert(PGRES_TUPLES_OK       == 2, "PGRES_TUPLES_OK      != 2");
-    static_assert(PGRES_COPY_OUT        == 3, "PGRES_COPY_OUT       != 3");
-    static_assert(PGRES_COPY_IN         == 4, "PGRES_COPY_IN        != 4");
-    static_assert(PGRES_BAD_RESPONSE    == 5, "PGRES_BAD_RESPONSE   != 5");
-    static_assert(PGRES_NONFATAL_ERROR  == 6, "PGRES_NONFATAL_ERROR != 6");
-    static_assert(PGRES_FATAL_ERROR     == 7, "PGRES_FATAL_ERROR    != 7");
-    static_assert(PGRES_COPY_BOTH       == 8, "PGRES_COPY_BOTH      != 8");
-    static_assert(PGRES_SINGLE_TUPLE    == 9, "PGRES_SINGLE_TUPLE   != 9");
+    //static_assert(PGRES_EMPTY_QUERY       == 0, "PGRES_EMPTY_QUERY    != 0");
+    //static_assert(PGRES_COMMAND_OK        == 1, "PGRES_COMMAND_OK     != 1");
+    //static_assert(PGRES_TUPLES_OK     == 2, "PGRES_TUPLES_OK      != 2");
+    //static_assert(PGRES_COPY_OUT      == 3, "PGRES_COPY_OUT       != 3");
+    //static_assert(PGRES_COPY_IN           == 4, "PGRES_COPY_IN        != 4");
+    //static_assert(PGRES_BAD_RESPONSE  == 5, "PGRES_BAD_RESPONSE   != 5");
+    //static_assert(PGRES_NONFATAL_ERROR    == 6, "PGRES_NONFATAL_ERROR != 6");
+    //static_assert(PGRES_FATAL_ERROR       == 7, "PGRES_FATAL_ERROR    != 7");
+    //static_assert(PGRES_COPY_BOTH     == 8, "PGRES_COPY_BOTH      != 8");
+    //static_assert(PGRES_SINGLE_TUPLE  == 9, "PGRES_SINGLE_TUPLE   != 9");
 }
 
 GpDbQueryResPgSql::~GpDbQueryResPgSql (void) noexcept
@@ -96,7 +95,7 @@ GpDbQueryResPgSql::~GpDbQueryResPgSql (void) noexcept
     ClearPgSql();
 }
 
-void    GpDbQueryResPgSql::Process
+/*void  GpDbQueryResPgSql::Process
 (
     const size_t    aMinResultRowsCount,
     PGconn*         aPgConn
@@ -161,7 +160,7 @@ void    GpDbQueryResPgSql::Process
         }
     }
 
-    if (errMsg.length() > 0)
+    if (std::size(errMsg) > 0)
     {
         Clear();
         ThrowDbEx(errMsg, aPgConn);
@@ -174,7 +173,7 @@ void    GpDbQueryResPgSql::Process
             THROW_DB(GpDbExceptionCode::QUERY_RESULT_COUNT_LOW, "RowsCount() < aMinResultRowsCount"_sv);
         }
     }
-}
+}*/
 
 void    GpDbQueryResPgSql::Clear (void)
 {
@@ -183,141 +182,184 @@ void    GpDbQueryResPgSql::Clear (void)
 
 GpDbQueryRes::StateTE   GpDbQueryResPgSql::State (void) const
 {
-    const ExecStatusType pgStatus = PQresultStatus(iPgResult);
-    return GpDbQueryRes::StateTE(int(pgStatus));
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //const ExecStatusType pgStatus = PQresultStatus(iPgResult);
+    //return GpDbQueryRes::StateTE(int(pgStatus));
 }
 
 size_t  GpDbQueryResPgSql::RowsCount (void) const
 {
-    int rowsCount = PQntuples(iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
 
-    if (rowsCount < 0)
-    {
-        rowsCount = 0;
-    }
+    //int rowsCount = PQntuples(iPgResult);
 
-    return NumOps::SConvert<size_t>(rowsCount);
+    //if (rowsCount < 0)
+    //{
+    //  rowsCount = 0;
+    //}
+
+    //return NumOps::SConvert<size_t>(rowsCount);
 }
 
 size_t  GpDbQueryResPgSql::ColumnsCount (void) const
 {
-    int columnsCount= PQnfields(iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
 
-    if (columnsCount < 0)
-    {
-        columnsCount = 0;
-    }
+    //int columnsCount= PQnfields(iPgResult);
 
-    return NumOps::SConvert<size_t>(columnsCount);
+    //if (columnsCount < 0)
+    //{
+    //  columnsCount = 0;
+    //}
+
+    //return NumOps::SConvert<size_t>(columnsCount);
 }
 
 s_int_16    GpDbQueryResPgSql::GetInt16
 (
-    const size_t            aRowId,
-    const size_t            aColId,
-    std::optional<s_int_16> aOnNullValue
+    [[maybe_unused]] const size_t           aRowId,
+    [[maybe_unused]] const size_t           aColId,
+    [[maybe_unused]] std::optional<s_int_16>    aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetPOD<s_int_16, 2>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetPOD<s_int_16, 2>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 std::vector<s_int_16>   GpDbQueryResPgSql::GetInt16Array1D
 (
-    const size_t                            aRowId,
-    const size_t                            aColId,
-    std::optional<std::vector<s_int_16>>    aOnNullValue
+    [[maybe_unused]] const size_t                           aRowId,
+    [[maybe_unused]] const size_t                           aColId,
+    [[maybe_unused]] std::optional<std::vector<s_int_16>>   aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetArray<s_int_16>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetArray<s_int_16>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 s_int_32    GpDbQueryResPgSql::GetInt32
 (
-    const size_t            aRowId,
-    const size_t            aColId,
-    std::optional<s_int_32> aOnNullValue
+    [[maybe_unused]] const size_t           aRowId,
+    [[maybe_unused]] const size_t           aColId,
+    [[maybe_unused]] std::optional<s_int_32>    aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetPOD<s_int_32, 4>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetPOD<s_int_32, 4>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 std::vector<s_int_32>   GpDbQueryResPgSql::GetInt32Array1D
 (
-    const size_t                            aRowId,
-    const size_t                            aColId,
-    std::optional<std::vector<s_int_32>>    aOnNullValue
+    [[maybe_unused]] const size_t                           aRowId,
+    [[maybe_unused]] const size_t                           aColId,
+    [[maybe_unused]] std::optional<std::vector<s_int_32>>   aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetArray<s_int_32>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetArray<s_int_32>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 s_int_64    GpDbQueryResPgSql::GetInt64
 (
-    const size_t            aRowId,
-    const size_t            aColId,
-    std::optional<s_int_64> aOnNullValue
+    [[maybe_unused]] const size_t           aRowId,
+    [[maybe_unused]] const size_t           aColId,
+    [[maybe_unused]] std::optional<s_int_64>    aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetPOD<s_int_64, 8>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetPOD<s_int_64, 8>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 std::vector<s_int_64>   GpDbQueryResPgSql::GetInt64Array1D
 (
-    const size_t                            aRowId,
-    const size_t                            aColId,
-    std::optional<std::vector<s_int_64>>    aOnNullValue
+    [[maybe_unused]] const size_t                           aRowId,
+    [[maybe_unused]] const size_t                           aColId,
+    [[maybe_unused]] std::optional<std::vector<s_int_64>>   aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetArray<s_int_64>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetArray<s_int_64>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 double  GpDbQueryResPgSql::GetDouble
 (
-    const size_t            aRowId,
-    const size_t            aColId,
-    std::optional<double>   aOnNullValue
+    [[maybe_unused]] const size_t           aRowId,
+    [[maybe_unused]] const size_t           aColId,
+    [[maybe_unused]] std::optional<double>  aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetPOD<double, 8>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetPOD<double, 8>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 std::vector<double> GpDbQueryResPgSql::GetDoubleArray1D
 (
-    const size_t                        aRowId,
-    const size_t                        aColId,
-    std::optional<std::vector<double>>  aOnNullValue
+    [[maybe_unused]] const size_t                       aRowId,
+    [[maybe_unused]] const size_t                       aColId,
+    [[maybe_unused]] std::optional<std::vector<double>> aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetArray<double>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetArray<double>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 float   GpDbQueryResPgSql::GetFloat
 (
-    const size_t            aRowId,
-    const size_t            aColId,
-    std::optional<float>    aOnNullValue
+    [[maybe_unused]] const size_t           aRowId,
+    [[maybe_unused]] const size_t           aColId,
+    [[maybe_unused]] std::optional<float>   aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetPOD<float, 4>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetPOD<float, 4>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 std::vector<float>  GpDbQueryResPgSql::GetFloatArray1D
 (
-    const size_t                        aRowId,
-    const size_t                        aColId,
-    std::optional<std::vector<float>>   aOnNullValue
+    [[maybe_unused]] const size_t                       aRowId,
+    [[maybe_unused]] const size_t                       aColId,
+    [[maybe_unused]] std::optional<std::vector<float>>  aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetArray<float>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetArray<float>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 std::string_view    GpDbQueryResPgSql::GetStr
 (
-    const size_t                    aRowId,
-    const size_t                    aColId,
-    std::optional<std::string_view> aOnNullValue
+    [[maybe_unused]] const size_t                   aRowId,
+    [[maybe_unused]] const size_t                   aColId,
+    [[maybe_unused]] std::optional<std::string_view>    aOnNullValue
 ) const
 {
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    /*
     const int rowId = NumOps::SConvert<int>(aRowId);
     const int colId = NumOps::SConvert<int>(aColId);
 
@@ -335,26 +377,33 @@ std::string_view    GpDbQueryResPgSql::GetStr
     const char*     strPtr  = PQgetvalue(iPgResult, rowId, colId);
     const size_t    strLen  = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
 
-    return std::string_view(strPtr, strLen);
+    return std::string_view(strPtr, strLen);*/
 }
 
 std::vector<std::string_view>   GpDbQueryResPgSql::GetStrArray1D
 (
-    const size_t                                    aRowId,
-    const size_t                                    aColId,
-    std::optional<std::vector<std::string_view>>    aOnNullValue
+    [[maybe_unused]] const size_t                                   aRowId,
+    [[maybe_unused]] const size_t                                   aColId,
+    [[maybe_unused]] std::optional<std::vector<std::string_view>>   aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetArray<std::string_view>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetArray<std::string_view>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 GpSpanCharRW    GpDbQueryResPgSql::GetStrRW
 (
-    const size_t                aRowId,
-    const size_t                aColId,
-    std::optional<GpSpanCharRW> aOnNullValue
+    [[maybe_unused]] const size_t               aRowId,
+    [[maybe_unused]] const size_t               aColId,
+    [[maybe_unused]] std::optional<GpSpanCharRW>    aOnNullValue
 )
 {
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    /*
     std::optional<std::string_view> defaultValue;
 
     if (aOnNullValue.has_value())
@@ -369,31 +418,37 @@ GpSpanCharRW    GpDbQueryResPgSql::GetStrRW
         defaultValue
     );
 
-    return GpSpanCharRW(const_cast<char*>(std::data(str)), std::size(str));
+    return GpSpanCharRW(const_cast<char*>(std::data(str)), std::size(str));*/
 }
 
 std::vector<GpSpanCharRW>   GpDbQueryResPgSql::GetStrRWArray1D
 (
-    const size_t                                aRowId,
-    const size_t                                aColId,
-    std::optional<std::vector<GpSpanCharRW>>    aOnNullValue
+    [[maybe_unused]] const size_t                               aRowId,
+    [[maybe_unused]] const size_t                               aColId,
+    [[maybe_unused]] std::optional<std::vector<GpSpanCharRW>>   aOnNullValue
 )
 {
-    return GpDbQueryResPgSql_GetArray<GpSpanCharRW>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetArray<GpSpanCharRW>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 std::string_view    GpDbQueryResPgSql::GetJson
 (
-    const size_t                    aRowId,
-    const size_t                    aColId,
-    std::optional<std::string_view> aOnNullValue
+    [[maybe_unused]] const size_t                   aRowId,
+    [[maybe_unused]] const size_t                   aColId,
+    [[maybe_unused]] std::optional<std::string_view>    aOnNullValue
 ) const
 {
-    std::string_view str = GetStr(aRowId, aColId, aOnNullValue);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    /*std::string_view str = GetStr(aRowId, aColId, aOnNullValue);
 
     THROW_COND_GP
     (
-        str.length() >= 3,
+        std::size(str) >= 3,
         "json data length must be >= 3 bytes"_sv
     );
 
@@ -403,23 +458,26 @@ std::string_view    GpDbQueryResPgSql::GetJson
         "Wrong pgJson format version"_sv
     );
 
-    return str.substr(1, str.length() - 1);
+    return str.substr(1, std::size(str) - 1);*/
 }
 
 std::vector<std::string_view>   GpDbQueryResPgSql::GetJsonArray1D
 (
-    const size_t                                    aRowId,
-    const size_t                                    aColId,
-    std::optional<std::vector<std::string_view>>    aOnNullValue
+    [[maybe_unused]] const size_t                                   aRowId,
+    [[maybe_unused]] const size_t                                   aColId,
+    [[maybe_unused]] std::optional<std::vector<std::string_view>>   aOnNullValue
 ) const
 {
-    std::vector<std::string_view> strArray = GetStrArray1D(aRowId, aColId, aOnNullValue);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    /*std::vector<std::string_view> strArray = GetStrArray1D(aRowId, aColId, aOnNullValue);
 
     for (std::string_view& element: strArray)
     {
         THROW_COND_GP
         (
-            element.length() >= 3,
+            std::size(element) >= 3,
             "json data length must be >= 3 bytes"_sv
         );
 
@@ -429,43 +487,50 @@ std::vector<std::string_view>   GpDbQueryResPgSql::GetJsonArray1D
             "Wrong pgJson format version"_sv
         );
 
-        element = element.substr(1, element.length() - 1);
+        element = element.substr(1, std::size(element) - 1);
     }
 
-    return strArray;
+    return strArray;*/
 }
 
 GpSpanCharRW    GpDbQueryResPgSql::GetJsonRW
 (
-    const size_t                aRowId,
-    const size_t                aColId,
-    std::optional<GpSpanCharRW> aOnNullValue
+    [[maybe_unused]] const size_t               aRowId,
+    [[maybe_unused]] const size_t               aColId,
+    [[maybe_unused]] std::optional<GpSpanCharRW>    aOnNullValue
 )
 {
-    std::optional<std::string_view> defaultValue;
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
 
-    if (aOnNullValue.has_value())
-    {
-        defaultValue = aOnNullValue.value().AsStringView();
-    }
+    //std::optional<std::string_view> defaultValue;
 
-    std::string_view str = std::as_const(*this).GetJson
-    (
-        aRowId,
-        aColId,
-        defaultValue
-    );
+    //if (aOnNullValue.has_value())
+    //{
+    //  defaultValue = aOnNullValue.value().AsStringView();
+    //}
 
-    return GpSpanCharRW(const_cast<char*>(std::data(str)), std::size(str));
+    //std::string_view str = std::as_const(*this).GetJson
+    //(
+    //  aRowId,
+    //  aColId,
+    //  defaultValue
+    //);
+
+    //return GpSpanCharRW(const_cast<char*>(std::data(str)), std::size(str));
 }
 
 std::vector<GpSpanCharRW>   GpDbQueryResPgSql::GetJsonRWArray1D
 (
-    const size_t                                aRowId,
-    const size_t                                aColId,
-    std::optional<std::vector<GpSpanCharRW>>    aOnNullValue
+    [[maybe_unused]] const size_t                               aRowId,
+    [[maybe_unused]] const size_t                               aColId,
+    [[maybe_unused]] std::optional<std::vector<GpSpanCharRW>>   aOnNullValue
 )
 {
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    /*
     std::vector<GpSpanCharRW> strArray = GetStrRWArray1D(aRowId, aColId, aOnNullValue);
 
     for (GpSpanCharRW& element: strArray)
@@ -482,20 +547,23 @@ std::vector<GpSpanCharRW>   GpDbQueryResPgSql::GetJsonRWArray1D
             "Wrong pgJson format version"_sv
         );
 
-        element = element.SubspanBegin(1, element.Count() - 1);
+        element = element.Subspan(1, element.Count() - 1);
     }
 
-    return strArray;
+    return strArray;*/
 }
 
 GpUUID  GpDbQueryResPgSql::GetUuid
 (
-    const size_t            aRowId,
-    const size_t            aColId,
-    std::optional<GpUUID>   aOnNullValue
+    [[maybe_unused]] const size_t           aRowId,
+    [[maybe_unused]] const size_t           aColId,
+    [[maybe_unused]] std::optional<GpUUID>  aOnNullValue
 ) const
 {
-    const int rowId = NumOps::SConvert<int>(aRowId);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    /*const int rowId = NumOps::SConvert<int>(aRowId);
     const int colId = NumOps::SConvert<int>(aColId);
 
     if (PQgetisnull(iPgResult, rowId, colId))
@@ -521,116 +589,130 @@ GpUUID  GpDbQueryResPgSql::GetUuid
     GpUUID uuid;
     std::memcpy(std::data(uuid.Data()), dataPtr, sizeof(GpUUID::DataT));
 
-    return uuid;
+    return uuid;*/
 }
 
 std::vector<GpUUID> GpDbQueryResPgSql::GetUuidArray1D
 (
-    const size_t                        aRowId,
-    const size_t                        aColId,
-    std::optional<std::vector<GpUUID>>  aOnNullValue
+    [[maybe_unused]] const size_t                       aRowId,
+    [[maybe_unused]] const size_t                       aColId,
+    [[maybe_unused]] std::optional<std::vector<GpUUID>> aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetArray<GpUUID>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetArray<GpUUID>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 GpSpanByteR GpDbQueryResPgSql::GetBlob
 (
-    const size_t                aRowId,
-    const size_t                aColId,
-    std::optional<GpSpanByteR>  aOnNullValue
+    [[maybe_unused]] const size_t               aRowId,
+    [[maybe_unused]] const size_t               aColId,
+    [[maybe_unused]] std::optional<GpSpanByteR> aOnNullValue
 ) const
 {
-    const int rowId = NumOps::SConvert<int>(aRowId);
-    const int colId = NumOps::SConvert<int>(aColId);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
 
-    if (PQgetisnull(iPgResult, rowId, colId))
-    {
-        THROW_COND_GP
-        (
-            aOnNullValue.has_value(),
-            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
-        );
-        return aOnNullValue.value();
-    }
+    //const int rowId = NumOps::SConvert<int>(aRowId);
+    //const int colId = NumOps::SConvert<int>(aColId);
 
-    const char*     dataPtr     = PQgetvalue(iPgResult, rowId, colId);
-    const size_t    dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
+    //if (PQgetisnull(iPgResult, rowId, colId))
+    //{
+    //  THROW_COND_GP
+    //  (
+    //      aOnNullValue.has_value(),
+    //      [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
+    //  );
+    //  return aOnNullValue.value();
+    //}
 
-    return GpSpanCharR(dataPtr, dataSize);
+    //const char*       dataPtr     = PQgetvalue(iPgResult, rowId, colId);
+    //const size_t  dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
+
+    //return GpSpanCharR(dataPtr, dataSize);
 }
 
 std::vector<GpSpanByteR>    GpDbQueryResPgSql::GetBlobArray1D
 (
-    const size_t                            aRowId,
-    const size_t                            aColId,
-    std::optional<std::vector<GpSpanByteR>> aOnNullValue
+    [[maybe_unused]] const size_t                           aRowId,
+    [[maybe_unused]] const size_t                           aColId,
+    [[maybe_unused]] std::optional<std::vector<GpSpanByteR>>    aOnNullValue
 ) const
 {
-    return GpDbQueryResPgSql_GetArray<GpSpanByteR>(aRowId, aColId, aOnNullValue, iPgResult);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //return GpDbQueryResPgSql_GetArray<GpSpanByteR>(aRowId, aColId, aOnNullValue, iPgResult);
 }
 
 bool    GpDbQueryResPgSql::GetBoolean
 (
-    const size_t        aRowId,
-    const size_t        aColId,
-    std::optional<bool> aOnNullValue
+    [[maybe_unused]] const size_t       aRowId,
+    [[maybe_unused]] const size_t       aColId,
+    [[maybe_unused]] std::optional<bool>    aOnNullValue
 ) const
 {
-    const int rowId = NumOps::SConvert<int>(aRowId);
-    const int colId = NumOps::SConvert<int>(aColId);
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
 
-    if (PQgetisnull(iPgResult, rowId, colId))
-    {
-        THROW_COND_GP
-        (
-            aOnNullValue.has_value(),
-            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
-        );
-        return aOnNullValue.value();
-    }
+    //const int rowId = NumOps::SConvert<int>(aRowId);
+    //const int colId = NumOps::SConvert<int>(aColId);
 
-    const char*     dataPtr     = PQgetvalue(iPgResult, rowId, colId);
-    const size_t    dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
+    //if (PQgetisnull(iPgResult, rowId, colId))
+    //{
+    //  THROW_COND_GP
+    //  (
+    //      aOnNullValue.has_value(),
+    //      [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
+    //  );
+    //  return aOnNullValue.value();
+    //}
 
-    std::string_view str{dataPtr, dataSize};
-    const char v = str.at(0);
+    //const char*       dataPtr     = PQgetvalue(iPgResult, rowId, colId);
+    //const size_t  dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
 
-    return     (v == 0x01)
-            || (v == 't')
-            || (v == 'T')
-            || (v == 'y')
-            || (v == 'Y');
+    //std::string_view str{dataPtr, dataSize};
+    //const char v = str.at(0);
+
+    //return       (v == 0x01)
+    //      || (v == 't')
+    //      || (v == 'T')
+    //      || (v == 'y')
+    //      || (v == 'Y');
 }
 
 void    GpDbQueryResPgSql::ClearPgSql (void) noexcept
 {
-    if (iPgResult != nullptr)
-    {
-        PQclear(iPgResult);
-        iPgResult = nullptr;
-    }
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
+
+    //if (iPgResult != nullptr)
+    //{
+    //  PQclear(iPgResult);
+    //  iPgResult = nullptr;
+    //}
 }
 
-void    GpDbQueryResPgSql::ThrowDbEx
-(
-    std::string_view    aMsg,
-    PGconn*             aPgConn
-)
+void    GpDbQueryResPgSql::ThrowDbEx ([[maybe_unused]] std::string_view aMsg)
 {
-    std::string_view            message{PQerrorMessage(aPgConn)};
-    GpDbExceptionCode::EnumT    code = GpDbExceptionCode::QUERY_ERROR;
+    // TODO: implement
+    THROW_GP_NOT_IMPLEMENTED();
 
-    if (message.find("duplicate key"_sv) != std::string_view::npos)
-    {
-        code = GpDbExceptionCode::QUERY_DUPLICATE_KEY;
-    }
+    //std::string_view          message{PQerrorMessage(aPgConn)};
+    //GpDbExceptionCode::EnumT  code = GpDbExceptionCode::REQUEST_ERROR;
 
-    THROW_DB
-    (
-        code,
-        aMsg + ": "_sv + message
-    );
+    //if (message.find("duplicate key"_sv) != std::string_view::npos)
+    //{
+    //  code = GpDbExceptionCode::QUERY_DUPLICATE_KEY;
+    //}
+
+    //THROW_DB
+    //(
+    //  code,
+    //  aMsg + ": "_sv + message
+    //);
 }
 
 }// namespace GPlatform

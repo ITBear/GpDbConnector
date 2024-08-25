@@ -175,7 +175,7 @@ void    GpDbQueryRes::_RowToObjectProp
         } break;
         case GpReflectType::FLOAT:
         {
-            aProp.Value_Float(aDataPtr) = GetFloat(aRowId, aColId, 0.0);
+            aProp.Value_Float(aDataPtr) = GetFloat(aRowId, aColId, 0.0f);
         } break;
         case GpReflectType::BOOLEAN:
         {
@@ -198,7 +198,7 @@ void    GpDbQueryRes::_RowToObjectProp
             std::string_view    jsonStr     = GetJson(aRowId, aColId, {});
             auto&               objectVal   = aProp.Value_Object(aDataPtr);
 
-            if (jsonStr.length() > 0)
+            if (std::size(jsonStr) > 0)
             {
                 GpJsonSerializer::SFromStr(jsonStr, objectVal, {});
             }
@@ -208,7 +208,7 @@ void    GpDbQueryRes::_RowToObjectProp
             std::string_view    jsonStr     = GetJson(aRowId, aColId, {});
             auto&               objectVal   = aProp.Value_ObjectSP(aDataPtr);
 
-            if (jsonStr.length() > 0)
+            if (std::size(jsonStr) > 0)
             {
                 GpReflectModel::CSP     modelSCP    = GpReflectManager::S().Find(aProp.ModelUid());
                 const GpReflectModel&   model       = modelSCP.Vn();

@@ -18,8 +18,8 @@ os_linux {
 } else:os_windows {
 	SUBDIRS += \
 		GpDbDataModels \
-		GpDbClient \
-		GpDbPostgreSql
+		GpDbClient
+#		GpDbPostgreSql
 } else:os_macx {
 	SUBDIRS += \
 		GpDbDataModels \

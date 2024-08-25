@@ -1,11 +1,11 @@
 #pragma once
 
-#include "GpDbQueryValType.hpp"
-#include "GpDbQueryValue.hpp"
-#include "../../GpDbDataModels/Search/GpDbSearchDesc.hpp"
-
 #include <GpCore2/GpReflection/GpReflectModel.hpp>
 #include <GpCore2/GpUtils/Types/Bool/GpBool.hpp>
+
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryValType.hpp>
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryValue.hpp>
+#include <GpDbConnector/GpDbDataModels/Search/GpDbSearchDesc.hpp>
 
 namespace GPlatform {
 

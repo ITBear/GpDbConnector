@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GpDbPostgreSql_global.hpp"
-#include "../GpDbClient/GpDbDriverFactory.hpp"
-#include "../GpDbClient/GpDbDriver.hpp"
+#include <GpDbConnector/GpDbPostgreSql/GpDbPostgreSql_global.hpp>
+#include <GpDbConnector/GpDbClient/GpDbDriverFactory.hpp>
+#include <GpDbConnector/GpDbClient/GpDbDriver.hpp>
 
 namespace GPlatform {
 
@@ -16,8 +16,7 @@ public:
                             GpDbDriverFactoryPgSql  (void);
     virtual                 ~GpDbDriverFactoryPgSql (void) noexcept override final;
 
-    virtual GpDbDriver::SP  NewInstance             (GpDbConnectionMode::EnumT  aMode,
-                                                     GpIOEventPollerIdx         aIOEventPollerIdx) const override final;
+    virtual GpDbDriver::SP  NewInstance             (void) const override final;
 };
 
 }// namespace GPlatform

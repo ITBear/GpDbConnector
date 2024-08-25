@@ -65,7 +65,7 @@ void    GpDbQuerySearchBuilder::ProcessFilter
 )
 {
     std::string_view    filter          = aSearchDesc.filter;
-    const size_t        filterLength    = filter.length();
+    const size_t        filterLength    = std::size(filter);
 
     if (filterLength == 0)
     {
@@ -263,7 +263,7 @@ size_t  GpDbQuerySearchBuilder::FindAndParseStr
     GpDbQueryBuilder&   aBuilder
 )
 {
-    const size_t    filterLength = aStr.length();
+    const size_t    filterLength = std::size(aStr);
     size_t          id;
 
     for (id = aStartId; id < filterLength; id++)
@@ -329,8 +329,10 @@ size_t  GpDbQuerySearchBuilder::ParseStr
                 else if (valueType == GpDbQueryValType::STRING) aBuilder.VALUE(GpDbQueryValue(std::move(strBuffer)));
                 else if (valueType == GpDbQueryValType::JSON)   aBuilder.VALUE(GpDbQueryValue(GpDbQueryValueJson(std::move(strBuffer))));
                 else if (valueType == GpDbQueryValType::UUID)   aBuilder.VALUE(GpDbQueryValue(GpUUID::SFromString(strBuffer)));
-                else if (valueType == GpDbQueryValType::BLOB)   aBuilder.VALUE(GpDbQueryValue(GpBase64::SDecodeToByteArray(strBuffer)));
-                else if (valueType == GpDbQueryValType::INT_16) aBuilder.VALUE(GpDbQueryValue(NumOps::SConvert<s_int_16>(StrOps::SToSI64(strBuffer))));
+                else if (valueType == GpDbQueryValType::BLOB)
+                {
+                    aBuilder.VALUE(GpDbQueryValue(GpBase64::SDecode<GpBytesArray>(strBuffer)));
+                } else if (valueType == GpDbQueryValType::INT_16) aBuilder.VALUE(GpDbQueryValue(NumOps::SConvert<s_int_16>(StrOps::SToSI64(strBuffer))));
                 else if (valueType == GpDbQueryValType::INT_32) aBuilder.VALUE(GpDbQueryValue(NumOps::SConvert<s_int_32>(StrOps::SToSI64(strBuffer))));
                 else if (valueType == GpDbQueryValType::INT_64) aBuilder.VALUE(GpDbQueryValue(NumOps::SConvert<s_int_64>(StrOps::SToSI64(strBuffer))));
                 else if (valueType == GpDbQueryValType::FLOAT)  aBuilder.VALUE(GpDbQueryValue(float(StrOps::SToDouble(strBuffer))));
@@ -471,7 +473,7 @@ std::tuple<GpDbQueryValType::EnumT, size_t> GpDbQuerySearchBuilder::DetectType
     else if (typeName == "double"_sv)   type = GpDbQueryValType::DOUBLE;
     else THROW_GP("Parsing error: unknown type '"_sv + typeName + "' at position "_sv + (aStartId + 1));
 
-    return {type, aStartId + typeName.length()};
+    return {type, aStartId + std::size(typeName)};
 }
 
 }// namespace GPlatform

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../GpDbClient/GpDbConnection.hpp"
-#include "../GpDbClient/GpDbDriver.hpp"
-#include <postgresql/libpq-fe.h>
+#include <GpDbConnector/GpDbClient/GpDbDriver.hpp>
 
 namespace GPlatform {
 
@@ -14,30 +12,16 @@ public:
     TAG_SET(THREAD_SAFE)
 
 public:
-    inline                          GpDbDriverPgSql     (GpDbConnectionMode::EnumT  aMode,
-                                                         GpIOEventPollerIdx         aIOEventPollerIdx);
+                                    GpDbDriverPgSql     (void);
     virtual                         ~GpDbDriverPgSql    (void) noexcept override final;
 
-    virtual GpDbConnection::SP      NewConnection       (std::string_view aConnStr) const override final;
-    virtual GpDbQueryPrepared::CSP  Prepare             (const GpDbQuery& aQuery) const override final;
-
-private:
-    PGconn*                         ConnectSync         (std::string_view aConnStr) const;
-    PGconn*                         ConnectAsync        (std::string_view aConnStr) const;
+    virtual GpDbConnection::SP      NewConnection       (GpIOEventPollerIdx aIOEventPollerIdx,
+                                                         milliseconds_t     aConnectTimeout,
+                                                         std::string        aServerHost,
+                                                         u_int_16           aServerPort,
+                                                         std::string        aUserName,
+                                                         std::string        aPassword,
+                                                         std::string        aDatabase) const override final;
 };
-
-GpDbDriverPgSql::GpDbDriverPgSql
-(
-    const GpDbConnectionMode::EnumT aMode,
-    const GpIOEventPollerIdx        aIOEventPollerIdx
-):
-GpDbDriver
-{
-    "postgresql",
-    aMode,
-    aIOEventPollerIdx
-}
-{
-}
 
 }// namespace GPlatform

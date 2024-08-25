@@ -1,9 +1,8 @@
 #pragma once
 
-#include "GpDbConnectionMode.hpp"
-
+#include <GpCore2/GpUtils/Types/Units/SI/GpUnitsSI_Time.hpp>
 #include <GpCore2/GpReflection/GpReflectObject.hpp>
-#include <GpCore2/GpReflection/GpReflectUtils.hpp>
+#include <GpDbConnector/GpDbClient/GpDbClient_global.hpp>
 
 namespace GPlatform {
 
@@ -15,39 +14,21 @@ public:
 
 public:
                                 GpDbManagerCfgDesc  (void) noexcept = default;
-    inline                      GpDbManagerCfgDesc  (const GpDbManagerCfgDesc& aDesc);
-    inline                      GpDbManagerCfgDesc  (GpDbManagerCfgDesc&& aDesc) noexcept;
+                                GpDbManagerCfgDesc  (const GpDbManagerCfgDesc& aDesc);
+                                GpDbManagerCfgDesc  (GpDbManagerCfgDesc&& aDesc) noexcept;
     virtual                     ~GpDbManagerCfgDesc (void) noexcept override final;
 
 public:
     std::vector<std::string>    aliases;
     std::string                 driver_name;
-    size_t                      max_conn_pool_size;
-    std::string                 connection_str;
-    GpDbConnectionMode          mode;
+    size_t                      max_conn_pool_size  = 16;
     std::string                 event_poller_name;
+    milliseconds_t              connect_timeout     = 1.0_si_s;
+    std::string                 db_host;
+    u_int_16                    db_port             = 0;
+    std::string                 db_name;
+    std::string                 db_user_name;
+    std::string                 db_password;
 };
-
-GpDbManagerCfgDesc::GpDbManagerCfgDesc (const GpDbManagerCfgDesc& aDesc):
-GpReflectObject(aDesc),
-aliases           (GpReflectUtils::SCopyValue(aDesc.aliases)),
-driver_name       (GpReflectUtils::SCopyValue(aDesc.driver_name)),
-max_conn_pool_size(GpReflectUtils::SCopyValue(aDesc.max_conn_pool_size)),
-connection_str    (GpReflectUtils::SCopyValue(aDesc.connection_str)),
-mode              (GpReflectUtils::SCopyValue(aDesc.mode)),
-event_poller_name (GpReflectUtils::SCopyValue(aDesc.event_poller_name))
-{
-}
-
-GpDbManagerCfgDesc::GpDbManagerCfgDesc (GpDbManagerCfgDesc&& aDesc) noexcept:
-GpReflectObject(std::move(aDesc)),
-aliases           (std::move(aDesc.aliases)),
-driver_name       (std::move(aDesc.driver_name)),
-max_conn_pool_size(std::move(aDesc.max_conn_pool_size)),
-connection_str    (std::move(aDesc.connection_str)),
-mode              (std::move(aDesc.mode)),
-event_poller_name (std::move(aDesc.event_poller_name))
-{
-}
 
 }// namespace GPlatform

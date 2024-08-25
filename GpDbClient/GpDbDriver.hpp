@@ -1,15 +1,11 @@
 #pragma once
 
-#include <GpDbConnector/GpDbClient/GpDbConnectionMode.hpp>
-#include <GpDbConnector/GpDbClient/Query/GpDbQueryPrepared.hpp>
-#include <GpNetwork/GpNetworkCore/Pollers/GpIOEventPoller.hpp>
+#include <GpDbConnector/GpDbClient/GpDbConnection.hpp>
 #include <GpNetwork/GpNetworkCore/Pollers/GpIOEventPollerCatalog.hpp>
 
 namespace GPlatform {
 
-class GpDbConnection;
-
-class GpDbDriver
+class GP_DB_CLIENT_API GpDbDriver
 {
 public:
     CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbDriver)
@@ -17,36 +13,23 @@ public:
     TAG_SET(THREAD_SAFE)
 
 protected:
-    inline                          GpDbDriver          (std::string                aName,
-                                                         GpDbConnectionMode::EnumT  aMode,
-                                                         GpIOEventPollerIdx         aIOEventPollerIdx) noexcept;
+                                GpDbDriver      (std::string aName) noexcept;
 
 public:
-    virtual                         ~GpDbDriver         (void) noexcept = default;
+    virtual                     ~GpDbDriver     (void) noexcept;
 
-    std::string_view                Name                (void) const noexcept {return iName;}
-    GpDbConnectionMode::EnumT       Mode                (void) const noexcept {return iMode;}
-    GpIOEventPollerIdx              IOEventPollerIdx    (void) const noexcept {return iIOEventPollerIdx;}
+    std::string_view            Name            (void) const noexcept {return iName;}
 
-    virtual GpSP<GpDbConnection>    NewConnection       (std::string_view aConnStr) const = 0;
-    virtual GpDbQueryPrepared::CSP  Prepare             (const GpDbQuery& aQuery) const = 0;
+    virtual GpDbConnection::SP  NewConnection   (GpIOEventPollerIdx aIOEventPollerIdx,
+                                                 milliseconds_t     aConnectTimeout,
+                                                 std::string        aServerHost,
+                                                 u_int_16           aServerPort,
+                                                 std::string        aUserName,
+                                                 std::string        aPassword,
+                                                 std::string        aDatabase) const = 0;
 
 private:
-    const std::string               iName;
-    const GpDbConnectionMode::EnumT iMode;
-    const GpIOEventPollerIdx        iIOEventPollerIdx;
+    const std::string           iName;
 };
-
-GpDbDriver::GpDbDriver
-(
-    std::string                     aName,
-    const GpDbConnectionMode::EnumT aMode,
-    const GpIOEventPollerIdx        aIOEventPollerIdx
-) noexcept:
-iName            {std::move(aName)},
-iMode            {aMode},
-iIOEventPollerIdx{aIOEventPollerIdx}
-{
-}
 
 }// namespace GPlatform

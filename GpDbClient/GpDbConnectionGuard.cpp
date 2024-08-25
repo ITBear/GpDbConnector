@@ -1,20 +1,25 @@
-#include "GpDbConnectionGuard.hpp"
-#include "GpDbManager.hpp"
-#include "GpDbConnection.hpp"
-#include "GpDbException.hpp"
+#include <GpDbConnector/GpDbClient/GpDbConnectionGuard.hpp>
+#include <GpDbConnector/GpDbClient/GpDbManager.hpp>
+#include <GpDbConnector/GpDbClient/GpDbManagerCatalog.hpp>
+#include <GpDbConnector/GpDbClient/GpDbConnection.hpp>
+#include <GpDbConnector/GpDbClient/GpDbException.hpp>
 
 #include <GpLog/GpLogCore/GpLog.hpp>
 #include <GpCore2/GpUtils/Types/Strings/GpStringUtils.hpp>
 #include <GpCore2/GpTasks/GpTask.hpp>
-
-GP_WARNING_PUSH()
-GP_WARNING_DISABLE(shadow)
-
-#include <boost/context/fiber.hpp>
-
-GP_WARNING_POP()
+#include <GpCore2/GpTasks/Fibers/GpTaskFiberCtxForceUnwind.hpp>
 
 namespace GPlatform {
+
+GpDbConnectionGuard::GpDbConnectionGuard (GpDbManager& aManager) noexcept:
+iManager{aManager}
+{
+}
+
+GpDbConnectionGuard::GpDbConnectionGuard (std::string_view aManagerName):
+GpDbConnectionGuard{GpDbManagerCatalog::S().Find(aManagerName)}
+{
+}
 
 GpDbConnectionGuard::~GpDbConnectionGuard (void) noexcept
 {
@@ -27,34 +32,42 @@ GpDbConnectionGuard::~GpDbConnectionGuard (void) noexcept
     } catch (const std::exception& e)
     {
         GpStringUtils::SCerr("[GpDbConnectionGuard::~GpDbConnectionGuard]: exception: "_sv + e.what());
-    } catch (const boost::context::detail::forced_unwind&)
-    {
-        GpStringUtils::SCerr("[GpDbConnectionGuard::~GpDbConnectionGuard]: exception: boost::context::detail::forced_unwind"_sv);
     } catch (...)
     {
         GpStringUtils::SCerr("[GpDbConnectionGuard::~GpDbConnectionGuard]: unknown exception"_sv);
     }
 }
 
+void    GpDbConnectionGuard::BeginTransaction (const GpDbTransactionIsolation::EnumT aIsolationLevel)
+{
+    ConnectionAcquire().BeginTransaction(aIsolationLevel);
+}
+
 void    GpDbConnectionGuard::CommitTransaction (void)
 {
     GpDbConnection& connection = ConnectionAcquire();
 
-    std::optional<std::exception_ptr> eptr;
+    std::optional<GpException> exOpt;
 
     try
     {
         connection.CommitTransaction();
+    } catch (const GpException& ex)
+    {
+        exOpt = ex;
+    } catch (const std::exception& ex)
+    {
+        exOpt = GpException{ex.what()};
     } catch (...)
     {
-        eptr = std::current_exception();
+        exOpt = GpException{"[GpDbConnectionGuard::CommitTransaction]: Unknown exception"};
     }
 
     ConnectionRelease();
 
-    if (eptr.has_value())
+    if (exOpt.has_value())
     {
-        std::rethrow_exception(eptr.value());
+        throw exOpt.value();
     }
 }
 
@@ -62,21 +75,27 @@ void    GpDbConnectionGuard::RollbackTransaction (void)
 {
     GpDbConnection& connection = ConnectionAcquire();
 
-    std::optional<std::exception_ptr> eptr;
+    std::optional<GpException> exOpt;
 
     try
     {
         connection.RollbackTransaction();
+    } catch (const GpException& ex)
+    {
+        exOpt = ex;
+    } catch (const std::exception& ex)
+    {
+        exOpt = GpException{ex.what()};
     } catch (...)
     {
-        eptr = std::current_exception();
+        exOpt = GpException{"[GpDbConnectionGuard::RollbackTransaction]: Unknown exception"};
     }
 
     ConnectionRelease();
 
-    if (eptr.has_value())
+    if (exOpt.has_value())
     {
-        std::rethrow_exception(eptr.value());
+        throw exOpt.value();
     }
 }
 
@@ -86,28 +105,33 @@ GpDbQueryRes::SP    GpDbConnectionGuard::Execute
     const size_t        aMinResultRowsCount
 )
 {
-    GpDbQueryPrepared::CSP  queryPreparedCSP    = Manager().Prepare(aQuery);
-    GpDbConnection&         connection          = ConnectionAcquire();
-    GpDbQueryRes::SP        res;
+    GpDbConnection&     connection = ConnectionAcquire();
+    GpDbQueryRes::SP    res;
 
-    std::optional<std::exception_ptr> eptr;
+    std::optional<GpException> exOpt;
 
     try
     {
-        res = connection.Execute(aQuery, queryPreparedCSP.V(), aMinResultRowsCount);
+        res = connection.Execute(aQuery, aMinResultRowsCount);
+    } catch (const GpException& ex)
+    {
+        exOpt = ex;
+    } catch (const std::exception& ex)
+    {
+        exOpt = GpException{ex.what()};
     } catch (...)
     {
-        eptr = std::current_exception();
+        exOpt = GpException{"[GpDbConnectionGuard::Execute]: Unknown exception"};
     }
 
-    if (   eptr.has_value()
+    if (   exOpt.has_value()
         || (connection.IsTransactionOpen() == false))
     {
         ConnectionRelease();
 
-        if (eptr.has_value())
+        if (exOpt.has_value())
         {
-            std::rethrow_exception(eptr.value());
+            throw exOpt.value();
         }
     }
 
@@ -156,37 +180,49 @@ void    GpDbConnectionGuard::ConnectionRelease (void)
     {
         try
         {           
-            conn.RollbackTransaction();         
+            conn.RollbackTransaction();
+        } catch (GpTaskFiberCtxForceUnwind&)
+        {
+            iConnection.Clear();
+            throw;
+        } catch (const GpException& ex)
+        {
+            const auto currentTaskOpt = GpTask::SCurrentTask();
+
+            if (currentTaskOpt.has_value())
+            {
+                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", ex, currentTaskOpt.value().get().TaskIdAsUUID());
+            } else
+            {
+                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", ex);
+            }
         } catch (const std::exception& e)
         {
             const auto currentTaskOpt = GpTask::SCurrentTask();
 
             if (currentTaskOpt.has_value())
             {
-                LOG_EXCEPTION(e, currentTaskOpt.value().get().TaskIdAsUUID());
+                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", GpException{e.what()}, currentTaskOpt.value().get().TaskIdAsUUID());
             } else
             {
-                LOG_EXCEPTION(e);
+                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", GpException{e.what()});
             }
-        } catch (const boost::context::detail::forced_unwind&)
-        {
-            iConnection.Clear();
-            throw;
         } catch (...)
         {
             const auto currentTaskOpt = GpTask::SCurrentTask();
 
             if (currentTaskOpt.has_value())
             {
-                LOG_EXCEPTION(currentTaskOpt.value().get().TaskIdAsUUID());
+                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", GpException{"Unknonwn excpeption"}, currentTaskOpt.value().get().TaskIdAsUUID());
             } else
             {
-                LOG_EXCEPTION();
+                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", GpException{"Unknonwn excpeption"});
             }
         }
     }
 
     Manager().Release(std::move(iConnection));
+    iConnection.Clear();
 }
 
 }// namespace GPlatform

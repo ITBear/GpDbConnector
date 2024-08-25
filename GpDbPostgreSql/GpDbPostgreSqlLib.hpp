@@ -1,7 +1,6 @@
 #pragma once
 
-#include "GpDbPostgreSql_global.hpp"
-
+#include <GpDbConnector/GpDbPostgreSql/GpDbPostgreSql_global.hpp>
 #include <GpCore2/GpUtils/Other/GpLinkedLibsInfo.hpp>
 
 namespace GPlatform {

@@ -1,23 +1,22 @@
 #pragma once
 
-#include "GpDbPostgreSql_global.hpp"
-#include "../GpDbClient/Query/GpDbQueryRes.hpp"
-#include <postgresql/libpq-fe.h>
+#include <GpDbConnector/GpDbPostgreSql/GpDbPostgreSql_global.hpp>
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryRes.hpp>
 
 namespace GPlatform {
 
 class GpDbQueryResPgSql final: public GpDbQueryRes
 {
 public:
-    CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbQueryResPgSql)
+    CLASS_REMOVE_CTRS_MOVE_COPY(GpDbQueryResPgSql)
     CLASS_DD(GpDbQueryResPgSql)
 
 public:
-                                            GpDbQueryResPgSql   (PGresult* aPgResult);
+                                            GpDbQueryResPgSql   (void);
     virtual                                 ~GpDbQueryResPgSql  (void) noexcept override final;
 
-    void                                    Process             (const size_t   aMinResultRowsCount,
-                                                                 PGconn*        aPgConn);
+    //void                                  Process             (const size_t   aMinResultRowsCount,
+    //                                                           PGconn*        aPgConn);
 
     virtual void                            Clear               (void) override final;
 
@@ -147,11 +146,9 @@ public:
 
 private:
     void                                    ClearPgSql          (void) noexcept;
-    void                                    ThrowDbEx           (std::string_view   aMsg,
-                                                                 PGconn*            aPgConn);
+    void                                    ThrowDbEx           (std::string_view aMsg);
 
 private:
-    PGresult*                               iPgResult = nullptr;
 };
 
 }// namespace GPlatform

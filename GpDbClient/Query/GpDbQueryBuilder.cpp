@@ -1,105 +1,107 @@
-#include "GpDbQueryBuilder.hpp"
-#include "GpDbQuerySearchBuilder.hpp"
-#include "../GpDbException.hpp"
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryBuilder.hpp>
+#include <GpDbConnector/GpDbClient/Query/GpDbQuerySearchBuilder.hpp>
+#include <GpDbConnector/GpDbClient/GpDbException.hpp>
 
 namespace GPlatform {
 
+GP_ENUM_IMPL(GpDbQueryBuilderMode)
+
 const GpDbQueryBuilder::BindStrsT   GpDbQueryBuilder::sBindStrs
 {
-    "int2",     //INT_16,
-    "int2[]",       //INT_16_ARRAY_1D,
-    "int4",     //INT_32,
-    "int4[]",       //INT_32_ARRAY_1D,
-    "int8",     //INT_64,
-    "int8[]",       //INT_64_ARRAY_1D,
-    "float8",       //DOUBLE,
-    "float8[]", //DOUBLE_ARRAY_1D,
-    "float4",       //FLOAT,
-    "float4[]", //FLOAT_ARRAY_1D,
-    "text",     //STRING,
-    "text[]",       //STRING_ARRAY_1D,
-    "jsonb",        //JSON,
-    "jsonb[]",  //JSON_ARRAY_1D,
-    "uuid",     //UUID,
-    "uuid[]",       //UUID_ARRAY_1D,
-    "bytea",        //BLOB,
-    "bytea[]",  //BLOB_ARRAY_1D,
-    "boolean",  //BOOLEAN,
-    "boolean[]",    //BOOLEAN_ARRAY_1D,
-    "",         //NULL_VAL
+    "int2",     // INT_16,
+    "int2[]",   // INT_16_ARRAY_1D,
+    "int4",     // INT_32,
+    "int4[]",   // INT_32_ARRAY_1D,
+    "int8",     // INT_64,
+    "int8[]",   // INT_64_ARRAY_1D,
+    "float8",   // DOUBLE,
+    "float8[]", // DOUBLE_ARRAY_1D,
+    "float4",   // FLOAT,
+    "float4[]", // FLOAT_ARRAY_1D,
+    "text",     // STRING,
+    "text[]",   // STRING_ARRAY_1D,
+    "jsonb",    // JSON,
+    "jsonb[]",  // JSON_ARRAY_1D,
+    "uuid",     // UUID,
+    "uuid[]",   // UUID_ARRAY_1D,
+    "bytea",    // BLOB,
+    "bytea[]",  // BLOB_ARRAY_1D,
+    "boolean",  // BOOLEAN,
+    "boolean[]",// BOOLEAN_ARRAY_1D,
+    "",         // NULL_VAL
 };
 
 const GpDbQueryBuilder::BindCacheT GpDbQueryBuilder::sTypeBind =
 {
     std::tuple<std::string, GpDbQueryValType::EnumT>
-    {"",            GpDbQueryValType::NULL_VAL},        //NOT_SET
-    {"::int2",  GpDbQueryValType::INT_16},          //U_INT_8,
-    {"::int2",  GpDbQueryValType::INT_16},          //S_INT_8,
-    {"::int2",  GpDbQueryValType::INT_16},          //U_INT_16,
-    {"::int2",  GpDbQueryValType::INT_16},          //S_INT_16,
-    {"::int4",  GpDbQueryValType::INT_32},          //U_INT_32,
-    {"::int4",  GpDbQueryValType::INT_32},          //S_INT_32,
-    {"::int8",  GpDbQueryValType::INT_64},          //U_INT_64,
-    {"::int8",  GpDbQueryValType::INT_64},          //S_INT_64,
-    {"::float8",    GpDbQueryValType::DOUBLE},          //DOUBLE,
-    {"::float4",    GpDbQueryValType::FLOAT},           //FLOAT,
-    {"::boolean",   GpDbQueryValType::BOOLEAN},         //BOOLEAN,
-    {"::uuid",  GpDbQueryValType::UUID},            //UUID,
-    {"::text",  GpDbQueryValType::STRING},          //STRING,
-    {"::bytea", GpDbQueryValType::BLOB},            //BLOB,
-    {"::jsonb", GpDbQueryValType::JSON},            //OBJECT,
-    {"::jsonb", GpDbQueryValType::JSON},            //OBJECT_SP,
-    {"",            GpDbQueryValType::STRING},          //ENUM,
-    {"",            GpDbQueryValType::STRING_ARRAY_1D}  //ENUM_FLAGS TODO: ? can be any ENUM DB type (CREATE TYPE schema.type_name AS ENUM ('A', 'B', 'C');
+    {"",            GpDbQueryValType::NULL_VAL},        // NOT_SET
+    {"::int2",      GpDbQueryValType::INT_16},          // U_INT_8,
+    {"::int2",      GpDbQueryValType::INT_16},          // S_INT_8,
+    {"::int2",      GpDbQueryValType::INT_16},          // U_INT_16,
+    {"::int2",      GpDbQueryValType::INT_16},          // S_INT_16,
+    {"::int4",      GpDbQueryValType::INT_32},          // U_INT_32,
+    {"::int4",      GpDbQueryValType::INT_32},          // S_INT_32,
+    {"::int8",      GpDbQueryValType::INT_64},          // U_INT_64,
+    {"::int8",      GpDbQueryValType::INT_64},          // S_INT_64,
+    {"::float8",    GpDbQueryValType::DOUBLE},          // DOUBLE,
+    {"::float4",    GpDbQueryValType::FLOAT},           // FLOAT,
+    {"::boolean",   GpDbQueryValType::BOOLEAN},         // BOOLEAN,
+    {"::uuid",      GpDbQueryValType::UUID},            // UUID,
+    {"::text",      GpDbQueryValType::STRING},          // STRING,
+    {"::bytea",     GpDbQueryValType::BLOB},            // BLOB,
+    {"::jsonb",     GpDbQueryValType::JSON},            // OBJECT,
+    {"::jsonb",     GpDbQueryValType::JSON},            // OBJECT_SP,
+    {"",            GpDbQueryValType::STRING},          // ENUM,
+    {"",            GpDbQueryValType::STRING_ARRAY_1D}  // ENUM_FLAGS TODO: ? can be any ENUM DB type (CREATE TYPE schema.type_name AS ENUM ('A', 'B', 'C');
                                                         // then valueBind must be = ::schema.type_name[]
 };
 
 const GpDbQueryBuilder::BindCacheT  GpDbQueryBuilder::sTypeBindVec =
 {
     std::tuple<std::string, GpDbQueryValType::EnumT>
-    {"",            GpDbQueryValType::NULL_VAL},        //NOT_SET
-    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, //U_INT_8,
-    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, //S_INT_8,
-    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, //U_INT_16,
-    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, //S_INT_16,
-    {"::int4[]",    GpDbQueryValType::INT_32_ARRAY_1D}, //U_INT_32,
-    {"::int4[]",    GpDbQueryValType::INT_32_ARRAY_1D}, //S_INT_32,
-    {"::int8[]",    GpDbQueryValType::INT_64_ARRAY_1D}, //U_INT_64,
-    {"::int8[]",    GpDbQueryValType::INT_64_ARRAY_1D}, //S_INT_64,
-    {"::float8[]",GpDbQueryValType::DOUBLE_ARRAY_1D},   //DOUBLE,
-    {"::float4[]",GpDbQueryValType::FLOAT_ARRAY_1D},    //FLOAT,
-    {"::boolean[]",GpDbQueryValType::BOOLEAN_ARRAY_1D},//BOOLEAN,
-    {"::uuid[]",    GpDbQueryValType::UUID_ARRAY_1D},   //UUID,
-    {"::text[]",    GpDbQueryValType::STRING_ARRAY_1D}, //STRING,
-    {"::bytea[]",   GpDbQueryValType::BLOB_ARRAY_1D},   //BLOB,
-    {"",            GpDbQueryValType::NULL_VAL},        //OBJECT,
-    {"::jsonb[]",   GpDbQueryValType::JSON_ARRAY_1D},   //OBJECT_SP,
-    {"",            GpDbQueryValType::NULL_VAL},        //ENUM,
-    {"",            GpDbQueryValType::NULL_VAL}         //ENUM_FLAGS
+    {"",            GpDbQueryValType::NULL_VAL},        // NOT_SET
+    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, // U_INT_8,
+    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, // S_INT_8,
+    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, // U_INT_16,
+    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, // S_INT_16,
+    {"::int4[]",    GpDbQueryValType::INT_32_ARRAY_1D}, // U_INT_32,
+    {"::int4[]",    GpDbQueryValType::INT_32_ARRAY_1D}, // S_INT_32,
+    {"::int8[]",    GpDbQueryValType::INT_64_ARRAY_1D}, // U_INT_64,
+    {"::int8[]",    GpDbQueryValType::INT_64_ARRAY_1D}, // S_INT_64,
+    {"::float8[]",  GpDbQueryValType::DOUBLE_ARRAY_1D}, // DOUBLE,
+    {"::float4[]",  GpDbQueryValType::FLOAT_ARRAY_1D},  // FLOAT,
+    {"::boolean[]", GpDbQueryValType::BOOLEAN_ARRAY_1D},// BOOLEAN,
+    {"::uuid[]",    GpDbQueryValType::UUID_ARRAY_1D},   // UUID,
+    {"::text[]",    GpDbQueryValType::STRING_ARRAY_1D}, // STRING,
+    {"::bytea[]",   GpDbQueryValType::BLOB_ARRAY_1D},   // BLOB,
+    {"",            GpDbQueryValType::NULL_VAL},        // OBJECT,
+    {"::jsonb[]",   GpDbQueryValType::JSON_ARRAY_1D},   // OBJECT_SP,
+    {"",            GpDbQueryValType::NULL_VAL},        // ENUM,
+    {"",            GpDbQueryValType::NULL_VAL}         // ENUM_FLAGS
 };
 
 const GpDbQueryBuilder::BindCacheT  GpDbQueryBuilder::sTypeBindVecWrap =
 {
     std::tuple<std::string, GpDbQueryValType::EnumT>
-    {"",            GpDbQueryValType::NULL_VAL},        //NOT_SET
-    {"",            GpDbQueryValType::NULL_VAL},        //U_INT_8,
-    {"",            GpDbQueryValType::NULL_VAL},        //S_INT_8,
-    {"",            GpDbQueryValType::NULL_VAL},        //U_INT_16,
-    {"",            GpDbQueryValType::NULL_VAL},        //S_INT_16,
-    {"",            GpDbQueryValType::NULL_VAL},        //U_INT_32,
-    {"",            GpDbQueryValType::NULL_VAL},        //S_INT_32,
-    {"",            GpDbQueryValType::NULL_VAL},        //U_INT_64,
-    {"",            GpDbQueryValType::NULL_VAL},        //S_INT_64,
-    {"",            GpDbQueryValType::NULL_VAL},        //DOUBLE,
-    {"",            GpDbQueryValType::NULL_VAL},        //FLOAT,
-    {"",            GpDbQueryValType::NULL_VAL},        //BOOLEAN,
-    {"",            GpDbQueryValType::NULL_VAL},        //UUID,
-    {"",            GpDbQueryValType::NULL_VAL},        //STRING,
-    {"",            GpDbQueryValType::NULL_VAL},        //BLOB,
-    {"::jsonb[]",   GpDbQueryValType::JSON_ARRAY_1D},   //OBJECT,
-    {"",            GpDbQueryValType::NULL_VAL},        //OBJECT_SP,
-    {"",            GpDbQueryValType::NULL_VAL},        //ENUM,
-    {"",            GpDbQueryValType::NULL_VAL}         //ENUM_FLAGS
+    {"",            GpDbQueryValType::NULL_VAL},        // NOT_SET
+    {"",            GpDbQueryValType::NULL_VAL},        // U_INT_8,
+    {"",            GpDbQueryValType::NULL_VAL},        // S_INT_8,
+    {"",            GpDbQueryValType::NULL_VAL},        // U_INT_16,
+    {"",            GpDbQueryValType::NULL_VAL},        // S_INT_16,
+    {"",            GpDbQueryValType::NULL_VAL},        // U_INT_32,
+    {"",            GpDbQueryValType::NULL_VAL},        // S_INT_32,
+    {"",            GpDbQueryValType::NULL_VAL},        // U_INT_64,
+    {"",            GpDbQueryValType::NULL_VAL},        // S_INT_64,
+    {"",            GpDbQueryValType::NULL_VAL},        // DOUBLE,
+    {"",            GpDbQueryValType::NULL_VAL},        // FLOAT,
+    {"",            GpDbQueryValType::NULL_VAL},        // BOOLEAN,
+    {"",            GpDbQueryValType::NULL_VAL},        // UUID,
+    {"",            GpDbQueryValType::NULL_VAL},        // STRING,
+    {"",            GpDbQueryValType::NULL_VAL},        // BLOB,
+    {"::jsonb[]",   GpDbQueryValType::JSON_ARRAY_1D},   // OBJECT,
+    {"",            GpDbQueryValType::NULL_VAL},        // OBJECT_SP,
+    {"",            GpDbQueryValType::NULL_VAL},        // ENUM,
+    {"",            GpDbQueryValType::NULL_VAL}         // ENUM_FLAGS
 };
 
 const GpDbQueryBuilder::BindCacheT  GpDbQueryBuilder::sTypeBindMap =
@@ -414,7 +416,7 @@ GpDbQueryBuilder&   GpDbQueryBuilder::ANY
     iQueryStr.append("ANY("_sv);
     VALUE(aValueType);
 
-    if (aTypeCast.length() > 0)
+    if (std::size(aTypeCast) > 0)
     {
         iQueryStr.append("::"_sv).append(aTypeCast);
     }
@@ -1040,7 +1042,7 @@ GpDbQueryBuilder&   GpDbQueryBuilder::COLS (const std::vector<std::string_view>&
 
         for (const auto& p: parts)
         {
-            if (s.length() > 0)
+            if (std::size(s) > 0)
             {
                 s.append("."_sv);
             }
@@ -1145,7 +1147,7 @@ GpDbQueryBuilder&   GpDbQueryBuilder::VALUE
 {
     VALUE(aValue);
 
-    if (aTypeCast.length() > 0)
+    if (std::size(aTypeCast) > 0)
     {
         iQueryStr
             .append("::"_sv).append(aTypeCast);
@@ -1347,7 +1349,7 @@ std::string GpDbQueryBuilder::_ValueBind
         .append("$"_sv)
         .append(std::to_string(std::size(iTypes)));
 
-    if (aTypeCast.length() > 0)
+    if (std::size(aTypeCast) > 0)
     {
         res.append("::"_sv).append(aTypeCast);
     }
@@ -1357,9 +1359,9 @@ std::string GpDbQueryBuilder::_ValueBind
 
 void    GpDbQueryBuilder::_CheckForSpace (void)
 {
-    if (iQueryStr.length() > 0)
+    if (std::size(iQueryStr) > 0)
     {
-        const char ch = iQueryStr.at(iQueryStr.length() - 1);
+        const char ch = iQueryStr.at(std::size(iQueryStr) - 1);
 
         if (   (ch != ' ')
             && (ch != ')')
@@ -1387,8 +1389,8 @@ std::string_view    GpDbQueryBuilder::_SCheckIfName (std::string_view aStr)
 {
     THROW_COND_DB
     (
-        aStr.length() <= 255,
-        GpDbExceptionCode::QUERY_ERROR,
+        std::size(aStr) <= 255,
+        GpDbExceptionCode::REQUEST_ERROR,
         "Name length must be <= 255"_sv
     );
 
@@ -1397,7 +1399,7 @@ std::string_view    GpDbQueryBuilder::_SCheckIfName (std::string_view aStr)
         THROW_COND_DB
         (
             ((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')) || ((ch >= '0') && (ch <= '9')) || (ch == '_'),
-            GpDbExceptionCode::QUERY_ERROR,
+            GpDbExceptionCode::REQUEST_ERROR,
             [&]()
             {
                 return "Name '"_sv + aStr + "' contains wrong character '"_sv + ch + "'"_sv;
@@ -1430,7 +1432,7 @@ std::vector<GpDbQueryBuilder::TypeInfo> GpDbQueryBuilder::_SFromModel
         std::string                     propName("\""_sv + _SCheckIfName(propInfo.Name()) + "\""_sv);
         const std::string                   srcPropName = propName;
 
-        if (aPrefix.length() > 0)
+        if (std::size(aPrefix) > 0)
         {
             propName = aPrefix + "." + propName;
         }

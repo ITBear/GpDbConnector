@@ -224,7 +224,7 @@ template<typename T>
 {
     std::string_view strVal = GetStr(aRowId, aColId, {});
 
-    if (strVal.length() == 0)
+    if (std::size(strVal) == 0)
     {
         THROW_COND_GP
         (

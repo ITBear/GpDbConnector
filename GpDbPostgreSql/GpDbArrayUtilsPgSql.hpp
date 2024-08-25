@@ -1,7 +1,5 @@
 #pragma once
 
-#include "GpDbPostgreSql_global.hpp"
-
 #include <GpCore2/GpUtils/Types/Numerics/GpNumericTypes.hpp>
 #include <GpCore2/GpUtils/Types/UIDs/GpUUID.hpp>
 #include <GpCore2/GpUtils/Types/Strings/GpStringOps.hpp>
@@ -9,10 +7,11 @@
 #include <GpCore2/GpUtils/Streams/GpByteWriterStorageByteArray.hpp>
 #include <GpCore2/GpUtils/Macro/GpMacroClass.hpp>
 
-#include <postgresql/libpq-fe.h>
 #include <tuple>
 
 namespace GPlatform {
+
+/*
 
 struct PgArrayHeaderT
 {
@@ -22,7 +21,7 @@ struct PgArrayHeaderT
     Oid             oid;
     s_int_32        elementsCount;
     s_int_32        lowerBoundary;
-} __attribute__ ((__packed__));/**/
+} __attribute__ ((__packed__));
 
 //https://github.com/postgres/postgres/blob/master/src/include/utils/array.h
 
@@ -329,7 +328,7 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildBytes
     GpBytesArray arrayData;
     {
         const size_t    elementsCount   = std::size(aArray);
-        size_t          totalSize       = sizeof(PgArrayHeaderT) + elementsCount * sizeof(s_int_32)/*element data size*/;
+        size_t          totalSize       = sizeof(PgArrayHeaderT) + elementsCount * sizeof(s_int_32);
 
         for (const T& e: aArray)
         {
@@ -459,6 +458,6 @@ std::vector<T>  GpDbArrayUtilsPgSql::_SReadBytes
     }
 
     return res;
-}
+}*/
 
 }// namespace GPlatform

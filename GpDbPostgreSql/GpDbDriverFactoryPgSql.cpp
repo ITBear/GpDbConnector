@@ -1,5 +1,5 @@
-#include "GpDbDriverFactoryPgSql.hpp"
-#include "GpDbDriverPgSql.hpp"
+#include <GpDbConnector/GpDbPostgreSql/GpDbDriverFactoryPgSql.hpp>
+#include <GpDbConnector/GpDbPostgreSql/GpDbDriverPgSql.hpp>
 
 namespace GPlatform {
 
@@ -12,17 +12,9 @@ GpDbDriverFactoryPgSql::~GpDbDriverFactoryPgSql (void) noexcept
 {
 }
 
-GpDbDriver::SP  GpDbDriverFactoryPgSql::NewInstance
-(
-    const GpDbConnectionMode::EnumT aMode,
-    const GpIOEventPollerIdx        aIOEventPollerIdx
-) const
+GpDbDriver::SP  GpDbDriverFactoryPgSql::NewInstance (void) const
 {
-    return MakeSP<GpDbDriverPgSql>
-    (
-        aMode,
-        aIOEventPollerIdx
-    );
+    return MakeSP<GpDbDriverPgSql>();
 }
 
 }// namespace GPlatform

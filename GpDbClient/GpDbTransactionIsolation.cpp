@@ -1,4 +1,4 @@
-#include "GpDbTransactionIsolation.hpp"
+#include <GpDbConnector/GpDbClient/GpDbTransactionIsolation.hpp>
 
 namespace GPlatform {
 

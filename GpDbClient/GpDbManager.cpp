@@ -1,18 +1,30 @@
-#include "GpDbManager.hpp"
-#include "GpDbDriver.hpp"
-#include "GpDbConnection.hpp"
+#include <GpDbConnector/GpDbClient/GpDbManager.hpp>
+#include <GpDbConnector/GpDbClient/GpDbDriver.hpp>
+#include <GpDbConnector/GpDbClient/GpDbConnection.hpp>
+#include <GpCore2/GpTasks/ITC/GpItcSharedFutureUtils.hpp>
 
 namespace GPlatform {
 
 GpDbManager::GpDbManager
 (
-    GpSP<GpDbDriver>                aDriver,
-    std::string                     aConnectionStr,
-    const GpDbConnectionMode::EnumT aMode
+    GpDbDriver::CSP             aDriver,
+    const GpIOEventPollerIdx    aIOEventPollerIdx,
+    const milliseconds_t        aConnectTimeout,
+    std::string                 aServerHost,
+    const u_int_16              aServerPort,
+    std::string                 aUserName,
+    std::string                 aPassword,
+    std::string                 aDatabase
 ) noexcept:
-iDriver (std::move(aDriver)),
-iConnStr(std::move(aConnectionStr)),
-iMode   (aMode)
+GpElementsPool{},
+iDriver          {std::move(aDriver)},
+iIOEventPollerIdx{std::move(aIOEventPollerIdx)},
+iConnectTimeout  {std::move(aConnectTimeout)},
+iServerHost      {std::move(aServerHost)},
+iServerPort      {std::move(aServerPort)},
+iUserName        {std::move(aUserName)},
+iPassword        {std::move(aPassword)},
+iDatabase        {std::move(aDatabase)}
 {
 }
 
@@ -20,10 +32,10 @@ GpDbManager::~GpDbManager (void) noexcept
 {
 }
 
-GpDbQueryPrepared::CSP  GpDbManager::Prepare (const GpDbQuery& aQuery) const
-{
-    return iDriver.V().Prepare(aQuery);
-}
+//GpDbQueryPrepared::CSP    GpDbManager::Prepare (const GpDbQuery& aQuery) const
+//{
+//  return iDriver.V().Prepare(aQuery);
+//}
 
 void    GpDbManager::PreInit (const size_t /*aCount*/)
 {
@@ -31,9 +43,16 @@ void    GpDbManager::PreInit (const size_t /*aCount*/)
 
 GpDbConnection::SP  GpDbManager::NewElement (void)
 {
-    //GpUnlockGuard unlock(aLocked);
-
-    return iDriver.V().NewConnection(iConnStr);
+    return iDriver.V().NewConnection
+    (
+        iIOEventPollerIdx,
+        iConnectTimeout,
+        iServerHost,
+        iServerPort,
+        iUserName,
+        iPassword,
+        iDatabase
+    );
 }
 
 void    GpDbManager::OnClear (void) noexcept
@@ -41,101 +60,68 @@ void    GpDbManager::OnClear (void) noexcept
     // NOP
 }
 
-bool    GpDbManager::Validate (GpSP<GpDbConnection>& aConnection) noexcept
+bool    GpDbManager::Validate (GpDbConnection::SP& aDbConnection) noexcept
 {
-    return aConnection.V().Validate();
+    const GpDbConnection& dbConnection = aDbConnection.Vn();
+    return dbConnection.IsConnected();
 }
 
-void    GpDbManager::OnAcquire
-(
-    GpSP<GpDbConnection>&   /*aDbConnection*/
-)
+void    GpDbManager::OnAcquire (GpDbConnection::SP& aDbConnection)
 {
-    // NOP
-}
+    GpDbConnection& dbConnection = aDbConnection.Vn();
 
-GpDbManager::ReleaseAct GpDbManager::OnRelease
-(
-    GpSP<GpDbConnection>&   /*aDbConnection*/
-)
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    /*if (iMode == GpDbConnectionMode::ASYNC) [[likely]]
+    if (dbConnection.IsConnected()) [[likely]]
     {
-        // Check if there are NO tasks waiting for connections
-        if (iConnWaitPromises.empty()) [[likely]]
-        {
-            return ReleaseAct::PUSH_TO_ELEMENTS;
-        }
+        return;
+    }
 
-        // Notify waiting task
-        ConnectItcPromiseT promise(std::move(iConnWaitPromises.front()));
-        iConnWaitPromises.pop();
+    // Try to connect
+    dbConnection.TryConnectAndWaitFor();
+}
 
-        //GpUnlockGuard unlock(aLocked);
-
-        promise.Fulfill(aDbConnection);
-
-        return ReleaseAct::ACQUIRED;
-    } else if (iMode == GpDbConnectionMode::SYNC)
+GpDbManager::ReleaseAct GpDbManager::OnRelease (GpDbConnection::SP& aDbConnection)
+{
+    // Check if there are NO tasks waiting for connections
+    if (iConnWaitToAcquirePromises.empty()) [[likely]]
     {
         return ReleaseAct::PUSH_TO_ELEMENTS;
-    } else
-    {
-        THROW_GP("Unknown DB connection mode"_sv);
-    }*/
+    }
+
+    // Notify waiting task
+    ConnectItcPromiseT promise(std::move(iConnWaitToAcquirePromises.front()));
+    iConnWaitToAcquirePromises.pop();
+
+    promise.Fulfill(std::move(aDbConnection));
+
+    return ReleaseAct::ACQUIRED;
 }
 
-std::optional<GpSP<GpDbConnection>> GpDbManager::OnAcquireNoElementsLeft (void)
+GpDbConnection::C::Opt::SP  GpDbManager::OnAcquireNoElementsLeft (void)
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
+    // Wait for Release any connection to pool
+    ConnectItcPromiseT      promise;
+    ConnectItcFutureT::SP   future = promise.Future();
+    iConnWaitToAcquirePromises.push(std::move(promise));
 
-    /*if (iMode == GpDbConnectionMode::ASYNC) [[likely]]
-    {
-        // Mode is ASYNC, wait for Release next connection
-        ConnectItcPromiseT      promise;
-        ConnectItcFutureT::SP   future = promise.Future();
-        iConnWaitPromises.push(std::move(promise));
+    // Wait for future
+    std::optional<GpDbConnection::SP> res;
 
-        //GpUnlockGuard unlock(aLocked);
-
-        // Wait for future
-        while (!future.Vn().WaitFor(250.0_si_ms))
+    // Check result
+    GpItcSharedFutureUtils::SWaitForInf
+    (
+        future.V(),
+        [&](GpDbConnection::SP& aConnection)
         {
-            // NOP
-        }
+            res = std::move(aConnection);
+        },
+        [](const GpException& aEx)
+        {
+            throw aEx;
+        },
+        250.0_si_ms
+    );
 
-        std::optional<GpSP<GpDbConnection>> res;
-
-        // Check result
-        ConnectItcFutureT::SCheckIfReady
-        (
-            future.V(),
-            [&](GpSP<GpDbConnection>& aConnection)
-            {
-                res = std::move(aConnection);
-            },
-            [](void)
-            {
-                // NOP
-            },
-            [](const GpException& aEx)
-            {
-                throw aEx;
-            }
-        );
-
-        return res;
-    } else if (iMode == GpDbConnectionMode::SYNC)
-    {
-        return std::nullopt;
-    } else
-    {
-        THROW_GP("Unknown DB connection mode"_sv);
-    }*/
+    return res;
 }
 
 }// namespace GPlatform

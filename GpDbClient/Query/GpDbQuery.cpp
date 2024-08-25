@@ -1,12 +1,12 @@
-#include "GpDbQuery.hpp"
-#include "GpDbQueryMapperCache.hpp"
-#include "../../../GpJson/GpJsonSerializer.hpp"
+#include <GpDbConnector/GpDbClient/Query/GpDbQuery.hpp>
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryMapperCache.hpp>
+#include <GpJson/GpJsonSerializer.hpp>
 
 namespace GPlatform {
 
 GpDbQuery::GpDbQuery (const GpDbQueryMapperCacheValue& aCacheValue):
-iQueryStr(aCacheValue.iQuery),
-iTypes(aCacheValue.iTypes)
+iQueryStr{aCacheValue.iQuery},
+iTypes   {aCacheValue.iTypes}
 {
 }
 

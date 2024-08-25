@@ -24,9 +24,9 @@ private:
 
 public:
     static GpDbManagerCatalog&  S                   (void) noexcept {return sInstance;}
-    static inline void          SStart              (const GpDbManagerCfgDesc::C::Vec::SP&  aCfgDescs,
+    static void                 SStart              (const GpDbManagerCfgDesc::C::Vec::SP&  aCfgDescs,
                                                      const GpDbDriverCatalog&               aDbDriverCatalog);
-    static inline void          SStopAndClear       (void);
+    static void                 SStopAndClear       (void);
 
     void                        Add                 (GpSP<GpDbManager>                  aManager,
                                                      const std::vector<std::string>&    aAliases);
@@ -42,19 +42,5 @@ private:
 
     static GpDbManagerCatalog   sInstance;
 };
-
-void    GpDbManagerCatalog::SStart
-(
-    const GpDbManagerCfgDesc::C::Vec::SP&   aCfgDescs,
-    const GpDbDriverCatalog&                aDbDriverCatalog
-)
-{
-    S().Start(aCfgDescs, aDbDriverCatalog);
-}
-
-void    GpDbManagerCatalog::SStopAndClear (void)
-{
-    S().StopAndClear();
-}
 
 }// GPlatform

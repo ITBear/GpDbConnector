@@ -1,5 +1,7 @@
 #include "GpDbQueryPreparedPgSql.hpp"
 
+/*
+
 #include <GpCore2/GpUtils/Streams/GpByteWriterStorageFixedSize.hpp>
 
 namespace GPlatform {
@@ -255,3 +257,4 @@ void    GpDbQueryPreparedPgSql::FillData
 }
 
 }// namespace GPlatform
+*/

@@ -1,37 +1,27 @@
 #pragma once
 
-#include <GpDbConnector/GpDbClient/GpDbConnectionMode.hpp>
-#include <GpNetwork/GpNetworkCore/Pollers/GpIOEventPoller.hpp>
-#include <GpNetwork/GpNetworkCore/Pollers/GpIOEventPollerCatalog.hpp>
+#include <GpDbConnector/GpDbClient/GpDbDriver.hpp>
 
 namespace GPlatform {
 
-class GpDbDriver;
-
-class GpDbDriverFactory
+class GP_DB_CLIENT_API GpDbDriverFactory
 {
 public:
     CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbDriverFactory)
     CLASS_DD(GpDbDriverFactory)
 
 protected:
-    inline                      GpDbDriverFactory   (std::string aName) noexcept;
+                            GpDbDriverFactory   (std::string aName) noexcept;
 
 public:
-    virtual                     ~GpDbDriverFactory  (void) noexcept = default;
+    virtual                 ~GpDbDriverFactory  (void) noexcept = default;
 
-    std::string_view            Name                (void) const noexcept {return  iName;}
+    std::string_view        Name                (void) const noexcept {return iName;}
 
-    virtual GpSP<GpDbDriver>    NewInstance         (GpDbConnectionMode::EnumT  aMode,
-                                                     GpIOEventPollerIdx         aIOEventPollerIdx) const = 0;
+    virtual GpDbDriver::SP  NewInstance         (void) const = 0;
 
 private:
-    const std::string           iName;
+    const std::string       iName;
 };
-
-GpDbDriverFactory::GpDbDriverFactory (std::string aName) noexcept:
-iName{std::move(aName)}
-{
-}
 
 }// namespace GPlatform

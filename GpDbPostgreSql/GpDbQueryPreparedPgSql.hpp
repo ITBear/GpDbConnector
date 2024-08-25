@@ -1,9 +1,9 @@
 #pragma once
 
+/*
 #include "GpDbPostgreSql_global.hpp"
 #include "GpDbArrayUtilsPgSql.hpp"
 #include "../GpDbClient/Query/GpDbQueryPrepared.hpp"
-#include <postgresql/libpq-fe.h>
 
 namespace GPlatform {
 
@@ -21,31 +21,31 @@ public:
     using BinaryDataVecT    = std::vector<GpBytesArray>;
 
 public:
-                                GpDbQueryPreparedPgSql  (void) noexcept;
-    virtual                     ~GpDbQueryPreparedPgSql (void) noexcept override final;
+                            GpDbQueryPreparedPgSql  (void) noexcept;
+    virtual                 ~GpDbQueryPreparedPgSql (void) noexcept override final;
 
-    virtual void                Prepare                 (const GpDbQuery& aQuery) override final;
+    virtual void            Prepare                 (const GpDbQuery& aQuery) override final;
 
-    const OIDsPtrT&             OIDs                    (void) const noexcept {return iOIDs;}
-    const ValuesPtrT&           ValuesPtr               (void) const noexcept {return iValuesPtr;}
-    const ValuesSizeT&          ValuesSize              (void) const noexcept {return iValuesSize;}
-    const ValuesIsBinaryT&      ValuesIsBinary          (void) const noexcept {return iValuesIsBinary;}
+    const OIDsPtrT&         OIDs                    (void) const noexcept {return iOIDs;}
+    const ValuesPtrT&       ValuesPtr               (void) const noexcept {return iValuesPtr;}
+    const ValuesSizeT&      ValuesSize              (void) const noexcept {return iValuesSize;}
+    const ValuesIsBinaryT&  ValuesIsBinary          (void) const noexcept {return iValuesIsBinary;}
 
 private:
-    void                        FillData                (const GpDbQueryValType::EnumT  aValueType,
-                                                         const size_t                   aValueId,
-                                                         const GpDbQuery&               aQuery);
+    void                    FillData                (const GpDbQueryValType::EnumT  aValueType,
+                                                     size_t                         aValueId,
+                                                     const GpDbQuery&               aQuery);
 
     template<typename T>
-    inline void                 _FillArray              (const T& aArray);
+    inline void             _FillArray              (const T& aArray);
 
 private:
-    OIDsPtrT                    iOIDs;
-    ValuesPtrT                  iValuesPtr;
-    ValuesSizeT                 iValuesSize;
-    ValuesIsBinaryT             iValuesIsBinary;
-    SInt64VecT                  iSInt64Vec;
-    BinaryDataVecT              iBinaryDataVec;
+    OIDsPtrT                iOIDs;
+    ValuesPtrT              iValuesPtr;
+    ValuesSizeT             iValuesSize;
+    ValuesIsBinaryT         iValuesIsBinary;
+    SInt64VecT              iSInt64Vec;
+    BinaryDataVecT          iBinaryDataVec;
 };
 
 template<typename T>
@@ -67,3 +67,4 @@ void    GpDbQueryPreparedPgSql::_FillArray (const T& aArray)
 }
 
 }// namespace GPlatform
+*/

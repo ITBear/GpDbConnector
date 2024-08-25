@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../GpDbClient_global.hpp"
-
+#include <GpDbConnector/GpDbClient/GpDbClient_global.hpp>
 #include <GpCore2/GpUtils/Types/Enums/GpEnum.hpp>
 #include <GpCore2/GpUtils/Types/Strings/GpStringOps.hpp>
 #include <GpCore2/GpReflection/GpReflectType.hpp>
@@ -35,7 +34,7 @@ GP_ENUM(GP_DB_CLIENT_API, GpDbQueryValType,
 class GP_DB_CLIENT_API GpDbQueryValTypeUtils
 {
 public:
-    static GpDbQueryValType::EnumT      SReflectToDbType    (const GpReflectType::EnumT aType);
+    static GpDbQueryValType::EnumT  SReflectToDbType (const GpReflectType::EnumT aType);
 };
 
 }// namespace GPlatform

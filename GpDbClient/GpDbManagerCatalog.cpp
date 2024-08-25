@@ -23,34 +23,48 @@ void    GpDbManagerCatalog::Start
     const GpDbDriverCatalog&                aDbDriverCatalog
 )
 {
+    // Read config
     for (const GpDbManagerCfgDesc::SP& cfgDescSP: aCfgDescs)
     {
-        const GpDbManagerCfgDesc&   cfgDesc         = cfgDescSP.V();
-        const GpIOEventPollerIdx    eventPollerIdx  = GpIOEventPollerCatalog::S().IdxByName(cfgDesc.event_poller_name);
-
-        GpDbDriverFactory::SP   driverFactorySP = aDbDriverCatalog.Find(cfgDesc.driver_name);
-        GpDbDriver::SP          driverSP        = driverFactorySP->NewInstance
-        (
-            cfgDesc.mode,
-            eventPollerIdx
-        );
+        const GpDbManagerCfgDesc&   dbManagerCfgDesc    = cfgDescSP.V();
+        const GpIOEventPollerIdx    eventPollerIdx      = GpIOEventPollerCatalog::S().IdxByName(dbManagerCfgDesc.event_poller_name);
+        GpDbDriverFactory::SP       driverFactorySP     = aDbDriverCatalog.Find(dbManagerCfgDesc.driver_name);
+        GpDbDriver::CSP             driverCSP           = driverFactorySP->NewInstance();
 
         GpDbManager::SP dbManager = MakeSP<GpDbManager>
         (
-            driverSP,
-            cfgDesc.connection_str,
-            cfgDesc.mode
+            std::move(driverCSP),
+            eventPollerIdx,
+            dbManagerCfgDesc.connect_timeout,
+            dbManagerCfgDesc.db_host,
+            dbManagerCfgDesc.db_port,
+            dbManagerCfgDesc.db_user_name,
+            dbManagerCfgDesc.db_password,
+            dbManagerCfgDesc.db_name
         );
 
-        dbManager.Vn().Init(0, cfgDesc.max_conn_pool_size);
-
-        Add(dbManager, cfgDesc.aliases);
+        dbManager.Vn().Init(0, dbManagerCfgDesc.max_conn_pool_size);
+        Add(std::move(dbManager), dbManagerCfgDesc.aliases);
     }
 }
 
 void    GpDbManagerCatalog::StopAndClear (void)
 {
     iManagers.Clear();
+}
+
+void    GpDbManagerCatalog::SStart
+(
+    const GpDbManagerCfgDesc::C::Vec::SP&   aCfgDescs,
+    const GpDbDriverCatalog&                aDbDriverCatalog
+)
+{
+    S().Start(aCfgDescs, aDbDriverCatalog);
+}
+
+void    GpDbManagerCatalog::SStopAndClear (void)
+{
+    S().StopAndClear();
 }
 
 void    GpDbManagerCatalog::Add

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "GpDbQueryValType.hpp"
-#include "GpDbQueryValue.hpp"
-#include "GpDbQueryBuilder.hpp"
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryBuilder.hpp>
 
 namespace GPlatform {
 
@@ -247,8 +245,8 @@ GpDbQuery::GpDbQuery
     std::string&&   aQueryStr,
     TypeVecT&&      aTypes
 ) noexcept:
-iQueryStr(std::move(aQueryStr)),
-iTypes   (std::move(aTypes))
+iQueryStr{std::move(aQueryStr)},
+iTypes   {std::move(aTypes)}
 {
 }
 
@@ -258,9 +256,9 @@ GpDbQuery{aCacheValueCSP.Vn()}
 }
 
 GpDbQuery::GpDbQuery (GpDbQueryBuilder&& aQueryBuilder):
-iQueryStr(aQueryBuilder.QueryStrMove()),
-iTypes   (aQueryBuilder.TypesMove()),
-iValues  (aQueryBuilder.ValuesMove())
+iQueryStr{aQueryBuilder.QueryStrMove()},
+iTypes   {aQueryBuilder.TypesMove()},
+iValues  {aQueryBuilder.ValuesMove()}
 {
 }
 

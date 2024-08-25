@@ -1,5 +1,4 @@
-#include "GpDbException.hpp"
-
+#include <GpDbConnector/GpDbClient/GpDbException.hpp>
 #include <GpCore2/GpUtils/Exceptions/GpExceptionCode.hpp>
 
 namespace GPlatform {
