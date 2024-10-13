@@ -11,12 +11,22 @@ DIR_LEVEL       = ./../..
 
 include($$DIR_LEVEL/../QtGlobalPro.pri)
 
-release_build_static{
+equals(var_link, "static") {
 	CONFIG += staticlib
 }
 
 # ----------- Libraries -----------
-os_windows{
+equals(var_os, "windows") {
+	LIBS += -lGpDbDataModels$$TARGET_POSTFIX
+	LIBS += -lGpLogCore$$TARGET_POSTFIX
+	LIBS += -lGpNetworkCore$$TARGET_POSTFIX
+	LIBS += -lGpJson$$TARGET_POSTFIX
+	LIBS += -lGpReflection$$TARGET_POSTFIX
+	LIBS += -lGpTasks$$TARGET_POSTFIX
+	LIBS += -lGpUtils$$TARGET_POSTFIX
+}
+
+equals(var_os, "linux") {
 	LIBS += -lGpDbDataModels$$TARGET_POSTFIX
 	LIBS += -lGpLogCore$$TARGET_POSTFIX
 	LIBS += -lGpNetworkCore$$TARGET_POSTFIX
@@ -25,17 +35,7 @@ os_windows{
 	LIBS += -lGpTasks$$TARGET_POSTFIX
 	LIBS += -lGpUtils$$TARGET_POSTFIX
 
-	QMAKE_LFLAGS += /NODEFAULTLIB:libboost_fiber-vc143-mt-x64-1_84
-	QMAKE_LFLAGS += /NODEFAULTLIB:libboost_fiber-vc143-mt-gd-x64-1_84
-	QMAKE_LFLAGS += /NODEFAULTLIB:boost_fiber-vc143-mt-gd-x64-1_84
-	LIBS +=  -lboost_fiber-vc143-mt-x64-1_84
-	QMAKE_LFLAGS += /NODEFAULTLIB:libboost_context-vc143-mt-x64-1_84
-	QMAKE_LFLAGS += /NODEFAULTLIB:libboost_context-vc143-mt-gd-x64-1_84
-	QMAKE_LFLAGS += /NODEFAULTLIB:boost_context-vc143-mt-gd-x64-1_84
-	LIBS += -lboost_context-vc143-mt-x64-1_84
-}
-
-os_linux{
+	LIBS += -lfmt
 }
 
 # ----------- Sources and headers -----------
@@ -58,7 +58,6 @@ HEADERS += \
 	Query/GpDbQueryMapperCache.hpp \
 	Query/GpDbQueryPrepared.hpp \
 	Query/GpDbQueryRes.hpp \
-	Query/GpDbQueryResState.hpp \
 	Query/GpDbQuerySearchBuilder.hpp \
 	Query/GpDbQueryValType.hpp \
 	Query/GpDbQueryValue.hpp
@@ -80,6 +79,5 @@ SOURCES += \
 	Query/GpDbQueryBuilder.cpp \
 	Query/GpDbQueryMapperCache.cpp \
 	Query/GpDbQueryRes.cpp \
-	Query/GpDbQueryResState.cpp \
 	Query/GpDbQuerySearchBuilder.cpp \
 	Query/GpDbQueryValType.cpp

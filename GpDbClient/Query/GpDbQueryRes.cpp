@@ -108,7 +108,7 @@ GpReflectObject::SP GpDbQueryRes::RowToObject
     return objectSP;
 }
 
-GpReflectObject::C::Vec::SP GpDbQueryRes::RowsToObject
+GpReflectObject::C::Vec::SP GpDbQueryRes::RowsToObjects
 (
     const size_t            aColStartId,
     const GpReflectModel&   aModel

@@ -1,9 +1,9 @@
 #pragma once
 
 /*
-#include "GpDbPostgreSql_global.hpp"
-#include "GpDbArrayUtilsPgSql.hpp"
-#include "../GpDbClient/Query/GpDbQueryPrepared.hpp"
+#include <GpDbConnector/GpDbPostgreSql/GpDbPostgreSql_global.hpp>
+#include <GpDbConnector/GpDbPostgreSql/GpDbArrayUtilsPgSql.hpp>
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryPrepared.hpp>
 
 namespace GPlatform {
 

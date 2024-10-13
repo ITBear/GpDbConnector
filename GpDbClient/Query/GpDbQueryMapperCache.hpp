@@ -1,11 +1,11 @@
 #pragma once
 
-#include "GpDbQuery.hpp"
-
+#include <GpDbConnector/GpDbClient/Query/GpDbQuery.hpp>
 #include <GpCore2/GpUtils/Types/Containers/GpDictionary.hpp>
 
 namespace GPlatform {
 
+/*
 // ------------------------------------ GpDbQueryMapperCacheValue -----------------------------------------
 
 class GpDbQueryMapperCacheValue
@@ -15,9 +15,9 @@ public:
 
 public:
                         GpDbQueryMapperCacheValue   (void) noexcept {}
-                        GpDbQueryMapperCacheValue   (GpDbQueryBuilder& aBuilder) noexcept:
-                                                        iTypes{std::move(aBuilder.TypesMove())},
-                                                        iQuery{std::move(aBuilder.QueryStrMove())} {}
+                        //GpDbQueryMapperCacheValue (GpDbQueryBuilder& aBuilder) noexcept:
+                        //                              iTypes{std::move(aBuilder.TypesMove())},
+                        //                              iQuery{std::move(aBuilder.QueryStrMove())} {}
                         GpDbQueryMapperCacheValue   (GpDbQuery::TypeVecT&&  aTypes,
                                                      std::string&&          aQuery) noexcept:
                                                         iTypes{std::move(aTypes)}, iQuery(std::move(aQuery)) {}
@@ -78,5 +78,6 @@ GpDbQueryMapperCacheValue::CSP  GpDbQueryMapperCache::Get
 
     return res;
 }
+*/
 
 }// namespace GPlatform

@@ -1,222 +1,73 @@
 #include <GpDbConnector/GpDbPostgreSql/GpDbQueryResPgSql.hpp>
 #include <GpDbConnector/GpDbClient/GpDbException.hpp>
 #include <GpDbConnector/GpDbPostgreSql/GpDbArrayUtilsPgSql.hpp>
-
 #include <GpCore2/GpUtils/Types/Bits/GpBitOps.hpp>
 
 namespace GPlatform {
 
-/*template<typename T, size_t ExpectedSizeT>
-T   GpDbQueryResPgSql_GetPOD
-(
-    const size_t        aRowId,
-    const size_t        aColId,
-    std::optional<T>    aOnNullValue,
-    PGresult*           aPgResult
-)
-{
-    static_assert(sizeof(T) == ExpectedSizeT);
-
-    const int rowId = NumOps::SConvert<int>(aRowId);
-    const int colId = NumOps::SConvert<int>(aColId);
-
-    if (PQgetisnull(aPgResult, rowId, colId))
-    {
-        THROW_COND_GP
-        (
-            aOnNullValue.has_value(),
-            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
-        );
-
-        return aOnNullValue.value();
-    }
-
-    const int len = PQgetlength(aPgResult, rowId, colId);
-
-    THROW_COND_GP
-    (
-        size_t(len) == sizeof(T),
-        [&]()
-        {
-            return "Length must be "_sv + sizeof(T) + " bytes"_sv;
-        }
-    );
-
-    T value;
-    std::memcpy(&value, PQgetvalue(aPgResult, rowId, colId), size_t(len));
-    return BitOps::N2H(value);
-}
-
-template<typename T>
-std::vector<T>  GpDbQueryResPgSql_GetArray
-(
-    const size_t                    aRowId,
-    const size_t                    aColId,
-    std::optional<std::vector<T>>   aOnNullValue,
-    PGresult*                       aPgResult
-)
-{
-    const int rowId = NumOps::SConvert<int>(aRowId);
-    const int colId = NumOps::SConvert<int>(aColId);
-
-    if (PQgetisnull(aPgResult, rowId, colId))
-    {
-        THROW_COND_GP
-        (
-            aOnNullValue.has_value(),
-            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
-        );
-
-        return aOnNullValue.value();
-    }
-
-    const int       dataSize = PQgetlength(aPgResult, rowId, colId);
-    GpSpanByteRW    data{reinterpret_cast<u_int_8*>(PQgetvalue(aPgResult, rowId, colId)), size_t(dataSize)};
-
-    return GpDbArrayUtilsPgSql::SRead<T>(data);
-}*/
-
 GpDbQueryResPgSql::GpDbQueryResPgSql (void)
 {
-    //static_assert(PGRES_EMPTY_QUERY       == 0, "PGRES_EMPTY_QUERY    != 0");
-    //static_assert(PGRES_COMMAND_OK        == 1, "PGRES_COMMAND_OK     != 1");
-    //static_assert(PGRES_TUPLES_OK     == 2, "PGRES_TUPLES_OK      != 2");
-    //static_assert(PGRES_COPY_OUT      == 3, "PGRES_COPY_OUT       != 3");
-    //static_assert(PGRES_COPY_IN           == 4, "PGRES_COPY_IN        != 4");
-    //static_assert(PGRES_BAD_RESPONSE  == 5, "PGRES_BAD_RESPONSE   != 5");
-    //static_assert(PGRES_NONFATAL_ERROR    == 6, "PGRES_NONFATAL_ERROR != 6");
-    //static_assert(PGRES_FATAL_ERROR       == 7, "PGRES_FATAL_ERROR    != 7");
-    //static_assert(PGRES_COPY_BOTH     == 8, "PGRES_COPY_BOTH      != 8");
-    //static_assert(PGRES_SINGLE_TUPLE  == 9, "PGRES_SINGLE_TUPLE   != 9");
 }
 
 GpDbQueryResPgSql::~GpDbQueryResPgSql (void) noexcept
 {
-    ClearPgSql();
 }
 
-/*void  GpDbQueryResPgSql::Process
+void    GpDbQueryResPgSql::AddDataRow
 (
-    const size_t    aMinResultRowsCount,
-    PGconn*         aPgConn
+    const PSQL::RowDescriptionDescRS&   aRowDesc,
+    const PSQL::DataRowDescRS&          aRowData
 )
 {
-    THROW_COND_GP
-    (
-        iPgResult != nullptr,
-        [&](){return "PGresult is null: "_sv + PQerrorMessage(aPgConn);}
-    );
-
-    const ExecStatusType    pgResStatus = PQresultStatus(iPgResult);
-    std::string_view        errMsg;
-
-    switch (pgResStatus)
+    // Save aRowDesc
+    if (!iRowDescOpt.has_value()) [[unlikely]]
     {
-        case PGRES_EMPTY_QUERY:     // empty query string was executed
-        {
-            if (aMinResultRowsCount > 0)
-            {
-                THROW_DB(GpDbExceptionCode::QUERY_RESULT_COUNT_LOW, ""_sv);
-            }
-        } break;
-        case PGRES_COMMAND_OK:      // a query command that doesn't return anything was executed properly by the backend
-        case PGRES_TUPLES_OK:       // a query command that returns tuples was executed properly by the backend, PGresult contains the result tuples
-        case PGRES_SINGLE_TUPLE:    // single tuple from larger resultset
-        case PGRES_NONFATAL_ERROR:  // notice or warning message
-        {
-            //OK
-        } break;
-        case PGRES_COPY_OUT:        // copy Out data transfer in progress
-        {
-            errMsg = "copy Out data transfer in progress"_sv;
-        } break;
-        case PGRES_COPY_IN:         // copy In data transfer in progress
-        {
-            errMsg = "copy In data transfer in progress"_sv;
-        } break;
-        case PGRES_BAD_RESPONSE:    // an unexpected response was recv'd from the backend
-        {
-            errMsg = "an unexpected response was recv'd from the backend"_sv;
-        } break;
-        case PGRES_FATAL_ERROR:     // query failed
-        {
-            errMsg = "query failed"_sv;
-        } break;
-        case PGRES_COPY_BOTH:       // Copy In/Out data transfer in progress
-        {
-            errMsg = "Copy In/Out data transfer in progress"_sv;
-        } break;
-        case PGRES_PIPELINE_SYNC:
-        {
-            errMsg = "single tuple from larger resultset pipeline synchronization point"_sv;
-        } break;
-        case PGRES_PIPELINE_ABORTED:
-        {
-            errMsg = "Command didn't run because of an abort earlier in a pipeline"_sv;
-        } break;
-        default:
-        {
-            errMsg = "Unknown error"_sv;
-        }
+        iRowDescOpt     = aRowDesc;
+        iColumnsCount   = aRowDesc.columns.size();
     }
 
-    if (std::size(errMsg) > 0)
+    // Reserve iRowsDataVec
+    const size_t rowColCount = iRowColDataVec.size() + aRowData.columns.size();
+    iRowColDataVec.reserve(rowColCount);
+
+    // Calculate data size
+    size_t rowsColDataSize = 0;
+    for (const GpSpanByteR& rowData: aRowData.columns)
     {
-        Clear();
-        ThrowDbEx(errMsg, aPgConn);
+        rowsColDataSize = NumOps::SAdd<size_t>(rowsColDataSize, rowData.Count());
     }
 
-    if (aMinResultRowsCount > 0)
+    // Copy data
+    const size_t oldRowColDataSize = iRowColDataStorage.size();
+    const size_t newRowColDataSize = oldRowColDataSize + rowsColDataSize;
+
+    iRowColDataStorage.resize(newRowColDataSize);
+    std_byte_no_init*   rowColDataStoragePtr        = iRowColDataStorage.data() + oldRowColDataSize;
+    const std::byte*    rowColDataStoragePtrCopy    = nullptr;
+
+    rowColDataStoragePtrCopy += oldRowColDataSize;
+    for (const GpSpanByteR& colData: aRowData.columns)
     {
-        if (RowsCount() < aMinResultRowsCount)
-        {
-            THROW_DB(GpDbExceptionCode::QUERY_RESULT_COUNT_LOW, "RowsCount() < aMinResultRowsCount"_sv);
-        }
+        const size_t colDataSize = colData.Count();
+
+        iRowColDataVec.emplace_back(GpSpanByteR{rowColDataStoragePtrCopy, colDataSize});
+        rowColDataStoragePtrCopy += colDataSize;
+
+        std::memcpy(rowColDataStoragePtr, colData.Ptr(), colDataSize);
+        rowColDataStoragePtr += colDataSize;
     }
-}*/
 
-void    GpDbQueryResPgSql::Clear (void)
-{
-    ClearPgSql();
-}
-
-GpDbQueryRes::StateTE   GpDbQueryResPgSql::State (void) const
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //const ExecStatusType pgStatus = PQresultStatus(iPgResult);
-    //return GpDbQueryRes::StateTE(int(pgStatus));
+    iRowsCount++;
 }
 
 size_t  GpDbQueryResPgSql::RowsCount (void) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //int rowsCount = PQntuples(iPgResult);
-
-    //if (rowsCount < 0)
-    //{
-    //  rowsCount = 0;
-    //}
-
-    //return NumOps::SConvert<size_t>(rowsCount);
+    return iRowsCount;
 }
 
 size_t  GpDbQueryResPgSql::ColumnsCount (void) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //int columnsCount= PQnfields(iPgResult);
-
-    //if (columnsCount < 0)
-    //{
-    //  columnsCount = 0;
-    //}
-
-    //return NumOps::SConvert<size_t>(columnsCount);
+    return iColumnsCount;
 }
 
 s_int_16    GpDbQueryResPgSql::GetInt16
@@ -226,10 +77,60 @@ s_int_16    GpDbQueryResPgSql::GetInt16
     [[maybe_unused]] std::optional<s_int_16>    aOnNullValue
 ) const
 {
-    // TODO: implement
     THROW_GP_NOT_IMPLEMENTED();
 
-    //return GpDbQueryResPgSql_GetPOD<s_int_16, 2>(aRowId, aColId, aOnNullValue, iPgResult);
+    /*
+    GpSpanByteR         dataPtr = RowColDataPtr(aRowId, aColId, PSQL::TypeOID::INT2);
+    //std::string_view  str     = dataPtr.AsStringView();
+
+    //if (str.data() != nullptr) [[likely]]
+    //{
+    //  return str;
+    //}
+
+    //THROW_COND_GP
+    //(
+    //  aOnNullValue.has_value(),
+    //  [aRowId, aColId]()
+    //  {
+    //      return fmt::format
+    //      (
+    //          "Requested column value is null (id[{}][{}])",
+    //          aRowId,
+    //          aColId
+    //      );
+    //  }
+    //);
+
+    //return aOnNullValue.value();
+
+
+    // Get column desc
+    const PSQL::RowDescriptionDescRS::ColumnDesc& columnDesc = iRowDescOpt.value().columns.at(aColId);
+
+    // Check UID
+    THROW_COND_DB
+    (
+        columnDesc.type_oid == u_int_32(PSQL::TypeOID::INT2),
+        GpDbExceptionCode::WRONG_TYPE,
+        [&columnDesc]()
+        {
+            return fmt::format
+            (
+                "Type OID for 16-bit signed integer (smallint) is expected to be {}, but the actual value is {}",
+                static_cast<u_int_32>(PSQL::TypeOID::INT2),
+                columnDesc.type_oid
+            );
+        }
+    );
+
+    //iRowColDataStorage.?
+
+    THROW_GP_NOT_IMPLEMENTED();
+
+
+
+    //return GpDbQueryResPgSql_GetPOD<s_int_16, 2>(aRowId, aColId, aOnNullValue, iPgResult);*/
 }
 
 std::vector<s_int_16>   GpDbQueryResPgSql::GetInt16Array1D
@@ -351,33 +252,34 @@ std::vector<float>  GpDbQueryResPgSql::GetFloatArray1D
 
 std::string_view    GpDbQueryResPgSql::GetStr
 (
-    [[maybe_unused]] const size_t                   aRowId,
-    [[maybe_unused]] const size_t                   aColId,
-    [[maybe_unused]] std::optional<std::string_view>    aOnNullValue
+    const size_t                    aRowId,
+    const size_t                    aColId,
+    std::optional<std::string_view> aOnNullValue
 ) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
+    GpSpanByteR         dataPtr = RowColDataPtr(aRowId, aColId, PSQL::TypeOID::TEXT);
+    std::string_view    str     = dataPtr.AsStringView();
 
-    /*
-    const int rowId = NumOps::SConvert<int>(aRowId);
-    const int colId = NumOps::SConvert<int>(aColId);
-
-    if (PQgetisnull(iPgResult, rowId, colId))
+    if (str.data() != nullptr) [[likely]]
     {
-        THROW_COND_GP
-        (
-            aOnNullValue.has_value(),
-            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
-        );
-
-        return aOnNullValue.value();
+        return str;
     }
 
-    const char*     strPtr  = PQgetvalue(iPgResult, rowId, colId);
-    const size_t    strLen  = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
+    THROW_COND_GP
+    (
+        aOnNullValue.has_value(),
+        [aRowId, aColId]()
+        {
+            return fmt::format
+            (
+                "Requested column value is null (id[{}][{}])",
+                aRowId,
+                aColId
+            );
+        }
+    );
 
-    return std::string_view(strPtr, strLen);*/
+    return aOnNullValue.value();
 }
 
 std::vector<std::string_view>   GpDbQueryResPgSql::GetStrArray1D
@@ -683,36 +585,68 @@ bool    GpDbQueryResPgSql::GetBoolean
     //      || (v == 'Y');
 }
 
-void    GpDbQueryResPgSql::ClearPgSql (void) noexcept
+GpSpanByteR GpDbQueryResPgSql::RowColDataPtr
+(
+    const size_t        aRowId,
+    const size_t        aColId,
+    const PSQL::TypeOID aTypeOID
+) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
+    // Check aRowId, aColId
+    THROW_COND_DB
+    (
+        (aRowId < iRowsCount) && (aColId < iColumnsCount),
+        GpDbExceptionCode::OUT_OF_RANGE_ROW_COL,
+        [&]()
+        {
+            return fmt::format
+            (
+                "Requested column id[{}][{}] is out of range [0..{}), [0..{})",
+                aRowId,
+                aColId,
+                iRowsCount,
+                iColumnsCount
+            );
+        }
+    );
 
-    //if (iPgResult != nullptr)
-    //{
-    //  PQclear(iPgResult);
-    //  iPgResult = nullptr;
-    //}
-}
+    // Get data ptr
+    GpSpanByteR dataPtr = iRowColDataVec[iRowsCount*aRowId + aColId];
 
-void    GpDbQueryResPgSql::ThrowDbEx ([[maybe_unused]] std::string_view aMsg)
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
+    // Check data description
+    THROW_COND_DB
+    (
+        iRowDescOpt.has_value(),
+        GpDbExceptionCode::EMPTY_RS_MODEL_DESC,
+        "No data description is available for the response"
+    );
 
-    //std::string_view          message{PQerrorMessage(aPgConn)};
-    //GpDbExceptionCode::EnumT  code = GpDbExceptionCode::REQUEST_ERROR;
+    // Get column desc
+    const PSQL::RowDescriptionDescRS::ColumnDesc& columnDesc = iRowDescOpt.value().columns[aColId];
 
-    //if (message.find("duplicate key"_sv) != std::string_view::npos)
-    //{
-    //  code = GpDbExceptionCode::QUERY_DUPLICATE_KEY;
-    //}
+    // Check IOD for column
+    THROW_COND_DB
+    (
+        columnDesc.type_oid == u_int_32(aTypeOID),
+        GpDbExceptionCode::WRONG_TYPE_OID,
+        [&]()
+        {
+            return fmt::format
+            (
+                "Wrong IOD type {} for column id[{}][{}]. Expected type {}",
+                columnDesc.type_oid,
+                aRowId,
+                aColId,
+                int(aTypeOID)
+            );
+        }
+    );
 
-    //THROW_DB
-    //(
-    //  code,
-    //  aMsg + ": "_sv + message
-    //);
+    return
+    {
+        iRowColDataStorage.data() + reinterpret_cast<size_t>(dataPtr.Ptr()),
+        dataPtr.Count()
+    };
 }
 
 }// namespace GPlatform

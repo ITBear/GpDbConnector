@@ -4,6 +4,7 @@
 
 namespace GPlatform {
 
+/*
 GP_ENUM_IMPL(GpDbQueryBuilderMode)
 
 const GpDbQueryBuilder::BindStrsT   GpDbQueryBuilder::sBindStrs
@@ -771,18 +772,18 @@ GpDbQueryBuilder&   GpDbQueryBuilder::RETURNING_ALL (void)
     return *this;
 }
 
-/*GpDbQueryBuilder& GpDbQueryBuilder::RETURNING (std::string_view aRaw)
-{
-    CheckForSpace();
-
-    iQueryStr
-        .append("RETURNING"_sv)
-        .append(" "_sv);
-
-    RAW(aRaw);
-
-    return *this;
-}*/
+//GpDbQueryBuilder& GpDbQueryBuilder::RETURNING (std::string_view aRaw)
+//{
+//  CheckForSpace();
+//
+//  iQueryStr
+//      .append("RETURNING"_sv)
+//      .append(" "_sv);
+//
+//  RAW(aRaw);
+//
+//  return *this;
+//}
 
 GpDbQueryBuilder&   GpDbQueryBuilder::FOR_UPDATE (void)
 {
@@ -1535,5 +1536,6 @@ std::string GpDbQueryBuilder::_SEscape (std::string_view aStr)
 
     return escapedStr;
 }
+*/
 
 }// namespace GPlatform

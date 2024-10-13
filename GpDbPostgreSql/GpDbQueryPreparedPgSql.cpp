@@ -1,4 +1,4 @@
-#include "GpDbQueryPreparedPgSql.hpp"
+#include <GpDbConnector/GpDbPostgreSql/GpDbQueryPreparedPgSql.hpp>
 
 /*
 

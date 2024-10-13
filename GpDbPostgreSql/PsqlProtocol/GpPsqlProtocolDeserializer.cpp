@@ -11,11 +11,6 @@ void    ProtocolDeserializer::SDeserialize
 {
     aMsgDescOut.length = aDataReader.UI32();
 
-    if (aMsgDescOut.length == 0)
-    {
-        [[maybe_unused]] int d = 0;
-    }
-
     while (aDataReader.SizeLeft() > 1/*last message byte is 0*/)
     {
         const ErrorCodeId       errorCodeId = static_cast<ErrorCodeId>(aDataReader.UI8());
@@ -116,6 +111,147 @@ void    ProtocolDeserializer::SDeserialize
             );
         }
     }
+}
+
+void    ProtocolDeserializer::SDeserialize
+(
+    GpByteReader&                   aDataReader,
+    PSQL::ParameterStatusDescRS&    aMsgDescOut
+)
+{
+    // length
+    aMsgDescOut.length  = aDataReader.UI32();
+
+    // name
+    aMsgDescOut.name    = aDataReader.NullTerminatedString();
+
+    // value
+    aMsgDescOut.value   = aDataReader.NullTerminatedString();
+}
+
+void    ProtocolDeserializer::SDeserialize
+(
+    GpByteReader&               aDataReader,
+    PSQL::BackendKeyDataDescRS& aMsgDescOut
+)
+{
+    // length
+    aMsgDescOut.length  = aDataReader.UI32();
+
+    // pid
+    aMsgDescOut.pid     = aDataReader.UI32();
+
+    // secret
+    aMsgDescOut.secret  = aDataReader.UI32();
+}
+
+void    ProtocolDeserializer::SDeserialize
+(
+    GpByteReader&               aDataReader,
+    PSQL::ReadyForQueryDescRS&  aMsgDescOut
+)
+{
+    // length
+    aMsgDescOut.length = aDataReader.UI32();
+
+    // transaction_status
+    const u_int_8 transactionStatus = aDataReader.UI8();
+
+    if (transactionStatus == static_cast<u_int_8>('I'))
+    {
+        aMsgDescOut.transaction_status = TransactionStatus::IDLE;
+    } else if (transactionStatus == static_cast<u_int_8>('T'))
+    {
+        aMsgDescOut.transaction_status = TransactionStatus::TRANSACTION_BLOCK;
+    } else if (transactionStatus == static_cast<u_int_8>('E'))
+    {
+        aMsgDescOut.transaction_status = TransactionStatus::FAILED_TRANSACTION_BLOCK;
+    } else
+    {
+        THROW_GP("Unknown transaction status"_sv);
+    }
+}
+
+void    ProtocolDeserializer::SDeserialize
+(
+    GpByteReader&               aDataReader,
+    PSQL::RowDescriptionDescRS& aMsgDescOut
+)
+{
+    // length
+    aMsgDescOut.length = aDataReader.UI32();
+
+    // columns count
+    const size_t columnsCount = aDataReader.UI16();
+
+    auto& columns = aMsgDescOut.columns;
+    columns.resize(columnsCount);
+
+    for (size_t id = 0; id < columnsCount; id++)
+    {
+        PSQL::RowDescriptionDescRS::ColumnDesc& columnDesc = columns.data()[id];
+
+        // name
+        columnDesc.name = aDataReader.NullTerminatedString();
+
+        // table OID
+        columnDesc.table_oid = aDataReader.UI32();
+
+        // attribute number
+        columnDesc.attribute_number = aDataReader.UI16();
+
+        // type OID
+        columnDesc.type_oid = aDataReader.UI32();
+
+        // type size
+        columnDesc.type_size = aDataReader.UI16();
+
+        // type modifier
+        columnDesc.type_modifier = aDataReader.UI32();
+
+        // format code
+        columnDesc.format_code = aDataReader.UI16();
+    }
+}
+
+void    ProtocolDeserializer::SDeserialize
+(
+    GpByteReader&           aDataReader,
+    PSQL::DataRowDescRS&    aMsgDescOut
+)
+{
+    // length
+    aMsgDescOut.length = aDataReader.UI32();
+
+    // columns count
+    const size_t columnsCount = aDataReader.UI16();
+
+    auto& columns = aMsgDescOut.columns;
+    columns.resize(columnsCount);
+
+    for (size_t id = 0; id < columnsCount; id++)
+    {
+        GpSpanByteR& columnDataPtr  = columns.data()[id];
+        const size_t dataSize       = aDataReader.UI32();
+
+        if (dataSize != std::numeric_limits<u_int_32>::max()) [[likely]]
+        {
+            columnDataPtr = aDataReader.Bytes(dataSize);
+        }
+    }
+}
+
+void    ProtocolDeserializer::SDeserialize
+(
+    GpByteReader&                   aDataReader,
+    PSQL::CommandCompleteDescRS&    aMsgDescOut
+)
+{
+    // length
+    aMsgDescOut.length = aDataReader.UI32();
+
+    // command
+    aMsgDescOut.command = aDataReader.NullTerminatedString();
 }
 
 }// namespace GPlatform::PSQL

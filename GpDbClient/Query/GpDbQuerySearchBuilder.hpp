@@ -1,10 +1,11 @@
 #pragma once
 
-#include "GpDbQueryBuilder.hpp"
-#include "GpDbQuery.hpp"
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryBuilder.hpp>
+#include <GpDbConnector/GpDbClient/Query/GpDbQuery.hpp>
 
 namespace GPlatform {
 
+/*
 class GpDbQuerySearchBuilder
 {
 public:
@@ -57,5 +58,6 @@ private:
 private:
     std::string                 iLastPropName;
 };
+*/
 
 }// namespace GPlatform

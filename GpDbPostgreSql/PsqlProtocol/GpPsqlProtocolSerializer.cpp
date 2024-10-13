@@ -39,6 +39,31 @@ size_t  ProtocolSerializer::SSerialize
 
 size_t  ProtocolSerializer::SSerialize
 (
+    const QueryDescRQ&  aMsgDesc,
+    GpBytesArray&       aBufferOut
+)
+{
+    GpByteWriterStorageByteArray    writerStorage{aBufferOut};
+    GpByteWriter                    writer{writerStorage};
+
+    // message_id
+    writer.UI8(static_cast<u_int_8>(aMsgDesc.message_id));
+
+    // length
+    auto lengthRef = writer.Ref<u_int_32>();
+
+    // query
+    writer.NullTerminatedString(aMsgDesc.query);
+
+    // update length
+    const size_t totalSize = writer.TotalWrite();
+    lengthRef.Write(NumOps::SConvert<u_int_32>(totalSize - 1/*message_id*/));
+
+    return totalSize;
+}
+
+size_t  ProtocolSerializer::SSerialize
+(
     const SASLInitialResponseDescRQ&    aMsgDesc,
     GpBytesArray&                       aBufferOut
 )

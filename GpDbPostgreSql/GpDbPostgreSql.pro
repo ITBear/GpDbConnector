@@ -11,15 +11,31 @@ DIR_LEVEL       = ./../..
 
 include($$DIR_LEVEL/../QtGlobalPro.pri)
 
-release_build_static{
+equals(var_link, "static") {
 	CONFIG += staticlib
 }
 
 # ----------- Libraries -----------
-os_windows{
+equals(var_os, "windows") {
+	LIBS += -lGpCryptoUtils$$TARGET_POSTFIX
+	LIBS += -lGpDbClient$$TARGET_POSTFIX
+	LIBS += -lGpDbDataModels$$TARGET_POSTFIX
+	LIBS += -lGpLogCore$$TARGET_POSTFIX
+	LIBS += -lGpNetworkCore$$TARGET_POSTFIX
+	LIBS += -lGpTasks$$TARGET_POSTFIX
+	LIBS += -lGpUtils$$TARGET_POSTFIX
 }
 
-os_linux{
+equals(var_os, "linux") {
+	LIBS += -lGpCryptoUtils$$TARGET_POSTFIX
+	LIBS += -lGpDbClient$$TARGET_POSTFIX
+	LIBS += -lGpDbDataModels$$TARGET_POSTFIX
+	LIBS += -lGpLogCore$$TARGET_POSTFIX
+	LIBS += -lGpNetworkCore$$TARGET_POSTFIX
+	LIBS += -lGpTasks$$TARGET_POSTFIX
+	LIBS += -lGpUtils$$TARGET_POSTFIX
+
+	LIBS += -lfmt
 }
 
 # ----------- Sources and headers -----------

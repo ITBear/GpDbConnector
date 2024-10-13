@@ -43,4 +43,4 @@ private:
     static GpDbManagerCatalog   sInstance;
 };
 
-}// GPlatform
+}// namespace GPlatform

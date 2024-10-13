@@ -1,7 +1,7 @@
-#include "GpDbDataModelsLib.hpp"
+#include <GpDbConnector/GpDbDataModels/GpDbDataModelsLib.hpp>
 
 namespace GPlatform {
 
-GP_IMPLEMENT_LIB(GpDbDataModelsLib)
+GP_IMPLEMENT_LIB_REGISTRATOR(GpDbDataModelsLib)
 
 }// namespaces GPlatform

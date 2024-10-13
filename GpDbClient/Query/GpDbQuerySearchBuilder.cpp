@@ -1,10 +1,10 @@
-#include "GpDbQuerySearchBuilder.hpp"
-#include "GpDbQuery.hpp"
-
+#include <GpDbConnector/GpDbClient/Query/GpDbQuerySearchBuilder.hpp>
+#include <GpDbConnector/GpDbClient/Query/GpDbQuery.hpp>
 #include <GpCore2/GpUtils/Encoders/GpBase64.hpp>
 
 namespace GPlatform {
 
+/*
 bool    _TestChar
 (
     const size_t        aCharId,
@@ -475,5 +475,6 @@ std::tuple<GpDbQueryValType::EnumT, size_t> GpDbQuerySearchBuilder::DetectType
 
     return {type, aStartId + std::size(typeName)};
 }
+*/
 
 }// namespace GPlatform

@@ -4,11 +4,11 @@
 
 namespace GPlatform {
 
-GpDbQuery::GpDbQuery (const GpDbQueryMapperCacheValue& aCacheValue):
-iQueryStr{aCacheValue.iQuery},
-iTypes   {aCacheValue.iTypes}
-{
-}
+//GpDbQuery::GpDbQuery (const GpDbQueryMapperCacheValue& aCacheValue):
+//iQueryStr{aCacheValue.iQuery},
+//iTypes   {aCacheValue.iTypes}
+//{
+//}
 
 GpDbQuery::~GpDbQuery (void) noexcept
 {
@@ -814,7 +814,7 @@ GpDbQuery&  GpDbQuery::AddNULL (void)
     return *this;
 }
 
-GpDbQuery&  GpDbQuery::FromObject
+/*GpDbQuery&    GpDbQuery::FromObject
 (
     const GpReflectObject&      aObject,
     GpDbQueryBuilderMode::EnumT aMode
@@ -834,13 +834,12 @@ GpDbQuery&  GpDbQuery::FromObject
             }
         } else if (aMode == GpDbQueryBuilderMode::READ)
         {
-            //NOP
-            /*
-            if (propInfo.FlagTest(GpReflectPropFlag::MULTILANGUAGE_STRING))
-            {
-                propName = "language.get_item("_sv + propName + ") AS "_sv + srcPropName;
-            }
-            */
+            // NOP
+
+            //if (propInfo.FlagTest(GpReflectPropFlag::MULTILANGUAGE_STRING))
+            //{
+            //  propName = "language.get_item("_sv + propName + ") AS "_sv + srcPropName;
+            //}
         } else if (aMode == GpDbQueryBuilderMode::UPDATE)
         {
             if (   (propInfo.FlagTest(GpReflectPropFlag::GENERATED_ONCE))
@@ -856,6 +855,7 @@ GpDbQuery&  GpDbQuery::FromObject
 
     return *this;
 }
+*/
 
 void    GpDbQuery::_NextProp
 (

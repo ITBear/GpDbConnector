@@ -1,7 +1,7 @@
-#include "GpDbQueryMapperCache.hpp"
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryMapperCache.hpp>
 
 namespace GPlatform {
 
-GpDbQueryMapperCache    GpDbQueryMapperCache::sInstance;
+//GpDbQueryMapperCache  GpDbQueryMapperCache::sInstance;
 
 }// namespace GPlatform

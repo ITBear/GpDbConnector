@@ -14,6 +14,18 @@ public:
                                      PSQL::ErrorResponseDescRS& aMsgDescOut);
     static void     SDeserialize    (GpByteReader&                  aDataReader,
                                      PSQL::AuthenticationDescRS&    aMsgDescOut);
+    static void     SDeserialize    (GpByteReader&                  aDataReader,
+                                     PSQL::ParameterStatusDescRS&   aMsgDescOut);
+    static void     SDeserialize    (GpByteReader&                  aDataReader,
+                                     PSQL::BackendKeyDataDescRS&    aMsgDescOut);
+    static void     SDeserialize    (GpByteReader&              aDataReader,
+                                     PSQL::ReadyForQueryDescRS& aMsgDescOut);
+    static void     SDeserialize    (GpByteReader&                  aDataReader,
+                                     PSQL::RowDescriptionDescRS&    aMsgDescOut);
+    static void     SDeserialize    (GpByteReader&          aDataReader,
+                                     PSQL::DataRowDescRS&   aMsgDescOut);
+    static void     SDeserialize    (GpByteReader&                  aDataReader,
+                                     PSQL::CommandCompleteDescRS&   aMsgDescOut);
 };
 
 }// namespace GPlatform::PSQL

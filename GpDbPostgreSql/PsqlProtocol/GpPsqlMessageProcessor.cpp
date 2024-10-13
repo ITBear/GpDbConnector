@@ -13,15 +13,19 @@ namespace GPlatform::PSQL {
 
 GpPsqlMessageProcessor::GpPsqlMessageProcessor
 (
-    std::string aUserName,
-    std::string aPassword,
-    std::string aDatabase,
-    OnAuthOkFnT aOnAuthOkFn
+    std::string             aUserName,
+    std::string             aPassword,
+    std::string             aDatabase,
+    OnReadyForRequestFnT    aReadyForRequestFn,
+    OnDataRowFnT            aOnDataRowFn,
+    OnCommandCompleteFnT    aOnCommandCompleteFn
 ) noexcept:
-iUserName  {std::move(aUserName)},
-iPassword  {std::move(aPassword)},
-iDatabase  {std::move(aDatabase)},
-iOnAuthOkFn{std::move(aOnAuthOkFn)}
+iUserName           {std::move(aUserName)},
+iPassword           {std::move(aPassword)},
+iDatabase           {std::move(aDatabase)},
+iReadyForRequestFn  {std::move(aReadyForRequestFn)},
+iOnDataRowFn        {std::move(aOnDataRowFn)},
+iOnCommandCompleteFn{std::move(aOnCommandCompleteFn)}
 {
 }
 
@@ -38,6 +42,22 @@ size_t  GpPsqlMessageProcessor::MakeStartupMessage (GpBytesArray& aOutMessageBuf
     startupMessageDesc.attributes["database"]   = iDatabase;
 
     const size_t dataSize = PSQL::ProtocolSerializer::SSerialize(startupMessageDesc, aOutMessageBuffer);
+
+    return dataSize;
+}
+
+size_t  GpPsqlMessageProcessor::MakeQueryMessage
+(
+    GpBytesArray&       aOutMessageBuffer,
+    std::string_view    aQuery
+)
+{
+    PSQL::QueryDescRQ queryMessage
+    {
+        .query{aQuery}
+    };
+
+    const size_t dataSize = PSQL::ProtocolSerializer::SSerialize(queryMessage, aOutMessageBuffer);
 
     return dataSize;
 }
@@ -66,9 +86,6 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
     {
         case PSQL::MessageRsDescId::AUTHENTICATION_REQUEST:
         {
-            // TODO: remove after debug
-            std::cout << StrOps::SFromBytesHex(aRsData) << std::endl;
-
             PSQL::AuthenticationDescRS rsMsgDesc;
             PSQL::ProtocolDeserializer::SDeserialize(dataReader, rsMsgDesc);
 
@@ -76,20 +93,13 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
         } break;
         case PSQL::MessageRsDescId::BACKEND_KEY_DATA:
         {
-            // TODO: implement
+            PSQL::BackendKeyDataDescRS rsMsgDesc;
+            PSQL::ProtocolDeserializer::SDeserialize(dataReader, rsMsgDesc);
 
-            LOG_ERROR
-            (
-                fmt::format
-                (
-                    "NOT IMPLEMENTED: BackendKeyData. Payload 0x{}",
-                    StrOps::SFromBytesHex(aRsData)
-                )
-            );
+            iDbPid          = rsMsgDesc.pid;
+            iDbCloseSecret  = rsMsgDesc.secret;
 
-            GpLog::S().Flush();
-
-            THROW_GP_NOT_IMPLEMENTED();
+            outMessageSize = 0;
         } break;
         case PSQL::MessageRsDescId::BIND_COMPLETE:
         {
@@ -127,20 +137,9 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
         } break;
         case PSQL::MessageRsDescId::COMMAND_COMPLETE:
         {
-            // TODO: implement
-
-            LOG_ERROR
-            (
-                fmt::format
-                (
-                    "NOT IMPLEMENTED: CommandComplete. Payload 0x{}",
-                    StrOps::SFromBytesHex(aRsData)
-                )
-            );
-
-            GpLog::S().Flush();
-
-            THROW_GP_NOT_IMPLEMENTED();
+            PSQL::CommandCompleteDescRS commandCompleteDesc;
+            PSQL::ProtocolDeserializer::SDeserialize(dataReader, commandCompleteDesc);
+            iOnCommandCompleteFn(commandCompleteDesc);
         } break;
         case PSQL::MessageRsDescId::COPY_IN_RESPONSE:
         {
@@ -178,20 +177,9 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
         } break;
         case PSQL::MessageRsDescId::DATA_ROW:
         {
-            // TODO: implement
-
-            LOG_ERROR
-            (
-                fmt::format
-                (
-                    "NOT IMPLEMENTED: DataRow. Payload 0x{}",
-                    StrOps::SFromBytesHex(aRsData)
-                )
-            );
-
-            GpLog::S().Flush();
-
-            THROW_GP_NOT_IMPLEMENTED();
+            PSQL::DataRowDescRS dataRowDesc;
+            PSQL::ProtocolDeserializer::SDeserialize(dataReader, dataRowDesc);
+            iOnDataRowFn(iRowDescriptionDescRS, dataRowDesc);
         } break;
         case PSQL::MessageRsDescId::ERROR_RESPONSE:
         {
@@ -216,7 +204,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             THROW_GP_NOT_IMPLEMENTED();
         } break;
-        case PSQL::MessageRsDescId::NO_DATA:
+        case PSQL::MessageRsDescId::EMPTY_DATA:
         {
             // TODO: implement
 
@@ -286,20 +274,12 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
         } break;
         case PSQL::MessageRsDescId::PARAMETER_STATUS:
         {
-            // TODO: implement
+            PSQL::ParameterStatusDescRS rsMsgDesc;
+            PSQL::ProtocolDeserializer::SDeserialize(dataReader, rsMsgDesc);
 
-            LOG_ERROR
-            (
-                fmt::format
-                (
-                    "NOT IMPLEMENTED: ParameterStatus. Payload 0x{}",
-                    StrOps::SFromBytesHex(aRsData)
-                )
-            );
+            iDbParameters[rsMsgDesc.name] = rsMsgDesc.value;
 
-            GpLog::S().Flush();
-
-            THROW_GP_NOT_IMPLEMENTED();
+            outMessageSize = 0;
         } break;
         case PSQL::MessageRsDescId::PARSE_COMPLETE:
         {
@@ -337,37 +317,20 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
         } break;
         case PSQL::MessageRsDescId::READY_FOR_QUERY:
         {
-            // TODO: implement
+            PSQL::ReadyForQueryDescRS rsMsgDesc;
+            PSQL::ProtocolDeserializer::SDeserialize(dataReader, rsMsgDesc);
 
-            LOG_ERROR
-            (
-                fmt::format
-                (
-                    "NOT IMPLEMENTED: ReadyForQuery. Payload 0x{}",
-                    StrOps::SFromBytesHex(aRsData)
-                )
-            );
+            iTransactionStatus = rsMsgDesc.transaction_status;
 
-            GpLog::S().Flush();
+            iReadyForRequestFn();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            outMessageSize = 0;
         } break;
         case PSQL::MessageRsDescId::ROW_DESCRIPTION:
         {
-            // TODO: implement
+            iRowDescriptionDescRS.Clear();
 
-            LOG_ERROR
-            (
-                fmt::format
-                (
-                    "NOT IMPLEMENTED: RowDescription. Payload 0x{}",
-                    StrOps::SFromBytesHex(aRsData)
-                )
-            );
-
-            GpLog::S().Flush();
-
-            THROW_GP_NOT_IMPLEMENTED();
+            PSQL::ProtocolDeserializer::SDeserialize(dataReader, iRowDescriptionDescRS);
         } break;
         default:
         {
@@ -399,8 +362,8 @@ size_t  GpPsqlMessageProcessor::ProcessAuthRequest
     {
         case PSQL::AuthenticationMethod::AUTH_OK:
         {
-            [[maybe_unused]] const auto& rsPayload = std::get<PSQL::AuthenticationDescRS::AuthenticationOk>(aRsMsgDesc.payload);
-            iOnAuthOkFn();
+            //[[maybe_unused]] const auto& rsPayload = std::get<PSQL::AuthenticationDescRS::AuthenticationOk>(aRsMsgDesc.payload);
+            // NOP
         } break;
         case PSQL::AuthenticationMethod::KERBEROS_V5:
         {

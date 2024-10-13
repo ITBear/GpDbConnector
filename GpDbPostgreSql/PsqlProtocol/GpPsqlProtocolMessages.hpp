@@ -11,19 +11,42 @@ namespace GPlatform::PSQL {
 // https://www.postgresql.org/docs/current/protocol-overview.html
 // https://www.postgresql.org/docs/current/protocol-message-formats.html
 
+enum class TypeOID: u_int_32
+{
+    INT2            = 21,
+    INT2_ARRAY      = 22,
+    INT4            = 23,
+    INT4_ARRAY      = 1007,
+    INT8            = 20,
+    INT8_ARRAY      = 1016,
+    FLOAT4          = 700,
+    FLOAT4_ARRAY    = 1021,
+    FLOAT8          = 701,
+    FLOAT8_ARRAY    = 1022,
+    TEXT            = 25,
+    TEXT_ARRAY      = 1009,
+    UUID            = 2950,
+    UUID_ARRAY      = 2951,
+    BYTEA           = 17,
+    BYTEA_ARRAY     = 1001,
+    BOOL            = 16,
+    BOOL_ARRAY      = 1000
+};
+
 enum class MessageRqDescId: u_int_8
 {
     NO_MESSAGE              = 0,
     STARTUP_MESSAGE         = 255,
     PASSWORD_MESSAGE        = 'p',
-    QUERY                   = 'Q',
+    QUERY                   = 'Q', // The client sends this message with the SQL statement as a string. The server processes the query and sends back the result or an error.
     TERMINATE               = 'X',
-    PARSE                   = 'P',
-    BIND                    = 'B',
-    EXECUTE                 = 'E',
+    PARSE                   = 'P', // The client sends this message to parse an SQL statement and create a prepared statement on the server. You can include parameter placeholders ($1, $2, etc.) in the SQL statement.
+    BIND                    = 'B', // Binds the parameters to the prepared statement.
+    EXECUTE                 = 'E', // Executes the prepared statement with the bound parameters.
     CLOSE                   = 'C',
     FLUSH                   = 'H',
-    SYNC                    = 'S',
+    SYNC                    = 'S', // Indicates that the client is finished sending commands for now.
+                                   // The client sends this message to synchronize with the server and receive any pending responses. It usually follows a QUERY or EXECUTE.
     FUNCTION_CALL           = 'F',
     COPY_DATA               = 'd',
     COPY_DONE               = 'c',
@@ -32,24 +55,24 @@ enum class MessageRqDescId: u_int_8
 
 enum class MessageRsDescId
 {
-    AUTHENTICATION_REQUEST  = 'R',
-    BACKEND_KEY_DATA        = 'K',
+    AUTHENTICATION_REQUEST  = 'R', // The client receives an AUTHENTICATION_REQUEST message during the initial connection phase, immediately after the client sends the startup message to the server. This message is part of the server's response to the client's attempt to authenticate.
+    BACKEND_KEY_DATA        = 'K', // The client receives a BACKEND_KEY_DATA message during the connection startup process, immediately after the AuthenticationOk message is sent by the server.
     BIND_COMPLETE           = '2',
     CLOSE_COMPLETE          = '3',
     COMMAND_COMPLETE        = 'C',
     COPY_IN_RESPONSE        = 'G',
     COPY_OUT_RESPONSE       = 'H',
     DATA_ROW                = 'D',
-    ERROR_RESPONSE          = 'E',
+    ERROR_RESPONSE          = 'E', // The client receives an ERROR_RESPONSE message whenever an error occurs during the communication between the client and the server. This message is sent by the server to notify the client that a problem has occurred that prevents the server from successfully processing a request.
     FUNCTION_CALL_RESPONSE  = 'V',
-    NO_DATA                 = 'n',
+    EMPTY_DATA              = 'n', // NO_DATA
     NOTICE_RESPONSE         = 'N',
     NOTIFICATION_RESPONSE   = 'A',
     PARAMETER_DESCRIPTION   = 't',
-    PARAMETER_STATUS        = 'S',
+    PARAMETER_STATUS        = 'S', // The client receives a PARAMETER_STATUS message during the startup phase of a connection and whenever a run-time parameter changes during the session.
     PARSE_COMPLETE          = '1',
     PORTAL_SUSPENDED        = 's',
-    READY_FOR_QUERY         = 'Z',
+    READY_FOR_QUERY         = 'Z', // The client receives a READY_FOR_QUERY message from the server after the server has completed processing the previous command and is ready to accept a new command. This message is an indication that the server is idle and waiting for the next request from the client.
     ROW_DESCRIPTION         = 'T'
 };
 
@@ -96,6 +119,13 @@ enum class ErrorCodeId
     ROUTINE                 = 'R'   // 'Routine': the name of the source-code routine reporting the error.
 };
 
+enum class TransactionStatus
+{
+    IDLE,
+    TRANSACTION_BLOCK,
+    FAILED_TRANSACTION_BLOCK
+};
+
 // -------------------------------- RQ messages --------------------------------
 
 struct StartupMessageDescRQ
@@ -107,6 +137,12 @@ struct StartupMessageDescRQ
     //u_int_32      length;              // Total length of the message (no need here, caclulated in ProtocolSerializer)
     u_int_32        protocol_version;    // Protocol version number
     AttributesMapT  attributes;          // Series of null-terminated key-value pairs
+};
+
+struct QueryDescRQ
+{
+    MessageRqDescId message_id  = PSQL::MessageRqDescId::QUERY;
+    std::string     query;                  // The query string
 };
 
 struct SASLInitialResponseDescRQ
@@ -141,6 +177,7 @@ struct ErrorResponseDescRS
     MessagesT       messages;
 };
 
+//
 struct AuthenticationDescRS
 {
     struct AuthenticationOk
@@ -174,6 +211,73 @@ struct AuthenticationDescRS
     u_int_32                length = 0;     // Total length of the message
     AuthenticationMethod    auth_method;    // Type of authentication required
     PayloadT                payload;
+};
+
+// run-time parameter status report
+struct ParameterStatusDescRS
+{
+    u_int_32        length = 0;     // Total length of the message
+    std::string     name;           // The name of the run-time parameter being reported
+    std::string     value;          // The current value of the parameter
+};
+
+// Cancellation key data. The frontend must save these values if it wishes to be able to issue CancelRequest messages later.
+struct BackendKeyDataDescRS
+{
+    u_int_32        length  = 0;    // Total length of the message
+    u_int_32        pid     = 0;    // The process ID of this backend
+    u_int_32        secret  = 0;    // The secret key of this backend
+};
+
+//
+struct ReadyForQueryDescRS
+{
+    u_int_32            length              = 0;                        // Total length of the message
+    TransactionStatus   transaction_status  = TransactionStatus::IDLE;  // Current backend transaction status indicator. Possible values are 'I' if idle (not in a transaction block);
+                                                                        // 'T' if in a transaction block; or 'E' if in a failed transaction block (queries will be rejected until block is ended).
+};
+
+// RowDescription
+struct RowDescriptionDescRS
+{
+    struct ColumnDesc
+    {
+        using Vec = boost::container::small_vector<ColumnDesc, 16>;
+
+        std::string name;                       // Field Name: (null-terminated string)
+        u_int_32    table_oid           = 0;    // The object ID of the table from which this field was retrieved. If this field is an expression rather than a direct
+                                                // reference to a table column, the value is 0.
+        u_int_16    attribute_number    = 0;    // The attribute number of the column. If the field is an expression or does not directly correspond to a table column,
+                                                // the value is 0.
+        u_int_32    type_oid            = 0;    // The OID of the data type of the column.
+        u_int_16    type_size           = 0;    // The size of the data type. This is the size in bytes, or -1 for variable-length types.
+        u_int_32    type_modifier       = 0;    // The type modifier is typically used to specify precision or scale for numeric types.
+        u_int_16    format_code         = 0;    // Specifies the format of the field: 0 indicates the field is in text format, 1 indicates the field is in binary format
+    };
+
+    void Clear (void)
+    {
+        columns.clear();
+    }
+
+    u_int_32        length  = 0;    // Total length of the message
+    ColumnDesc::Vec columns;        // Columns
+};
+
+// DataRow
+struct DataRowDescRS
+{
+    using ColumnDescVec = boost::container::small_vector<GpSpanByteR, 16>;
+
+    u_int_32        length  = 0;    // Total length of the message
+    ColumnDescVec   columns;
+};
+
+// CommandComplete
+struct CommandCompleteDescRS
+{
+    u_int_32            length  = 0;    // Total length of the message
+    std::string_view    command;        // The command tag. This is usually a single word that identifies which SQL command was completed.
 };
 
 }// namespace GPlatform::PSQL

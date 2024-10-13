@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GpDbConnector/GpDbClient/Query/GpDbQueryResState.hpp>
+#include <GpDbConnector/GpDbClient/GpDbClient_global.hpp>
 #include <GpCore2/GpReflection/GpReflectObject.hpp>
 
 namespace GPlatform {
@@ -11,16 +11,9 @@ public:
     CLASS_REMOVE_CTRS_MOVE_COPY(GpDbQueryRes)
     CLASS_DD(GpDbQueryRes)
 
-    using StateTE = GpDbQueryResState::EnumT;
-
 public:
                                             GpDbQueryRes            (void) noexcept {}
     virtual                                 ~GpDbQueryRes           (void) noexcept {}
-
-    virtual void                            Clear                   (void) = 0;
-
-    [[nodiscard]]
-    virtual StateTE                         State                   (void) const = 0;
 
     [[nodiscard]]
     virtual size_t                          RowsCount               (void) const = 0;
@@ -29,183 +22,183 @@ public:
     virtual size_t                          ColumnsCount            (void) const = 0;
 
     [[nodiscard]]
-    virtual s_int_16                        GetInt16                (const size_t               aRowId,
-                                                                     const size_t               aColId,
+    virtual s_int_16                        GetInt16                (size_t                     aRowId,
+                                                                     size_t                     aColId,
                                                                      std::optional<s_int_16>    aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<s_int_16>           GetInt16Array1D         (const size_t                           aRowId,
-                                                                     const size_t                           aColId,
+    virtual std::vector<s_int_16>           GetInt16Array1D         (size_t                                 aRowId,
+                                                                     size_t                                 aColId,
                                                                      std::optional<std::vector<s_int_16>>   aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual s_int_32                        GetInt32                (const size_t               aRowId,
-                                                                     const size_t               aColId,
+    virtual s_int_32                        GetInt32                (size_t                     aRowId,
+                                                                     size_t                     aColId,
                                                                      std::optional<s_int_32>    aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<s_int_32>           GetInt32Array1D         (const size_t                           aRowId,
-                                                                     const size_t                           aColId,
+    virtual std::vector<s_int_32>           GetInt32Array1D         (size_t                                 aRowId,
+                                                                     size_t                                 aColId,
                                                                      std::optional<std::vector<s_int_32>>   aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual s_int_64                        GetInt64                (const size_t               aRowId,
-                                                                     const size_t               aColId,
+    virtual s_int_64                        GetInt64                (size_t                     aRowId,
+                                                                     size_t                     aColId,
                                                                      std::optional<s_int_64>    aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<s_int_64>           GetInt64Array1D         (const size_t                           aRowId,
-                                                                     const size_t                           aColId,
+    virtual std::vector<s_int_64>           GetInt64Array1D         (size_t                                 aRowId,
+                                                                     size_t                                 aColId,
                                                                      std::optional<std::vector<s_int_64>>   aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual double                          GetDouble               (const size_t           aRowId,
-                                                                     const size_t           aColId,
+    virtual double                          GetDouble               (size_t                 aRowId,
+                                                                     size_t                 aColId,
                                                                      std::optional<double>  aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<double>             GetDoubleArray1D        (const size_t                       aRowId,
-                                                                     const size_t                       aColId,
+    virtual std::vector<double>             GetDoubleArray1D        (size_t                             aRowId,
+                                                                     size_t                             aColId,
                                                                      std::optional<std::vector<double>> aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual float                           GetFloat                (const size_t           aRowId,
-                                                                     const size_t           aColId,
+    virtual float                           GetFloat                (size_t                 aRowId,
+                                                                     size_t                 aColId,
                                                                      std::optional<float>   aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<float>              GetFloatArray1D         (const size_t                       aRowId,
-                                                                     const size_t                       aColId,
+    virtual std::vector<float>              GetFloatArray1D         (size_t                             aRowId,
+                                                                     size_t                             aColId,
                                                                      std::optional<std::vector<float>>  aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::string_view                GetStr                  (const size_t                       aRowId,
-                                                                     const size_t                       aColId,
+    virtual std::string_view                GetStr                  (size_t                             aRowId,
+                                                                     size_t                             aColId,
                                                                      std::optional<std::string_view>    aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<std::string_view>   GetStrArray1D           (const size_t                                   aRowId,
-                                                                     const size_t                                   aColId,
+    virtual std::vector<std::string_view>   GetStrArray1D           (size_t                                         aRowId,
+                                                                     size_t                                         aColId,
                                                                      std::optional<std::vector<std::string_view>>   aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual GpSpanCharRW                    GetStrRW                (const size_t                   aRowId,
-                                                                     const size_t                   aColId,
+    virtual GpSpanCharRW                    GetStrRW                (size_t                         aRowId,
+                                                                     size_t                         aColId,
                                                                      std::optional<GpSpanCharRW>    aOnNullValue) = 0;
 
     [[nodiscard]]
-    virtual std::vector<GpSpanCharRW>       GetStrRWArray1D         (const size_t                               aRowId,
-                                                                     const size_t                               aColId,
+    virtual std::vector<GpSpanCharRW>       GetStrRWArray1D         (size_t                                     aRowId,
+                                                                     size_t                                     aColId,
                                                                      std::optional<std::vector<GpSpanCharRW>>   aOnNullValue) = 0;
 
     [[nodiscard]]
-    virtual std::string_view                GetJson                 (const size_t                       aRowId,
-                                                                     const size_t                       aColId,
+    virtual std::string_view                GetJson                 (size_t                             aRowId,
+                                                                     size_t                             aColId,
                                                                      std::optional<std::string_view>    aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<std::string_view>   GetJsonArray1D          (const size_t                                   aRowId,
-                                                                     const size_t                                   aColId,
+    virtual std::vector<std::string_view>   GetJsonArray1D          (size_t                                         aRowId,
+                                                                     size_t                                         aColId,
                                                                      std::optional<std::vector<std::string_view>>   aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual GpSpanCharRW                    GetJsonRW               (const size_t                   aRowId,
-                                                                     const size_t                   aColId,
+    virtual GpSpanCharRW                    GetJsonRW               (size_t                         aRowId,
+                                                                     size_t                         aColId,
                                                                      std::optional<GpSpanCharRW>    aOnNullValue) = 0;
 
     [[nodiscard]]
-    virtual std::vector<GpSpanCharRW>       GetJsonRWArray1D        (const size_t                               aRowId,
-                                                                     const size_t                               aColId,
+    virtual std::vector<GpSpanCharRW>       GetJsonRWArray1D        (size_t                                     aRowId,
+                                                                     size_t                                     aColId,
                                                                      std::optional<std::vector<GpSpanCharRW>>   aOnNullValue) = 0;
 
     [[nodiscard]]
-    virtual GpUUID                          GetUuid                 (const size_t           aRowId,
-                                                                     const size_t           aColId,
+    virtual GpUUID                          GetUuid                 (size_t                 aRowId,
+                                                                     size_t                 aColId,
                                                                      std::optional<GpUUID>  aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<GpUUID>             GetUuidArray1D          (const size_t                       aRowId,
-                                                                     const size_t                       aColId,
+    virtual std::vector<GpUUID>             GetUuidArray1D          (size_t                             aRowId,
+                                                                     size_t                             aColId,
                                                                      std::optional<std::vector<GpUUID>> aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual GpSpanByteR                     GetBlob                 (const size_t               aRowId,
-                                                                     const size_t               aColId,
+    virtual GpSpanByteR                     GetBlob                 (size_t                     aRowId,
+                                                                     size_t                     aColId,
                                                                      std::optional<GpSpanByteR> aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual std::vector<GpSpanByteR>        GetBlobArray1D          (const size_t                               aRowId,
-                                                                     const size_t                               aColId,
+    virtual std::vector<GpSpanByteR>        GetBlobArray1D          (size_t                                     aRowId,
+                                                                     size_t                                     aColId,
                                                                      std::optional<std::vector<GpSpanByteR>>    aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual bool                            GetBoolean              (const size_t           aRowId,
-                                                                     const size_t           aColId,
+    virtual bool                            GetBoolean              (size_t                 aRowId,
+                                                                     size_t                 aColId,
                                                                      std::optional<bool>    aOnNullValue) const = 0;
 
     template<typename T>
-    [[nodiscard]] typename T::EnumT         GetEnum                 (const size_t                       aRowId,
-                                                                     const size_t                       aColId,
+    [[nodiscard]] typename T::EnumT         GetEnum                 (size_t                             aRowId,
+                                                                     size_t                             aColId,
                                                                      std::optional<typename T::EnumT>   aOnNullValue) const;
 
     [[nodiscard]]
-    GpReflectObject::SP                     ColToObject             (const size_t   aRowId,
-                                                                     const size_t   aColId) const;
+    GpReflectObject::SP                     ColToObject             (size_t aRowId,
+                                                                     size_t aColId) const;
 
     [[nodiscard]]
-    GpReflectObject::C::Vec::SP             ColToObjectArray1D      (const size_t   aRowId,
-                                                                     const size_t   aColId) const;
+    GpReflectObject::C::Vec::SP             ColToObjectArray1D      (size_t aRowId,
+                                                                     size_t aColId) const;
 
     [[nodiscard]]
-    GpReflectObject::SP                     ColToObject             (const size_t           aRowId,
-                                                                     const size_t           aColId,
+    GpReflectObject::SP                     ColToObject             (size_t                 aRowId,
+                                                                     size_t                 aColId,
                                                                      const GpReflectModel&  aModel) const;
 
     template<typename T>
-    [[nodiscard]] typename T::SP            ColToObjectAs           (const size_t           aRowId,
-                                                                     const size_t           aColId) const;
+    [[nodiscard]] typename T::SP            ColToObjectAs           (size_t aRowId,
+                                                                     size_t aColId) const;
 
     [[nodiscard]]
-    GpReflectObject::C::Vec::SP             ColToObjectArray1D      (const size_t           aRowId,
-                                                                     const size_t           aColId,
+    GpReflectObject::C::Vec::SP             ColToObjectArray1D      (size_t                 aRowId,
+                                                                     size_t                 aColId,
                                                                      const GpReflectModel&  aModel) const;
 
     [[nodiscard]]
-    GpReflectObject::SP                     RowToObject             (const size_t           aRowId,
-                                                                     const size_t           aColStartId,
+    GpReflectObject::SP                     RowToObject             (size_t                 aRowId,
+                                                                     size_t                 aColStartId,
                                                                      const GpReflectModel&  aModel) const;
 
     [[nodiscard]]
-    GpReflectObject::C::Vec::SP             RowsToObject            (const size_t           aColStartId,
+    GpReflectObject::C::Vec::SP             RowsToObjects           (size_t                 aColStartId,
                                                                      const GpReflectModel&  aModel) const;
 
     template<typename T>
-    [[nodiscard]] typename T::SP            RowToObjectAs           (const size_t aRowId,
-                                                                     const size_t aColStartId) const;
+    [[nodiscard]] typename T::SP            RowToObjectAs           (size_t aRowId,
+                                                                     size_t aColStartId) const;
 
     template<typename T>
-    [[nodiscard]] typename T::C::Vec::SP    RowsToObjectAs          (const size_t aColStartId) const;
+    [[nodiscard]] typename T::C::Vec::SP    RowsToObjectsAs         (size_t aColStartId) const;
 
 private:
     void                                    _RowToObjectProp        (void*                  aDataPtr,
                                                                      const GpReflectProp&   aProp,
-                                                                     const size_t           aRowId,
-                                                                     const size_t           aColId) const;
+                                                                     size_t                 aRowId,
+                                                                     size_t                 aColId) const;
 
     void                                    _RowToObjectPropVec     (void*                  aDataPtr,
                                                                      const GpReflectProp&   aProp,
-                                                                     const size_t           aRowId,
-                                                                     const size_t           aColId) const;
+                                                                     size_t                 aRowId,
+                                                                     size_t                 aColId) const;
 
     void                                    _RowToObjectPropVecWrap (void*                  aDataPtr,
                                                                      const GpReflectProp&   aProp,
-                                                                     const size_t           aRowId,
-                                                                     const size_t           aColId) const;
+                                                                     size_t                 aRowId,
+                                                                     size_t                 aColId) const;
 
     void                                    _RowToObjectPropMap     (void*                  aDataPtr,
                                                                      const GpReflectProp&   aProp,
-                                                                     const size_t           aRowId,
-                                                                     const size_t           aColId) const;
+                                                                     size_t                 aRowId,
+                                                                     size_t                 aColId) const;
 
     template<typename ToT, typename  FromT>
     static std::vector<ToT>                 _SConvertArrayNum       (const std::vector<FromT>& aVec);
@@ -276,7 +269,7 @@ template<typename T>
 }
 
 template<typename T>
-[[nodiscard]] typename T::C::Vec::SP    GpDbQueryRes::RowsToObjectAs (const size_t aColStartId) const
+[[nodiscard]] typename T::C::Vec::SP    GpDbQueryRes::RowsToObjectsAs (const size_t aColStartId) const
 {
     const size_t            rowsCount = RowsCount();
     typename T::C::Vec::SP  res;

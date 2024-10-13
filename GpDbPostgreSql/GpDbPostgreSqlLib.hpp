@@ -5,6 +5,6 @@
 
 namespace GPlatform {
 
-GP_DECLARE_LIB(GP_DB_POSTGRESQL_API, GpDbPostgreSqlLib)
+GP_DECLARE_LIB_REGISTRATOR(GpDbPostgreSqlLib)
 
-}// namespace GPlatform
+}// namespaces GPlatform

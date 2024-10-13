@@ -11,24 +11,25 @@ DIR_LEVEL       = ./../..
 
 include($$DIR_LEVEL/../QtGlobalPro.pri)
 
-release_build_static{
+equals(var_link, "static") {
 	CONFIG += staticlib
 }
 
 # ----------- Libraries -----------
-os_windows{
+equals(var_os, "windows") {
 	LIBS += -lGpReflection$$TARGET_POSTFIX
 	LIBS += -lGpUtils$$TARGET_POSTFIX
 }
 
-os_linux{
+equals(var_os, "linux") {
+	LIBS += -lGpReflection$$TARGET_POSTFIX
+	LIBS += -lGpUtils$$TARGET_POSTFIX
 }
 
 # ----------- Sources and headers -----------
 HEADERS += \
 	GpDbDataModelsLib.hpp \
 	GpDbDataModels_global.hpp \
-	Search/GpDbDataModelsSearch.hpp \
 	Search/GpDbSearchDesc.hpp \
 	Search/GpDbSearchOrderDesc.hpp \
 	Search/GpDbSearchOrderType.hpp

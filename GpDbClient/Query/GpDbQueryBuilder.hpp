@@ -9,6 +9,7 @@
 
 namespace GPlatform {
 
+/*
 class GpDbQuery;
 class GpDbQuerySearchBuilder;
 
@@ -41,7 +42,7 @@ public:
                                 propInfo(aPropInfo)
                                 {}
 
-        std::string             name;       //*values names*/
+        std::string             name;       // values names
         std::string             bindType;   //::type
         GpDbQueryValType::EnumT type;
         const GpReflectProp&    propInfo;
@@ -232,5 +233,5 @@ GpDbQueryValType::EnumT GpDbQueryBuilder::SDetectQueryValType (const GpDbQueryVa
 {
     return GpDbQueryValType::EnumT(aValue.index());
 }
-
+*/
 }// namespace GPlatform

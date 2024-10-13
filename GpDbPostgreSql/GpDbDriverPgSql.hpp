@@ -12,16 +12,16 @@ public:
     TAG_SET(THREAD_SAFE)
 
 public:
-                                    GpDbDriverPgSql     (void);
-    virtual                         ~GpDbDriverPgSql    (void) noexcept override final;
+                                GpDbDriverPgSql     (void);
+    virtual                     ~GpDbDriverPgSql    (void) noexcept override final;
 
-    virtual GpDbConnection::SP      NewConnection       (GpIOEventPollerIdx aIOEventPollerIdx,
-                                                         milliseconds_t     aConnectTimeout,
-                                                         std::string        aServerHost,
-                                                         u_int_16           aServerPort,
-                                                         std::string        aUserName,
-                                                         std::string        aPassword,
-                                                         std::string        aDatabase) const override final;
+    virtual GpDbConnection::SP  NewConnection       (GpIOEventPollerIdx aIOEventPollerIdx,
+                                                     milliseconds_t     aConnectTimeout,
+                                                     std::string        aServerHost,
+                                                     u_int_16           aServerPort,
+                                                     std::string        aUserName,
+                                                     std::string        aPassword,
+                                                     std::string        aDatabase) const override final;
 };
 
 }// namespace GPlatform

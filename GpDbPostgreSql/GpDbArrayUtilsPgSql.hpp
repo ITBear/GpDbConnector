@@ -25,25 +25,6 @@ struct PgArrayHeaderT
 
 //https://github.com/postgres/postgres/blob/master/src/include/utils/array.h
 
-constexpr const Oid INT2OID         = 21;
-constexpr const Oid INT2VECTOROID   = 22;
-constexpr const Oid INT4OID         = 23;
-constexpr const Oid INT4ARRAYOID    = 1007;
-constexpr const Oid INT8OID         = 20;
-constexpr const Oid INT8ARRAYOID    = 1016;
-constexpr const Oid FLOAT8OID       = 701;
-constexpr const Oid FLOAT8ARRAYOID  = 1022;
-constexpr const Oid FLOAT4OID       = 700;
-constexpr const Oid FLOAT4ARRAYOID  = 1021;
-constexpr const Oid TEXTOID         = 25;
-constexpr const Oid TEXTARRAYOID    = 1009;
-constexpr const Oid UUIDOID         = 2950;
-constexpr const Oid UUIDARRAYOID    = 2951;
-constexpr const Oid BYTEAOID        = 17;
-constexpr const Oid BYTEAARRAYOID   = 1001;
-constexpr const Oid BOOLOID         = 16;
-constexpr const Oid BOOLARRAYOID    = 1000;
-
 class GpDbArrayUtilsPgSql
 {
 public:

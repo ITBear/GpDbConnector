@@ -58,4 +58,4 @@ private:
     std::queue<ConnectItcPromiseT>      iConnWaitToAcquirePromises;
 };
 
-}// GPlatform
+}// namespace GPlatform

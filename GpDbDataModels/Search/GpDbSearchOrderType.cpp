@@ -1,4 +1,4 @@
-#include "GpDbSearchOrderType.hpp"
+#include <GpDbConnector/GpDbDataModels/Search/GpDbSearchOrderType.hpp>
 
 namespace GPlatform {
 

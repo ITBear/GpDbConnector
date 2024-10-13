@@ -2,6 +2,6 @@
 
 namespace GPlatform {
 
-GP_IMPLEMENT_LIB(GpDbPostgreSqlLib)
+GP_IMPLEMENT_LIB_REGISTRATOR(GpDbPostgreSqlLib)
 
 }// namespaces GPlatform

@@ -4,7 +4,7 @@
 
 namespace GPlatform {
 
-class GpDbQueryMapperCacheValue;
+//class GpDbQueryMapperCacheValue;
 
 class GP_DB_CLIENT_API GpDbQuery
 {
@@ -18,15 +18,16 @@ public:
 public:
     inline                              GpDbQuery           (void) noexcept;
     inline                              GpDbQuery           (GpDbQuery&& aDbQuery) noexcept;
+    inline                              GpDbQuery           (const char* aQueryStr);
     inline                              GpDbQuery           (std::string aQueryStr) noexcept;
     inline                              GpDbQuery           (std::string_view aQueryStr);
     inline                              GpDbQuery           (std::string        aQueryStr,
                                                              const TypeVecT&    aTypes);
     inline                              GpDbQuery           (std::string&&  aQueryStr,
                                                              TypeVecT&&     aTypes) noexcept;
-    inline                              GpDbQuery           (GpCSP<GpDbQueryMapperCacheValue>&& aCacheValueCSP);
-                                        GpDbQuery           (const GpDbQueryMapperCacheValue& aCacheValue);
-    inline                              GpDbQuery           (GpDbQueryBuilder&& aQueryBuilder);
+    //inline                            GpDbQuery           (GpCSP<GpDbQueryMapperCacheValue>&& aCacheValueCSP);
+    //                                  GpDbQuery           (const GpDbQueryMapperCacheValue& aCacheValue);
+    //inline                            GpDbQuery           (GpDbQueryBuilder&& aQueryBuilder);
                                         ~GpDbQuery          (void) noexcept;
 
     inline GpDbQuery&                   operator=           (GpDbQuery&& aDbQuery) noexcept;
@@ -40,37 +41,37 @@ public:
     void                                AddValues           (GpDbQuery&& aDbQuery);
     void                                Reset               (void);
 
-    GpDbQuery&                          NextInt16           (const s_int_16                 aValue);
+    GpDbQuery&                          NextInt16           (s_int_16                       aValue);
     GpDbQuery&                          NextInt16Array1D    (const std::vector<s_int_16>&   aValue);
     GpDbQuery&                          NextInt16Array1D    (std::vector<s_int_16>&&        aValue);
 
-    GpDbQuery&                          InsertInt16         (const size_t                   aId,
-                                                             const s_int_16                 aValue);
-    GpDbQuery&                          InsertInt16Array1D  (const size_t                   aId,
+    GpDbQuery&                          InsertInt16         (size_t                         aId,
+                                                             s_int_16                       aValue);
+    GpDbQuery&                          InsertInt16Array1D  (size_t                         aId,
                                                              const std::vector<s_int_16>&   aValue);
-    GpDbQuery&                          InsertInt16Array1D  (const size_t                   aId,
+    GpDbQuery&                          InsertInt16Array1D  (size_t                         aId,
                                                              std::vector<s_int_16>&&        aValue);
 
-    GpDbQuery&                          NextInt32           (const s_int_32                 aValue);
+    GpDbQuery&                          NextInt32           (s_int_32                       aValue);
     GpDbQuery&                          NextInt32Array1D    (const std::vector<s_int_32>&   aValue);
     GpDbQuery&                          NextInt32Array1D    (std::vector<s_int_32>&&        aValue);
 
-    GpDbQuery&                          InsertInt32         (const size_t                   aId,
-                                                             const s_int_32                 aValue);
-    GpDbQuery&                          InsertInt32Array1D  (const size_t                   aId,
+    GpDbQuery&                          InsertInt32         (size_t                         aId,
+                                                             s_int_32                       aValue);
+    GpDbQuery&                          InsertInt32Array1D  (size_t                         aId,
                                                              const std::vector<s_int_32>&   aValue);
-    GpDbQuery&                          InsertInt32Array1D  (const size_t                   aId,
+    GpDbQuery&                          InsertInt32Array1D  (size_t                         aId,
                                                              std::vector<s_int_32>&&        aValue);
 
-    GpDbQuery&                          NextInt64           (const s_int_64                 aValue);
+    GpDbQuery&                          NextInt64           (s_int_64                       aValue);
     GpDbQuery&                          NextInt64Array1D    (const std::vector<s_int_64>&   aValue);
     GpDbQuery&                          NextInt64Array1D    (std::vector<s_int_64>&&        aValue);
 
-    GpDbQuery&                          NextDouble          (const double                   aValue);
+    GpDbQuery&                          NextDouble          (double                         aValue);
     GpDbQuery&                          NextDoubleArray1D   (const std::vector<double>&     aValue);
     GpDbQuery&                          NextDoubleArray1D   (std::vector<double>&&          aValue);
 
-    GpDbQuery&                          NextFloat           (const float                    aValue);
+    GpDbQuery&                          NextFloat           (float                          aValue);
     GpDbQuery&                          NextFloatArray1D    (const std::vector<float>&      aValue);
     GpDbQuery&                          NextFloatArray1D    (std::vector<float>&&           aValue);
 
@@ -99,7 +100,7 @@ public:
     GpDbQuery&                          NextBlobArray1D     (const std::vector<GpBytesArray>&   aValue);
     GpDbQuery&                          NextBlobArray1D     (std::vector<GpBytesArray>&&        aValue);
 
-    GpDbQuery&                          NextBoolean         (const bool                 aValue);
+    GpDbQuery&                          NextBoolean         (bool                   aValue);
 
     GpDbQuery&                          NextNULL            (void);
 
@@ -114,7 +115,7 @@ public:
     GpDbQuery&                          AddInt32Array1D     (const std::vector<s_int_32>&   aValue);
     GpDbQuery&                          AddInt32Array1D     (std::vector<s_int_32>&&        aValue);
 
-    GpDbQuery&                          AddInt64            (const s_int_64                 aValue);
+    GpDbQuery&                          AddInt64            (s_int_64                       aValue);
     GpDbQuery&                          AddInt64Array1D     (const std::vector<s_int_64>&   aValue);
     GpDbQuery&                          AddInt64Array1D     (std::vector<s_int_64>&&        aValue);
 
@@ -156,29 +157,29 @@ public:
 
     GpDbQuery&                          AddNULL             (void);
 
-    GpDbQuery&                          FromObject          (const GpReflectObject&         aObject,
-                                                             GpDbQueryBuilderMode::EnumT    aMode);
+    //GpDbQuery&                        FromObject          (const GpReflectObject&         aObject,
+    //                                                       GpDbQueryBuilderMode::EnumT    aMode);
 
-    inline s_int_16                     Int16               (const size_t aId) const;
-    inline const std::vector<s_int_16>& Int16Array1D        (const size_t aId) const;
-    inline s_int_32                     Int32               (const size_t aId) const;
-    inline const std::vector<s_int_32>& Int32Array1D        (const size_t aId) const;
-    inline s_int_64                     Int64               (const size_t aId) const;
-    inline const std::vector<s_int_64>& Int64Array1D        (const size_t aId) const;
-    inline double                       Double              (const size_t aId) const;
-    inline const std::vector<double>&   DoubleArray1D       (const size_t aId) const;
-    inline float                        Float               (const size_t aId) const;
-    inline const std::vector<float>&    FloatArray1D        (const size_t aId) const;
-    inline std::string_view             Str                 (const size_t aId) const;
-    inline const std::vector<std::string>&StrArray1D        (const size_t aId) const;
-    inline std::string_view             Json                (const size_t aId) const;
-    inline const std::vector<std::string>&JsonArray1D       (const size_t aId) const;
-    inline const GpUUID&                Uuid                (const size_t aId) const;
-    inline const std::vector<GpUUID>&   UuidArray1D         (const size_t aId) const;
-    inline bool                         Boolean             (const size_t aId) const;
-    inline const std::vector<bool>&     BooleanArray1D      (const size_t aId) const;
-    inline const GpBytesArray&          Blob                (const size_t aId) const;
-    inline const std::vector<GpBytesArray>&BlobArray1D      (const size_t aId) const;
+    inline s_int_16                     Int16               (size_t aId) const;
+    inline const std::vector<s_int_16>& Int16Array1D        (size_t aId) const;
+    inline s_int_32                     Int32               (size_t aId) const;
+    inline const std::vector<s_int_32>& Int32Array1D        (size_t aId) const;
+    inline s_int_64                     Int64               (size_t aId) const;
+    inline const std::vector<s_int_64>& Int64Array1D        (size_t aId) const;
+    inline double                       Double              (size_t aId) const;
+    inline const std::vector<double>&   DoubleArray1D       (size_t aId) const;
+    inline float                        Float               (size_t aId) const;
+    inline const std::vector<float>&    FloatArray1D        (size_t aId) const;
+    inline std::string_view             Str                 (size_t aId) const;
+    inline const std::vector<std::string>&StrArray1D        (size_t aId) const;
+    inline std::string_view             Json                (size_t aId) const;
+    inline const std::vector<std::string>&JsonArray1D       (size_t aId) const;
+    inline const GpUUID&                Uuid                (size_t aId) const;
+    inline const std::vector<GpUUID>&   UuidArray1D         (size_t aId) const;
+    inline bool                         Boolean             (size_t aId) const;
+    inline const std::vector<bool>&     BooleanArray1D      (size_t aId) const;
+    inline const GpBytesArray&          Blob                (size_t aId) const;
+    inline const std::vector<GpBytesArray>&BlobArray1D      (size_t aId) const;
 
 private:
     void                                _NextProp           (const GpReflectProp&   aProp,
@@ -214,19 +215,24 @@ GpDbQuery::GpDbQuery (void) noexcept
 }
 
 GpDbQuery::GpDbQuery (GpDbQuery&& aDbQuery) noexcept:
-iQueryStr(std::move(aDbQuery.iQueryStr)),
-iTypes   (std::move(aDbQuery.iTypes)),
-iValues  (std::move(aDbQuery.iValues))
+iQueryStr{std::move(aDbQuery.iQueryStr)},
+iTypes   {std::move(aDbQuery.iTypes)},
+iValues  {std::move(aDbQuery.iValues)}
+{
+}
+
+GpDbQuery::GpDbQuery (const char* aQueryStr):
+iQueryStr{aQueryStr}
 {
 }
 
 GpDbQuery::GpDbQuery (std::string aQueryStr) noexcept:
-iQueryStr(std::move(aQueryStr))
+iQueryStr{std::move(aQueryStr)}
 {
 }
 
 GpDbQuery::GpDbQuery (std::string_view aQueryStr):
-iQueryStr(std::string_view(aQueryStr))
+iQueryStr{std::string_view(aQueryStr)}
 {
 }
 
@@ -235,8 +241,8 @@ GpDbQuery::GpDbQuery
     std::string     aQueryStr,
     const TypeVecT& aTypes
 ):
-iQueryStr(std::move(aQueryStr)),
-iTypes(aTypes)
+iQueryStr{std::move(aQueryStr)},
+iTypes   {aTypes}
 {
 }
 
@@ -250,17 +256,17 @@ iTypes   {std::move(aTypes)}
 {
 }
 
-GpDbQuery::GpDbQuery (GpCSP<GpDbQueryMapperCacheValue>&& aCacheValueCSP):
-GpDbQuery{aCacheValueCSP.Vn()}
-{
-}
+//GpDbQuery::GpDbQuery (GpCSP<GpDbQueryMapperCacheValue>&& aCacheValueCSP):
+//GpDbQuery{aCacheValueCSP.Vn()}
+//{
+//}
 
-GpDbQuery::GpDbQuery (GpDbQueryBuilder&& aQueryBuilder):
-iQueryStr{aQueryBuilder.QueryStrMove()},
-iTypes   {aQueryBuilder.TypesMove()},
-iValues  {aQueryBuilder.ValuesMove()}
-{
-}
+//GpDbQuery::GpDbQuery (GpDbQueryBuilder&& aQueryBuilder):
+//iQueryStr{aQueryBuilder.QueryStrMove()},
+//iTypes   {aQueryBuilder.TypesMove()},
+//iValues  {aQueryBuilder.ValuesMove()}
+//{
+//}
 
 GpDbQuery&  GpDbQuery::operator= (GpDbQuery&& aDbQuery) noexcept
 {

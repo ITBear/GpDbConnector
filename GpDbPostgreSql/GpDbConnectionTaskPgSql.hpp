@@ -6,6 +6,7 @@
 #include <GpDbConnector/GpDbPostgreSql/PsqlProtocol/GpPsqlMessageProcessor.hpp>
 #include <GpDbConnector/GpDbClient/Query/GpDbQueryRes.hpp>
 #include <GpDbConnector/GpDbClient/Query/GpDbQuery.hpp>
+#include <GpDbConnector/GpDbPostgreSql/GpDbQueryResPgSql.hpp>
 
 namespace GPlatform {
 
@@ -15,11 +16,11 @@ public:
     CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbConnectionTaskPgSql)
     CLASS_DD(GpDbConnectionTaskPgSql)
 
-    enum class ProcessStateT
+    enum class SocketStateT
     {
-        CHECK_CONNECTION,
+        CONNECTING,
         IDLE,
-        SEND_MESSAGE
+        SENDING_MESSAGE
     };
 
     class ConnectedToDbMsg {};
@@ -57,6 +58,7 @@ protected:
     virtual void                    OnError                     (GpSocket& aSocket) override final;
     virtual void                    OnConnected                 (GpSocketTCP& aSocket) override final;
     virtual void                    ProcessOtherMessages        (GpAny& aMessage) override;
+    void                            ProcessExecuteMsg           (ExecuteMsgT& aMessage);
 
 private:
     void                            ReadFromSocket              (GpSocketTCP& aSocket);
@@ -64,24 +66,33 @@ private:
     void                            PrepareAndSendMessage       (size_t aMessageSize);
     void                            ProcessRsMessage            (GpSpanByteR aMessageData);
 
-    void                            OnAuthOk                    (void);
+    void                            OnReadyForRequest           (void);
+    void                            OnDataRow                   (const PSQL::RowDescriptionDescRS&  aRowDesc,
+                                                                 const PSQL::DataRowDescRS&         aRowData);
+    void                            OnCommandComplete           (const PSQL::CommandCompleteDescRS& aCommandCompleteDesc);
 
 private:
     const milliseconds_t            iConnectTimeout;
     const std::string               iServerHost;
     const u_int_16                  iServerPort;
 
-    std::atomic_bool                iIsConnectd             = false;
+    std::atomic_bool                iIsConnectd                 = false;
     ConnectedToDbPromiseT           iConnectedToDbPromise;
 
-    ProcessStateT                   iProcessState           = ProcessStateT::CHECK_CONNECTION;
+    SocketStateT                    iSocketState                = SocketStateT::IDLE;
+    ExecutePromiseT                 iExecutePromise;
+    GpDbQueryResPgSql::SP           iDbQueryResSP;
 
+    // Read buffers
     GpBytesArray                    iSocketTmpBufferRead;
-    GpBytesArray                    iSocketTmpBufferWrite;
-    size_t                          iRqBytesToWriteTotal    = 0;
-    size_t                          iRqBytesWrited          = 0;
-    size_t                          iRsSizeOfCurrentMessage = 0;
+    size_t                          iSocketTmpBufferReadSize    = 0;
 
+    // Write buffers
+    GpBytesArray                    iSocketTmpBufferWrite;
+    size_t                          iRqBytesToWriteTotal        = 0;
+    size_t                          iRqBytesWrited              = 0;
+
+    // Message processor
     PSQL::GpPsqlMessageProcessor    iMessageProcessor;
 };
 
