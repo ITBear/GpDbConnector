@@ -16,7 +16,7 @@ public:
     CLASS_DD(GpDbManagerCatalog)
     TAG_SET(THREAD_SAFE)
 
-    using ManagersT = GpDictionary<boost::container::small_flat_map<std::string, GpSP<GpDbManager>, 8, std::less<>>>;
+    using ManagersT = GpSharedMap<boost::container::small_flat_map<std::string, GpSP<GpDbManager>, 8, std::less<>>>;
 
 private:
                                 GpDbManagerCatalog  (void) noexcept;

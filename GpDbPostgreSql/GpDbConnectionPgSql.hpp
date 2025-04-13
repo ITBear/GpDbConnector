@@ -24,8 +24,7 @@ public:
     virtual                     ~GpDbConnectionPgSql    (void) noexcept override final;
 
     virtual void                Close                   (void) override final;
-    virtual GpDbQueryRes::SP    Execute                 (const GpDbQuery&   aQuery,
-                                                         size_t             aMinResultRowsCount) override final;
+    virtual GpDbQueryRes::SP    Execute                 (const GpDbQuery& aQuery) override final;
     virtual bool                IsConnected             (void) const noexcept override final;
     virtual void                TryConnectAndWaitFor    (void) override final;
 

@@ -17,13 +17,13 @@ equals(var_link, "static") {
 
 # ----------- Libraries -----------
 equals(var_os, "windows") {
-	LIBS += -lGpDbDataModels$$TARGET_POSTFIX
-	LIBS += -lGpLogCore$$TARGET_POSTFIX
-	LIBS += -lGpNetworkCore$$TARGET_POSTFIX
-	LIBS += -lGpJson$$TARGET_POSTFIX
-	LIBS += -lGpReflection$$TARGET_POSTFIX
-	LIBS += -lGpTasks$$TARGET_POSTFIX
-	LIBS += -lGpUtils$$TARGET_POSTFIX
+	LIBS += -lGpDbDataModels$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpLogCore$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpNetworkCore$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpJson$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpReflection$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpTasks$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpUtils$$TARGET_POSTFIX$$_VER_MAJ
 }
 
 equals(var_os, "linux") {
@@ -55,7 +55,7 @@ HEADERS += \
 	GpDbTransactionIsolation.hpp \
 	Query/GpDbQuery.hpp \
 	Query/GpDbQueryBuilder.hpp \
-	Query/GpDbQueryMapperCache.hpp \
+	Query/GpDbQueryCacheManager.hpp \
 	Query/GpDbQueryPrepared.hpp \
 	Query/GpDbQueryRes.hpp \
 	Query/GpDbQuerySearchBuilder.hpp \
@@ -77,7 +77,7 @@ SOURCES += \
 	GpDbTransactionIsolation.cpp \
 	Query/GpDbQuery.cpp \
 	Query/GpDbQueryBuilder.cpp \
-	Query/GpDbQueryMapperCache.cpp \
+	Query/GpDbQueryCacheManager.cpp \
 	Query/GpDbQueryRes.cpp \
 	Query/GpDbQuerySearchBuilder.cpp \
 	Query/GpDbQueryValType.cpp

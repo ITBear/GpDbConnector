@@ -1,7 +1,7 @@
 #include <GpDbConnector/GpDbPostgreSql/GpDbConnectionPgSql.hpp>
 #include <GpCore2/GpUtils/Debugging/GpDebugging.hpp>
 #include <GpCore2/GpTasks/Scheduler/GpTaskScheduler.hpp>
-#include <GpCore2/GpTasks/ITC/GpItcSharedFutureUtils.hpp>
+#include <GpCore2/GpTasks/ITC/GpItcFutureUtils.hpp>
 #include <GpLog/GpLogCore/GpLog.hpp>
 
 namespace GPlatform {
@@ -45,13 +45,9 @@ void    GpDbConnectionPgSql::Close (void)
     _Close();
 }
 
-GpDbQueryRes::SP    GpDbConnectionPgSql::Execute
-(
-    const GpDbQuery&    aQuery,
-    const size_t        aMinResultRowsCount
-)
+GpDbQueryRes::SP    GpDbConnectionPgSql::Execute (const GpDbQuery& aQuery)
 {   
-    return iConnectionTaskSP->Execute(aQuery, aMinResultRowsCount);
+    return iConnectionTaskSP->Execute(aQuery);
 }
 
 bool    GpDbConnectionPgSql::IsConnected (void) const noexcept
@@ -82,15 +78,19 @@ void    GpDbConnectionPgSql::TryConnectAndWaitFor (void)
     );
 
     // Add task to ready
-    GpTask::DoneFutureT::SP                             doneFutureSP        = iConnectionTaskSP.Vn().GetDoneFuture();
+    GpTask::DoneFutureT::SP                             doneFutureSP        = iConnectionTaskSP.Vn().DoneFuture();
     GpDbConnectionTaskPgSql::ConnectedToDbFutureT::SP   connectedToDbFuture = iConnectionTaskSP.Vn().GetConnectedToDbFuture();
 
-    GpTaskScheduler::S().NewToReady(iConnectionTaskSP);
+    VERIFY
+    (
+        GpTaskScheduler::S().NewToReady(iConnectionTaskSP),
+        "Failed to start connection task"
+    );
 
     // Wait for start
-    GpItcSharedFutureUtils::SWaitForInf
+    GpItcFutureUtils::SWait
     (
-        iConnectionTaskSP.Vn().GetStartFuture().V(),
+        iConnectionTaskSP.Vn().StartFuture().V(),
         [&](typename GpTaskFiber::StartFutureT::value_type&)// OnSuccessFnT
         {
             // NOP
@@ -109,8 +109,7 @@ void    GpDbConnectionPgSql::TryConnectAndWaitFor (void)
             );
 
             throw aEx;
-        },
-        100.0_si_ms
+        }
     );
 
     // Wait for connect or done
@@ -154,7 +153,7 @@ void    GpDbConnectionPgSql::TryConnectAndWaitFor (void)
 
         auto onDoneSuccessFn = [&](typename GpTask::DoneFutureT::value_type&)// OnSuccessFnT
         {
-            THROW_GP
+            THROW
             (
                 fmt::format
                 (
@@ -178,9 +177,8 @@ void    GpDbConnectionPgSql::TryConnectAndWaitFor (void)
             onDoneExceptionFn
         };
 
-        GpItcSharedFutureUtils::SWaitForInfAny
+        GpItcFutureUtils::SWaitAny
         (
-            100.0_si_ms,
             onConnectFuturePack,
             onDoneFuturePack
         );
@@ -190,7 +188,7 @@ void    GpDbConnectionPgSql::TryConnectAndWaitFor (void)
 void    GpDbConnectionPgSql::OnBeginTransaction ([[maybe_unused]] GpDbTransactionIsolation::EnumT aIsolationLevel)
 {
     // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
+    THROW_NOT_IMPLEMENTED();
 
     //GpDbQuery             query("BEGIN ISOLATION LEVEL "_sv + sIsolationLevelNames.at(size_t(aIsolationLevel)));
     //GpDbQueryPreparedPgSql    queryPrepared;
@@ -202,7 +200,7 @@ void    GpDbConnectionPgSql::OnBeginTransaction ([[maybe_unused]] GpDbTransactio
 void    GpDbConnectionPgSql::OnCommitTransaction (void)
 {
     // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
+    THROW_NOT_IMPLEMENTED();
 
     //GpDbQuery             query("COMMIT"_sv);
     //GpDbQueryPreparedPgSql    queryPrepared;
@@ -214,7 +212,7 @@ void    GpDbConnectionPgSql::OnCommitTransaction (void)
 void    GpDbConnectionPgSql::OnRollbackTransaction (void)
 {
     // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
+    THROW_NOT_IMPLEMENTED();
 
     //GpDbQuery             query("ROLLBACK"_sv);
     //GpDbQueryPreparedPgSql    queryPrepared;
@@ -232,7 +230,7 @@ void    GpDbConnectionPgSql::_Close (void) noexcept
 
     try
     {
-        iConnectionTaskSP.Vn().RequestAndWaitForStop();
+        std::ignore = iConnectionTaskSP.Vn().RequestStopAndWait();
         iConnectionTaskSP.Clear();
     } catch (const GpException& e)
     {

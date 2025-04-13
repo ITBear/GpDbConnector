@@ -12,7 +12,7 @@ GpDbConnection::~GpDbConnection (void) noexcept
 
 void    GpDbConnection::BeginTransaction (GpDbTransactionIsolation::EnumT aIsolationLevel)
 {
-    THROW_COND_GP
+    VERIFY
     (
         iIsTransactionOpen == false,
         "Transaction already open"_sv
@@ -26,7 +26,7 @@ void    GpDbConnection::BeginTransaction (GpDbTransactionIsolation::EnumT aIsola
 
 void    GpDbConnection::CommitTransaction (void)
 {
-    THROW_COND_GP
+    VERIFY
     (
         iIsTransactionOpen == true,
         "Transaction not open"_sv
@@ -49,7 +49,7 @@ void    GpDbConnection::CommitTransaction (void)
 
 void    GpDbConnection::RollbackTransaction (void)
 {
-    THROW_COND_GP
+    VERIFY
     (
         iIsTransactionOpen == true,
         "Transaction not open"_sv

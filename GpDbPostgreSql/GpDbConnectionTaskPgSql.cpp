@@ -1,7 +1,7 @@
 #include <GpDbConnector/GpDbPostgreSql/GpDbConnectionTaskPgSql.hpp>
 #include <GpLog/GpLogCore/GpLog.hpp>
 #include <GpCore2/GpUtils/Debugging/GpDebugging.hpp>
-#include <GpCore2/GpTasks/ITC/GpItcSharedFutureUtils.hpp>
+#include <GpCore2/GpTasks/ITC/GpItcFutureUtils.hpp>
 #include <GpDbConnector/GpDbClient/GpDbException.hpp>
 #include <GpDbConnector/GpDbPostgreSql/GpDbQueryResPgSql.hpp>
 #include <GpCore2/GpTasks/Scheduler/GpTaskScheduler.hpp>
@@ -49,11 +49,7 @@ GpDbConnectionTaskPgSql::ConnectedToDbFutureT::SP   GpDbConnectionTaskPgSql::Get
     return iConnectedToDbPromise.Future();
 }
 
-GpDbQueryRes::SP    GpDbConnectionTaskPgSql::Execute
-(
-    const GpDbQuery&    aQuery,
-    const size_t        aMinResultRowsCount
-)
+GpDbQueryRes::SP    GpDbConnectionTaskPgSql::Execute (const GpDbQuery& aQuery)
 {
     // Log
     LOG_INFO
@@ -61,18 +57,22 @@ GpDbQueryRes::SP    GpDbConnectionTaskPgSql::Execute
         fmt::format
         (
             "[GpDbConnectionTaskPgSql::Execute]: SQL '{}', values: {}",
-            aQuery.QueryStr(),
-            aQuery.Values().empty() ? "empty" : ("\n" + aQuery.ValuesToStr())
+            aQuery.Query(),
+            aQuery.Values().empty() ? "empty" : ("\n" + aQuery.ToString())
         )
     );
 
-    // Create SQL request task
+    // Wakeup SQL request task
     ExecutePromiseT     executePromise;
     ExecuteFutureT::SP  executeFuture = executePromise.Future();
 
-    GpTaskScheduler::S().MakeTaskReady
+    VERIFY
     (
-        TaskId(), ExecuteMsgT{aQuery, aMinResultRowsCount, std::move(executePromise)}
+        GpTaskScheduler::S().MakeTaskReady
+        (
+            TaskId(), ExecuteMsgT{aQuery, std::move(executePromise)}
+        ) == true,
+        "Failed to start SQL query task"
     );
 
     // Wait for execute or done
@@ -97,7 +97,7 @@ GpDbQueryRes::SP    GpDbConnectionTaskPgSql::Execute
 
         auto onDoneSuccessFn = []([[maybe_unused]] typename GpTask::DoneFutureT::value_type&)// OnSuccessFnT
         {
-            THROW_GP("[GpDbConnectionTaskPgSql::Execute]: Connection task return done future while execute SQL request"_sv);
+            THROW("[GpDbConnectionTaskPgSql::Execute]: Connection task return done future while execute SQL request"_sv);
         };
 
         auto onDoneExceptionFn = [](const GpException& aEx)// OnExceptionFnT
@@ -107,14 +107,13 @@ GpDbQueryRes::SP    GpDbConnectionTaskPgSql::Execute
 
         auto onDoneFuturePack = std::tuple<GpTask::DoneFutureT&, decltype(onDoneSuccessFn), decltype(onDoneExceptionFn)>
         {
-            GetDoneFuture().Vn(),
+            DoneFuture().Vn(),
             onDoneSuccessFn,
             onDoneExceptionFn
         };
 
-        GpItcSharedFutureUtils::SWaitForInfAny
+        GpItcFutureUtils::SWaitAny
         (
-            100.0_si_ms,
             onExecuteFuturePack,
             onDoneFuturePack
         );
@@ -149,7 +148,7 @@ void    GpDbConnectionTaskPgSql::OnStart (void)
     PrepareAndSendMessage(messageSize);
 }
 
-void    GpDbConnectionTaskPgSql::OnStop (StopExceptionsT& aStopExceptionsOut) noexcept
+void    GpDbConnectionTaskPgSql::OnStop (ExceptionsT& aStopExceptionsOut) noexcept
 {
     try
     {
@@ -211,7 +210,7 @@ void    GpDbConnectionTaskPgSql::OnConnected (GpSocketTCP& aSocket)
 
 void    GpDbConnectionTaskPgSql::ProcessOtherMessages (GpAny& aMessage)
 {
-    THROW_COND_GP
+    VERIFY
     (
         aMessage.IsContatinType<ExecuteMsgT>() == true,
         [&aMessage]()
@@ -232,12 +231,12 @@ void    GpDbConnectionTaskPgSql::ProcessExecuteMsg (ExecuteMsgT& aMessage)
     try
     {
         // Get message values
-        auto& [dbQuery, minResultRowsCount, executePromise] = aMessage;
+        auto& [dbQuery, executePromise] = aMessage;
 
         iExecutePromise = std::move(executePromise);
 
         // Check `iSocketState`
-        THROW_COND_GP
+        VERIFY
         (
             iSocketState == SocketStateT::IDLE,
             [&]()
@@ -253,13 +252,25 @@ void    GpDbConnectionTaskPgSql::ProcessExecuteMsg (ExecuteMsgT& aMessage)
         // DB query to PostgreSQL message
         if (!dbQuery.Values().empty()) [[likely]]
         {
-            //?
-            // TODO: implement
+            // Send prepare message
+            const size_t messageSize = iMessageProcessor.MakeParseMessage
+            (
+                iSocketTmpBufferWrite,
+                dbQuery.Query(),
+                dbQuery.Name(),
+                QueryToOIDs(dbQuery.Values())
+            );
+
+            PrepareAndSendMessage(messageSize);
         } else
         {
-            //?
             // Send simple SQL query (no values)
-            const size_t messageSize = iMessageProcessor.MakeQueryMessage(iSocketTmpBufferWrite, dbQuery.QueryStr());
+            const size_t messageSize = iMessageProcessor.MakeQueryMessage
+            (
+                iSocketTmpBufferWrite,
+                dbQuery.Query()
+            );
+
             PrepareAndSendMessage(messageSize);
         }
     } catch (const GpException& ex)
@@ -365,7 +376,7 @@ void    GpDbConnectionTaskPgSql::PrepareAndSendMessage (const size_t aMessageSiz
 {
     // Note: all data must be stored in iSocketTmpBufferWrite
 
-    THROW_COND_GP
+    VERIFY
     (
         iSocketState == SocketStateT::IDLE,
         "iSocketState state must be IDLE"
@@ -419,6 +430,30 @@ void    GpDbConnectionTaskPgSql::OnDataRow
 void    GpDbConnectionTaskPgSql::OnCommandComplete ([[maybe_unused]] const PSQL::CommandCompleteDescRS& aCommandCompleteDesc)
 {
     iExecutePromise.Fulfill(std::move(iDbQueryResSP));
+}
+
+std::vector<PSQL::TypeOID>  GpDbConnectionTaskPgSql::QueryToOIDs (const GpDbQuery::ValueVecT& aValues) const
+{
+    std::vector<PSQL::TypeOID> resOIDs;
+    resOIDs.resize(std::size(aValues));
+    PSQL::TypeOID* resOIDsPtr = resOIDs.data();
+
+    for (const GpDbQueryValue& value: aValues)
+    {
+        PSQL::TypeOID& typeOID = *resOIDsPtr++;
+
+        std::visit
+        (
+            [&typeOID](auto&& arg)
+            {
+                using T = std::decay_t<decltype(arg)>;
+                typeOID = PSQL::TypeOidUitls::SDetectTypeOID<T>();
+            },
+            value
+        );
+    }
+
+    return resOIDs;
 }
 
 }// namespace GPlatform

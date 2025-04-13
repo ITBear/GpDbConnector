@@ -15,27 +15,24 @@ public:
     using ManagerRefT = std::optional<std::reference_wrapper<GpDbManager>>;
 
 public:
-                                GpDbConnectionGuard     (GpDbManager& aManager) noexcept;
-                                GpDbConnectionGuard     (std::string_view aManagerName);
-    virtual                     ~GpDbConnectionGuard    (void) noexcept;
+                            GpDbConnectionGuard     (GpDbManager& aManager) noexcept;
+                            GpDbConnectionGuard     (std::string_view aManagerName);
+                            ~GpDbConnectionGuard    (void) noexcept;
 
-    void                        BeginTransaction        (GpDbTransactionIsolation::EnumT aIsolationLevel);
-    void                        CommitTransaction       (void);
-    void                        RollbackTransaction     (void);
+    void                    BeginTransaction        (GpDbTransactionIsolation::EnumT aIsolationLevel);
+    void                    CommitTransaction       (void);
+    void                    RollbackTransaction     (void);
 
-    virtual GpDbQueryRes::SP    Execute                 (const GpDbQuery&   aQuery,
-                                                         size_t             aMinResultRowsCount);
-    virtual GpDbQueryRes::SP    Execute                 (std::string_view   aSQL,
-                                                         size_t             aMinResultRowsCount);
+    GpDbQueryRes::SP        Execute                 (const GpDbQuery& aQuery);
 
 private:
-    GpDbManager&                Manager                 (void) {return iManager;}
-    GpDbConnection&             ConnectionAcquire       (void);
-    void                        ConnectionRelease       (void);
+    GpDbManager&            Manager                 (void) {return iManager;}
+    GpDbConnection&         ConnectionAcquire       (void);
+    void                    ConnectionRelease       (void);
 
 private:
-    GpDbManager&                iManager;
-    GpDbConnection::SP          iConnection;
+    GpDbManager&            iManager;
+    GpDbConnection::SP      iConnection;
 };
 
 }// namespace GPlatform

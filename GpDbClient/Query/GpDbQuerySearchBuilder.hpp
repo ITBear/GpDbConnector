@@ -17,7 +17,7 @@ public:
     virtual                     ~GpDbQuerySearchBuilder (void) noexcept;
 
     void                        SEARCH_WHERE            (GpDbQueryBuilder&              aBuilder,
-                                                         GpReflectModel::C::Opt::CRef   aModel,
+                                                         GpReflectModel::C::Opts::CRef  aModel,
                                                          const GpDbSearchDesc&          aSearchDesc);
     void                        SEARCH_ORDER            (GpDbQueryBuilder&      aBuilder,
                                                          const GpDbSearchDesc&  aSearchDesc);
@@ -26,7 +26,7 @@ public:
 
 private:
     void                        ProcessFilter           (GpDbQueryBuilder&              aBuilder,
-                                                         GpReflectModel::C::Opt::CRef   aModel,
+                                                         GpReflectModel::C::Opts::CRef  aModel,
                                                          const GpDbSearchDesc&          aSearchDesc);
     void                        ProcessOrderByCond      (GpDbQueryBuilder&      aBuilder,
                                                          const GpDbSearchDesc&  aSearchDesc);

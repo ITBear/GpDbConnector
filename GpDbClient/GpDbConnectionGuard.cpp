@@ -3,6 +3,7 @@
 #include <GpDbConnector/GpDbClient/GpDbManagerCatalog.hpp>
 #include <GpDbConnector/GpDbClient/GpDbConnection.hpp>
 #include <GpDbConnector/GpDbClient/GpDbException.hpp>
+#include <GpDbConnector/GpDbClient/Query/GpDbQueryBuilder.hpp>
 
 #include <GpLog/GpLogCore/GpLog.hpp>
 #include <GpCore2/GpUtils/Types/Strings/GpStringUtils.hpp>
@@ -99,11 +100,7 @@ void    GpDbConnectionGuard::RollbackTransaction (void)
     }
 }
 
-GpDbQueryRes::SP    GpDbConnectionGuard::Execute
-(
-    const GpDbQuery&    aQuery,
-    const size_t        aMinResultRowsCount
-)
+GpDbQueryRes::SP    GpDbConnectionGuard::Execute (const GpDbQuery& aQuery)
 {
     GpDbConnection&     connection = ConnectionAcquire();
     GpDbQueryRes::SP    res;
@@ -112,7 +109,7 @@ GpDbQueryRes::SP    GpDbConnectionGuard::Execute
 
     try
     {
-        res = connection.Execute(aQuery, aMinResultRowsCount);
+        res = connection.Execute(aQuery);
     } catch (const GpException& ex)
     {
         exOpt = ex;
@@ -138,23 +135,13 @@ GpDbQueryRes::SP    GpDbConnectionGuard::Execute
     return res;
 }
 
-GpDbQueryRes::SP    GpDbConnectionGuard::Execute
-(
-    std::string_view    aSQL,
-    const size_t        aMinResultRowsCount
-)
-{
-    GpDbQuery query(aSQL);
-    return Execute(query, aMinResultRowsCount);
-}
-
 GpDbConnection& GpDbConnectionGuard::ConnectionAcquire (void)
 {
     if (iConnection.IsNULL())
     {
         auto res = Manager().Acquire();
 
-        THROW_COND_DB
+        VERIFY
         (
             res.has_value(),
             GpDbExceptionCode::CONNECTION_LIMIT_EXCEEDED,

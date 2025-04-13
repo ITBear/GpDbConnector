@@ -24,12 +24,12 @@ public:
     };
 
     class ConnectedToDbMsg {};
-    using ConnectedToDbPromiseT = GpItcSharedPromise<ConnectedToDbMsg>;
+    using ConnectedToDbPromiseT = GpItcPromise<ConnectedToDbMsg>;
     using ConnectedToDbFutureT  = typename ConnectedToDbPromiseT::FutureT;
 
-    using ExecutePromiseT       = GpItcSharedPromise<GpDbQueryRes::SP>;
+    using ExecutePromiseT       = GpItcPromise<GpDbQueryRes::SP>;
     using ExecuteFutureT        = typename ExecutePromiseT::FutureT;
-    using ExecuteMsgT           = std::tuple<const GpDbQuery&, size_t/*aMinResultRowsCount*/, ExecutePromiseT>;
+    using ExecuteMsgT           = std::tuple<const GpDbQuery&, ExecutePromiseT>;
 
 public:
                                     GpDbConnectionTaskPgSql     (GpIOEventPollerIdx aIOEventPollerIdx,
@@ -44,12 +44,11 @@ public:
     bool                            IsConnected                 (void) const noexcept {return iIsConnectd.load(std::memory_order_relaxed);}
     ConnectedToDbFutureT::SP        GetConnectedToDbFuture      (void);
 
-    GpDbQueryRes::SP                Execute                     (const GpDbQuery&   aQuery,
-                                                                 size_t             aMinResultRowsCount);
+    GpDbQueryRes::SP                Execute                     (const GpDbQuery& aQuery);
 
 protected:
     virtual void                    OnStart                     (void) override final;
-    virtual void                    OnStop                      (StopExceptionsT& aStopExceptionsOut) noexcept override final;
+    virtual void                    OnStop                      (ExceptionsT& aStopExceptionsOut) noexcept override final;
     virtual void                    OnStopException             (const GpException& aException) noexcept override final;
 
     virtual void                    OnReadyToRead               (GpSocket& aSocket) override final;
@@ -70,6 +69,8 @@ private:
     void                            OnDataRow                   (const PSQL::RowDescriptionDescRS&  aRowDesc,
                                                                  const PSQL::DataRowDescRS&         aRowData);
     void                            OnCommandComplete           (const PSQL::CommandCompleteDescRS& aCommandCompleteDesc);
+
+    std::vector<PSQL::TypeOID>      QueryToOIDs                 (const GpDbQuery::ValueVecT& aValues) const;
 
 private:
     const milliseconds_t            iConnectTimeout;

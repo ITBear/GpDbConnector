@@ -7,8 +7,6 @@
 #include <GpCore2/GpUtils/Streams/GpByteReader.hpp>
 #include <GpLog/GpLogCore/GpLog.hpp>
 
-#include <iostream>
-
 namespace GPlatform::PSQL {
 
 GpPsqlMessageProcessor::GpPsqlMessageProcessor
@@ -62,13 +60,33 @@ size_t  GpPsqlMessageProcessor::MakeQueryMessage
     return dataSize;
 }
 
+size_t  GpPsqlMessageProcessor::MakeParseMessage
+(
+    GpBytesArray&           aOutMessageBuffer,
+    std::string_view        aQuery,
+    std::string_view        aName,
+    std::vector<TypeOID>&&  aOIDs
+)
+{
+    PSQL::ParseDescRQ parseMessage
+    {
+        .name{aName},
+        .query{aQuery},
+        .OIDs{std::move(aOIDs)}
+    };
+
+    const size_t dataSize = PSQL::ProtocolSerializer::SSerialize(parseMessage, aOutMessageBuffer);
+
+    return dataSize;
+}
+
 size_t  GpPsqlMessageProcessor::ProcessRsMessage
 (
     GpSpanByteR     aRsData,
     GpBytesArray&   aOutMessageBuffer
 )
 {
-    THROW_COND_DB
+    VERIFY
     (
         !aRsData.Empty(),
         GpDbExceptionCode::RESPONSE_ERROR,
@@ -116,7 +134,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::CLOSE_COMPLETE:
         {
@@ -133,7 +151,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::COMMAND_COMPLETE:
         {
@@ -156,7 +174,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::COPY_OUT_RESPONSE:
         {
@@ -173,7 +191,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::DATA_ROW:
         {
@@ -202,7 +220,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::EMPTY_DATA:
         {
@@ -219,7 +237,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::NOTICE_RESPONSE:
         {
@@ -236,7 +254,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::NOTIFICATION_RESPONSE:
         {
@@ -253,7 +271,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::PARAMETER_DESCRIPTION:
         {
@@ -270,7 +288,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::PARAMETER_STATUS:
         {
@@ -296,7 +314,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::PORTAL_SUSPENDED:
         {
@@ -313,7 +331,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 
             GpLog::S().Flush();
 
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
         } break;
         case PSQL::MessageRsDescId::READY_FOR_QUERY:
         {
@@ -334,7 +352,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
         } break;
         default:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::RESPONSE_ERROR,
                 fmt::format
@@ -367,7 +385,7 @@ size_t  GpPsqlMessageProcessor::ProcessAuthRequest
         } break;
         case PSQL::AuthenticationMethod::KERBEROS_V5:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::UNSUPPORTED_FEATURE,
                 "Unsupported authentication method KERBEROS_V5"_sv
@@ -375,7 +393,7 @@ size_t  GpPsqlMessageProcessor::ProcessAuthRequest
         } break;
         case PSQL::AuthenticationMethod::CLEAR_TEXT_PASSWORD:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::UNSUPPORTED_FEATURE,
                 "Unsupported authentication method CLEAR_TEXT_PASSWORD"_sv
@@ -383,7 +401,7 @@ size_t  GpPsqlMessageProcessor::ProcessAuthRequest
         } break;
         case PSQL::AuthenticationMethod::MD5_PASSWORD:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::UNSUPPORTED_FEATURE,
                 "Unsupported authentication method MD5_PASSWORD"_sv
@@ -391,7 +409,7 @@ size_t  GpPsqlMessageProcessor::ProcessAuthRequest
         } break;
         case PSQL::AuthenticationMethod::GSS:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::UNSUPPORTED_FEATURE,
                 "Unsupported authentication method GSS"_sv
@@ -399,7 +417,7 @@ size_t  GpPsqlMessageProcessor::ProcessAuthRequest
         } break;
         case PSQL::AuthenticationMethod::SSPI:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::UNSUPPORTED_FEATURE,
                 "Unsupported authentication method SSPI"_sv
@@ -409,7 +427,7 @@ size_t  GpPsqlMessageProcessor::ProcessAuthRequest
         {
             const auto& rsPayload = std::get<PSQL::AuthenticationDescRS::AuthenticationSASL>(aRsMsgDesc.payload);
 
-            THROW_COND_GP
+            VERIFY
             (
                 std::find
                 (
@@ -440,7 +458,7 @@ size_t  GpPsqlMessageProcessor::ProcessAuthRequest
         } break;
         default:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::RESPONSE_ERROR,
                 fmt::format

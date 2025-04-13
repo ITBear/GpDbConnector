@@ -92,7 +92,7 @@ void    ErrorResponseUtils::SThrow
     const SourceLocationT&              aSourceLocation
 )
 {
-    THROW_DB
+    THROW
     (
         GpDbExceptionCode::REQUEST_ERROR,
         fmt::format("PostgreSQL error:\n{}", aMsgDescOut),

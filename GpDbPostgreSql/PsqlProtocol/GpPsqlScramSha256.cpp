@@ -24,7 +24,7 @@ SASLInitialResponseDescRQ   GpPsqlScramSha256::ClientFirstMessage (void)
     return PSQL::SASLInitialResponseDescRQ
     {
         .name                   = "SCRAM-SHA-256",
-        .client_first_message   = GpBytesArrayUtils::SMake<std::string>(clientFirstMessage)
+        .client_first_message   = GpArrayUtils::SMake<std::string>(clientFirstMessage)
     };
 }
 
@@ -38,7 +38,7 @@ SASLResponseDescRQ  GpPsqlScramSha256::ClientFinalMessage (const AuthenticationD
 
     return SASLResponseDescRQ
     {
-        .client_final_message = GpBytesArrayUtils::SMake<std::string>(clientFinalMessage)
+        .client_final_message = GpArrayUtils::SMake<std::string>(clientFinalMessage)
     };
 }
 

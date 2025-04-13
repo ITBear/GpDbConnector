@@ -11,22 +11,22 @@ GpDbDriverCatalog::~GpDbDriverCatalog (void) noexcept
 {
 }
 
-void    GpDbDriverCatalog::Add (GpSP<GpDbDriverFactory> aFactory)
+void    GpDbDriverCatalog::Add (GpDbDriverFactory::SP aFactory)
 {
     const GpDbDriverFactory& driverFactory = aFactory.V();
 
-    iCatalog.SetOrUpdate
+    iCatalog.Set
     (
-        std::string(driverFactory.Name()),
+        driverFactory.Name(),
         std::move(aFactory)
     );
 }
 
 GpDbDriverFactory::SP   GpDbDriverCatalog::Find (std::string_view aName) const
 {
-    auto res = iCatalog.GetOpt(aName);
+    auto res = iCatalog.FindOpt(aName);
 
-    THROW_COND_GP
+    VERIFY
     (
         res.has_value(),
         [aName]()

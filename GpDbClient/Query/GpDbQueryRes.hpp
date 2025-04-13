@@ -82,16 +82,6 @@ public:
                                                                      std::optional<std::vector<std::string_view>>   aOnNullValue) const = 0;
 
     [[nodiscard]]
-    virtual GpSpanCharRW                    GetStrRW                (size_t                         aRowId,
-                                                                     size_t                         aColId,
-                                                                     std::optional<GpSpanCharRW>    aOnNullValue) = 0;
-
-    [[nodiscard]]
-    virtual std::vector<GpSpanCharRW>       GetStrRWArray1D         (size_t                                     aRowId,
-                                                                     size_t                                     aColId,
-                                                                     std::optional<std::vector<GpSpanCharRW>>   aOnNullValue) = 0;
-
-    [[nodiscard]]
     virtual std::string_view                GetJson                 (size_t                             aRowId,
                                                                      size_t                             aColId,
                                                                      std::optional<std::string_view>    aOnNullValue) const = 0;
@@ -100,16 +90,6 @@ public:
     virtual std::vector<std::string_view>   GetJsonArray1D          (size_t                                         aRowId,
                                                                      size_t                                         aColId,
                                                                      std::optional<std::vector<std::string_view>>   aOnNullValue) const = 0;
-
-    [[nodiscard]]
-    virtual GpSpanCharRW                    GetJsonRW               (size_t                         aRowId,
-                                                                     size_t                         aColId,
-                                                                     std::optional<GpSpanCharRW>    aOnNullValue) = 0;
-
-    [[nodiscard]]
-    virtual std::vector<GpSpanCharRW>       GetJsonRWArray1D        (size_t                                     aRowId,
-                                                                     size_t                                     aColId,
-                                                                     std::optional<std::vector<GpSpanCharRW>>   aOnNullValue) = 0;
 
     [[nodiscard]]
     virtual GpUUID                          GetUuid                 (size_t                 aRowId,
@@ -219,7 +199,7 @@ template<typename T>
 
     if (std::size(strVal) == 0)
     {
-        THROW_COND_GP
+        VERIFY
         (
             aOnNullValue.has_value(),
             [&]()

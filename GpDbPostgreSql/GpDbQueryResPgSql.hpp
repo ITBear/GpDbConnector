@@ -12,7 +12,8 @@ public:
     CLASS_REMOVE_CTRS_MOVE_COPY(GpDbQueryResPgSql)
     CLASS_DD(GpDbQueryResPgSql)
 
-    using RowColDataVecT    = boost::container::small_vector<GpSpanByteR, 16*4>;
+    using RowColDataVecT    = boost::container::small_vector<std::tuple<size_t/*offset*/, size_t/*size*/>, 16*4>;
+    using RowColDataInfoT   = std::tuple<GpSpanByteRW, const PSQL::RowDescriptionDescRS::ColumnDesc&>;
 
 public:
                                             GpDbQueryResPgSql   (void);
@@ -88,16 +89,6 @@ public:
                                                                  std::optional<std::vector<std::string_view>>   aOnNullValue) const override final;
 
     [[nodiscard]]
-    virtual GpSpanCharRW                    GetStrRW            (size_t                         aRowId,
-                                                                 size_t                         aColId,
-                                                                 std::optional<GpSpanCharRW>    aOnNullValue) override final;
-
-     [[nodiscard]]
-    virtual std::vector<GpSpanCharRW>       GetStrRWArray1D     (size_t                                     aRowId,
-                                                                 size_t                                     aColId,
-                                                                 std::optional<std::vector<GpSpanCharRW>>   aOnNullValue) override final;
-
-    [[nodiscard]]
     virtual std::string_view                GetJson             (size_t                             aRowId,
                                                                  size_t                             aColId,
                                                                  std::optional<std::string_view>    aOnNullValue) const override final;
@@ -106,16 +97,6 @@ public:
     virtual std::vector<std::string_view>   GetJsonArray1D      (size_t                                         aRowId,
                                                                  size_t                                         aColId,
                                                                  std::optional<std::vector<std::string_view>>   aOnNullValue) const override final;
-
-    [[nodiscard]]
-    virtual GpSpanCharRW                    GetJsonRW           (size_t                         aRowId,
-                                                                 size_t                         aColId,
-                                                                 std::optional<GpSpanCharRW>    aOnNullValue) override final;
-
-     [[nodiscard]]
-    virtual std::vector<GpSpanCharRW>       GetJsonRWArray1D    (size_t                                     aRowId,
-                                                                 size_t                                     aColId,
-                                                                 std::optional<std::vector<GpSpanCharRW>>   aOnNullValue) override final;
 
     [[nodiscard]]
     virtual GpUUID                          GetUuid             (size_t                 aRowId,
@@ -143,9 +124,26 @@ public:
                                                                  std::optional<bool>    aOnNullValue) const override final;
 
 private:
-    GpSpanByteR                             RowColDataPtr       (size_t         aRowId,
-                                                                 size_t         aColId,
-                                                                 PSQL::TypeOID  aTypeOID) const;
+    static RowColDataInfoT                  SRowColDataInfo     (size_t             aRowId,
+                                                                 size_t             aColId,
+                                                                 PSQL::TypeOID      aTypeOID,
+                                                                 GpDbQueryResPgSql& aDbQueryRes);
+
+    template<typename T, typename OIDT>
+    static  T                               SReadValue          (size_t                     aRowId,
+                                                                 size_t                     aColId,
+                                                                 const std::optional<T>&    aOnNullValue,
+                                                                 GpDbQueryResPgSql&         aDbQueryRes);
+
+    template<typename T, typename OIDT>
+    static std::vector<T>                   SReadVector         (size_t                                 aRowId,
+                                                                 size_t                                 aColId,
+                                                                 const std::optional<std::vector<T>>&   aOnNullValue,
+                                                                 GpDbQueryResPgSql&                     aDbQueryRes);
+
+    static std::vector<std::string_view>    SReadStrVector      (GpSpanCharRW aVectorStr);
+    static GpSpanByteR                      SReadStrToBlob      (GpSpanByteRW aDataPtr, bool aIsFromArray);
+    static std::vector<GpSpanByteR>         SReadStrToBlobVector(GpSpanCharRW aVectorStr);
 
 private:
     std::optional<PSQL::RowDescriptionDescRS>   iRowDescOpt;

@@ -37,7 +37,7 @@ void    ProtocolDeserializer::SDeserialize
         } break;
         case AuthenticationMethod::KERBEROS_V5:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::UNSUPPORTED_FEATURE,
                 "Unsupported authentication method KERBEROS_V5"_sv
@@ -45,7 +45,7 @@ void    ProtocolDeserializer::SDeserialize
         } break;
         case AuthenticationMethod::CLEAR_TEXT_PASSWORD:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::UNSUPPORTED_FEATURE,
                 "Unsupported authentication method CLEAR_TEXT_PASSWORD"_sv
@@ -53,7 +53,7 @@ void    ProtocolDeserializer::SDeserialize
         } break;
         case AuthenticationMethod::MD5_PASSWORD:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::UNSUPPORTED_FEATURE,
                 "Unsupported authentication method MD5_PASSWORD"_sv
@@ -61,7 +61,7 @@ void    ProtocolDeserializer::SDeserialize
         } break;
         case AuthenticationMethod::GSS:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::UNSUPPORTED_FEATURE,
                 "Unsupported authentication method GSS"_sv
@@ -69,7 +69,7 @@ void    ProtocolDeserializer::SDeserialize
         } break;
         case AuthenticationMethod::SSPI:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::UNSUPPORTED_FEATURE,
                 "Unsupported authentication method SSPI"_sv
@@ -100,7 +100,7 @@ void    ProtocolDeserializer::SDeserialize
         } break;
         default:
         {
-            THROW_DB
+            THROW
             (
                 GpDbExceptionCode::RESPONSE_ERROR,
                 fmt::format
@@ -168,7 +168,7 @@ void    ProtocolDeserializer::SDeserialize
         aMsgDescOut.transaction_status = TransactionStatus::FAILED_TRANSACTION_BLOCK;
     } else
     {
-        THROW_GP("Unknown transaction status"_sv);
+        THROW("Unknown transaction status"_sv);
     }
 }
 
@@ -204,10 +204,10 @@ void    ProtocolDeserializer::SDeserialize
         columnDesc.type_oid = aDataReader.UI32();
 
         // type size
-        columnDesc.type_size = aDataReader.UI16();
+        columnDesc.type_size = aDataReader.SI16();
 
         // type modifier
-        columnDesc.type_modifier = aDataReader.UI32();
+        columnDesc.type_modifier = aDataReader.SI32();
 
         // format code
         columnDesc.format_code = aDataReader.UI16();
@@ -231,12 +231,18 @@ void    ProtocolDeserializer::SDeserialize
 
     for (size_t id = 0; id < columnsCount; id++)
     {
-        GpSpanByteR& columnDataPtr  = columns.data()[id];
-        const size_t dataSize       = aDataReader.UI32();
+        GpSpanByteRW&   columnDataPtr   = columns.data()[id];
+        const ssize_t   dataSize        = aDataReader.SI32();
 
-        if (dataSize != std::numeric_limits<u_int_32>::max()) [[likely]]
+        if (dataSize >= 0) [[likely]]
         {
-            columnDataPtr = aDataReader.Bytes(dataSize);
+            GpSpanByteR data = aDataReader.Bytes(size_t(dataSize));
+
+            columnDataPtr = GpSpanByteRW
+            {
+                const_cast<std::byte*>(data.Ptr()),
+                data.Count()
+            };
         }
     }
 }

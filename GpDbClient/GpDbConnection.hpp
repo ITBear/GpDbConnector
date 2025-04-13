@@ -28,8 +28,7 @@ public:
     TransactionLevelTE          TransactionLevel        (void) const noexcept {return iTransactionLevel;}
 
     virtual void                Close                   (void) = 0;
-    virtual GpDbQueryRes::SP    Execute                 (const GpDbQuery&   aQuery,
-                                                         size_t             aMinResultRowsCount) = 0;
+    virtual GpDbQueryRes::SP    Execute                 (const GpDbQuery& aQuery) = 0;
 
     virtual bool                IsConnected             (void) const noexcept = 0;
     virtual void                TryConnectAndWaitFor    (void) = 0;

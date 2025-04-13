@@ -28,7 +28,7 @@ void    GpDbQueryPreparedPgSql::Prepare (const GpDbQuery& aQuery)
         return;
     }
 
-    THROW_COND_GP
+    VERIFY
     (
         typesCount == valuesCount,
         [&aQuery](){return "valuesTypesCount != valuesCount. SQL '"_sv + aQuery.QueryStr() + "'"_sv;}
@@ -251,7 +251,7 @@ void    GpDbQueryPreparedPgSql::FillData
         } break;
         default:
         {
-            THROW_GP("Unknown value type"_sv);
+            THROW("Unknown value type"_sv);
         };
     }
 }

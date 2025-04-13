@@ -4,112 +4,40 @@
 
 namespace GPlatform {
 
-/*
-GP_ENUM_IMPL(GpDbQueryBuilderMode)
-
-const GpDbQueryBuilder::BindStrsT   GpDbQueryBuilder::sBindStrs
+template<typename T>
+void    GpDbQueryBuilder::Next
+(
+    const ssize_t   aId,
+    auto&&          aValue
+)
 {
-    "int2",     // INT_16,
-    "int2[]",   // INT_16_ARRAY_1D,
-    "int4",     // INT_32,
-    "int4[]",   // INT_32_ARRAY_1D,
-    "int8",     // INT_64,
-    "int8[]",   // INT_64_ARRAY_1D,
-    "float8",   // DOUBLE,
-    "float8[]", // DOUBLE_ARRAY_1D,
-    "float4",   // FLOAT,
-    "float4[]", // FLOAT_ARRAY_1D,
-    "text",     // STRING,
-    "text[]",   // STRING_ARRAY_1D,
-    "jsonb",    // JSON,
-    "jsonb[]",  // JSON_ARRAY_1D,
-    "uuid",     // UUID,
-    "uuid[]",   // UUID_ARRAY_1D,
-    "bytea",    // BLOB,
-    "bytea[]",  // BLOB_ARRAY_1D,
-    "boolean",  // BOOLEAN,
-    "boolean[]",// BOOLEAN_ARRAY_1D,
-    "",         // NULL_VAL
-};
-
-const GpDbQueryBuilder::BindCacheT GpDbQueryBuilder::sTypeBind =
-{
-    std::tuple<std::string, GpDbQueryValType::EnumT>
-    {"",            GpDbQueryValType::NULL_VAL},        // NOT_SET
-    {"::int2",      GpDbQueryValType::INT_16},          // U_INT_8,
-    {"::int2",      GpDbQueryValType::INT_16},          // S_INT_8,
-    {"::int2",      GpDbQueryValType::INT_16},          // U_INT_16,
-    {"::int2",      GpDbQueryValType::INT_16},          // S_INT_16,
-    {"::int4",      GpDbQueryValType::INT_32},          // U_INT_32,
-    {"::int4",      GpDbQueryValType::INT_32},          // S_INT_32,
-    {"::int8",      GpDbQueryValType::INT_64},          // U_INT_64,
-    {"::int8",      GpDbQueryValType::INT_64},          // S_INT_64,
-    {"::float8",    GpDbQueryValType::DOUBLE},          // DOUBLE,
-    {"::float4",    GpDbQueryValType::FLOAT},           // FLOAT,
-    {"::boolean",   GpDbQueryValType::BOOLEAN},         // BOOLEAN,
-    {"::uuid",      GpDbQueryValType::UUID},            // UUID,
-    {"::text",      GpDbQueryValType::STRING},          // STRING,
-    {"::bytea",     GpDbQueryValType::BLOB},            // BLOB,
-    {"::jsonb",     GpDbQueryValType::JSON},            // OBJECT,
-    {"::jsonb",     GpDbQueryValType::JSON},            // OBJECT_SP,
-    {"",            GpDbQueryValType::STRING},          // ENUM,
-    {"",            GpDbQueryValType::STRING_ARRAY_1D}  // ENUM_FLAGS TODO: ? can be any ENUM DB type (CREATE TYPE schema.type_name AS ENUM ('A', 'B', 'C');
-                                                        // then valueBind must be = ::schema.type_name[]
-};
-
-const GpDbQueryBuilder::BindCacheT  GpDbQueryBuilder::sTypeBindVec =
-{
-    std::tuple<std::string, GpDbQueryValType::EnumT>
-    {"",            GpDbQueryValType::NULL_VAL},        // NOT_SET
-    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, // U_INT_8,
-    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, // S_INT_8,
-    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, // U_INT_16,
-    {"::int2[]",    GpDbQueryValType::INT_16_ARRAY_1D}, // S_INT_16,
-    {"::int4[]",    GpDbQueryValType::INT_32_ARRAY_1D}, // U_INT_32,
-    {"::int4[]",    GpDbQueryValType::INT_32_ARRAY_1D}, // S_INT_32,
-    {"::int8[]",    GpDbQueryValType::INT_64_ARRAY_1D}, // U_INT_64,
-    {"::int8[]",    GpDbQueryValType::INT_64_ARRAY_1D}, // S_INT_64,
-    {"::float8[]",  GpDbQueryValType::DOUBLE_ARRAY_1D}, // DOUBLE,
-    {"::float4[]",  GpDbQueryValType::FLOAT_ARRAY_1D},  // FLOAT,
-    {"::boolean[]", GpDbQueryValType::BOOLEAN_ARRAY_1D},// BOOLEAN,
-    {"::uuid[]",    GpDbQueryValType::UUID_ARRAY_1D},   // UUID,
-    {"::text[]",    GpDbQueryValType::STRING_ARRAY_1D}, // STRING,
-    {"::bytea[]",   GpDbQueryValType::BLOB_ARRAY_1D},   // BLOB,
-    {"",            GpDbQueryValType::NULL_VAL},        // OBJECT,
-    {"::jsonb[]",   GpDbQueryValType::JSON_ARRAY_1D},   // OBJECT_SP,
-    {"",            GpDbQueryValType::NULL_VAL},        // ENUM,
-    {"",            GpDbQueryValType::NULL_VAL}         // ENUM_FLAGS
-};
-
-const GpDbQueryBuilder::BindCacheT  GpDbQueryBuilder::sTypeBindVecWrap =
-{
-    std::tuple<std::string, GpDbQueryValType::EnumT>
-    {"",            GpDbQueryValType::NULL_VAL},        // NOT_SET
-    {"",            GpDbQueryValType::NULL_VAL},        // U_INT_8,
-    {"",            GpDbQueryValType::NULL_VAL},        // S_INT_8,
-    {"",            GpDbQueryValType::NULL_VAL},        // U_INT_16,
-    {"",            GpDbQueryValType::NULL_VAL},        // S_INT_16,
-    {"",            GpDbQueryValType::NULL_VAL},        // U_INT_32,
-    {"",            GpDbQueryValType::NULL_VAL},        // S_INT_32,
-    {"",            GpDbQueryValType::NULL_VAL},        // U_INT_64,
-    {"",            GpDbQueryValType::NULL_VAL},        // S_INT_64,
-    {"",            GpDbQueryValType::NULL_VAL},        // DOUBLE,
-    {"",            GpDbQueryValType::NULL_VAL},        // FLOAT,
-    {"",            GpDbQueryValType::NULL_VAL},        // BOOLEAN,
-    {"",            GpDbQueryValType::NULL_VAL},        // UUID,
-    {"",            GpDbQueryValType::NULL_VAL},        // STRING,
-    {"",            GpDbQueryValType::NULL_VAL},        // BLOB,
-    {"::jsonb[]",   GpDbQueryValType::JSON_ARRAY_1D},   // OBJECT,
-    {"",            GpDbQueryValType::NULL_VAL},        // OBJECT_SP,
-    {"",            GpDbQueryValType::NULL_VAL},        // ENUM,
-    {"",            GpDbQueryValType::NULL_VAL}         // ENUM_FLAGS
-};
-
-const GpDbQueryBuilder::BindCacheT  GpDbQueryBuilder::sTypeBindMap =
-{
-};
+    if constexpr (std::is_move_assignable_v<decltype(aValue)>)
+    {
+        if (aId < 0)
+        {
+            iValues.emplace_back(std::move(aValue));
+        } else
+        {
+            iValues.insert(std::begin(iValues) + aId, std::move(aValue));
+        }
+    } else
+    {
+        if (aId < 0)
+        {
+            iValues.emplace_back(aValue);
+        } else
+        {
+            iValues.insert(std::begin(iValues) + aId, aValue);
+        }
+    }
+}
 
 GpDbQueryBuilder::GpDbQueryBuilder (void) noexcept
+{
+}
+
+GpDbQueryBuilder::GpDbQueryBuilder (GpDbQueryBuilder&& aBuilder) noexcept:
+iValues{std::move(aBuilder.iValues)}
 {
 }
 
@@ -117,1327 +45,388 @@ GpDbQueryBuilder::~GpDbQueryBuilder (void) noexcept
 {
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::RAW (std::string_view aRawStr)
+GpDbQueryBuilder&   GpDbQueryBuilder::operator= (GpDbQueryBuilder&& aBuilder) noexcept
 {
-    _CheckForSpace();
-
-    iQueryStr
-        .append(aRawStr);
-
+    iValues = std::move(aBuilder.iValues);
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::BRACE_BEGIN (void)
+GpDbQuery   GpDbQueryBuilder::Build (void)
 {
-    iQueryStr
-        .append("("_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::BRACE_END (void)
-{
-    iQueryStr
-        .append(")"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COMMA (void)
-{
-    iQueryStr
-        .append(","_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::AND (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("AND"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::OR (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("OR"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::NOT (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("NOT"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::BITWISE_AND (void)
-{
-    iQueryStr
-        .append("&"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::BITWISE_OR (void)
-{
-    iQueryStr
-        .append("|"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::EQUAL (void)
-{
-    iQueryStr
-        .append("="_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::NOT_EQUAL (void)
-{
-    iQueryStr
-        .append("!="_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::GREATER (void)
-{
-    iQueryStr
-        .append(">"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::GREATER_EQUAL (void)
-{
-    iQueryStr
-        .append(">="_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::LESS (void)
-{
-    iQueryStr
-        .append("<"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::LESS_EQUAL (void)
-{
-    iQueryStr
-        .append("<="_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::ASSIGN (void)
-{
-    iQueryStr
-        .append("="_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::ADD (void)
-{
-    iQueryStr
-        .append("+"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::SUB (void)
-{
-    iQueryStr
-        .append("-"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::MUL (void)
-{
-    iQueryStr
-        .append("*"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::DIV (void)
-{
-    iQueryStr
-        .append("/"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COUNT_1 (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("COUNT(1)"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COALESCE_BEGIN (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("COALESCE("_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COALESCE_END (void)
-{
-    iQueryStr
-        .append(")"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::ASC (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("ASC"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::DESC (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("DESC"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::NULLS (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("NULLS"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::LAST (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("LAST"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::ON (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("ON"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::AS (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("AS"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::AS (std::string_view aName)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("AS "_sv);
-
-    _AppendName(aName);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::IN (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("IN"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::ANY (const GpDbQueryValType::EnumT aValueType)
-{
-    _CheckForSpace();
-
-    iQueryStr.append("ANY("_sv);
-    VALUE(aValueType);
-    iQueryStr.append(")"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::ANY
-(
-    const GpDbQueryValType::EnumT   aValueType,
-    std::string_view                aTypeCast
-)
-{
-    _CheckForSpace();
-
-    iQueryStr.append("ANY("_sv);
-    VALUE(aValueType);
-
-    if (std::size(aTypeCast) > 0)
+    return GpDbQuery
     {
-        iQueryStr.append("::"_sv).append(aTypeCast);
-    }
-
-    iQueryStr.append(")"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::BETWEEN (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("BETWEEN"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::BETWEEN
-(
-    const GpDbQueryValType::EnumT aValueTypeA,
-    const GpDbQueryValType::EnumT aValueTypeB
-)
-{
-    BETWEEN().VALUE(aValueTypeA).AND().VALUE(aValueTypeB);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::LIKE (const GpDbQueryValType::EnumT aValueType)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("LIKE "_sv)
-        .append(_ValueBind(aValueType));
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::LIKE (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("LIKE "_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::ILIKE (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("ILIKE "_sv);
-
-    return *this;
-}
-
-
-GpDbQueryBuilder&   GpDbQueryBuilder::IS_NULL (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("IS NULL"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::IS_NOT_NULL (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("IS NOT NULL"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUES_BEGIN (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("VALUES("_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUES_END (void)
-{
-    iQueryStr
-        .append(")"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUES (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("VALUES"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::WITH (std::string_view aName)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("WITH "_sv);
-
-    _AppendName(aName);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::INSERT_INTO
-(
-    std::string_view aSchema,
-    std::string_view aTable
-)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("INSERT INTO "_sv);
-
-    _AppendName(aSchema);
-
-    iQueryStr
-        .append("."_sv);
-
-    _AppendName(aTable);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::SELECT (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("SELECT"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::SELECT_ALL (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("SELECT *"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::SELECT_ALL (std::string_view aTable)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("SELECT"_sv);
-
-    _CheckForSpace();
-    _AppendName(aTable);
-
-    _CheckForSpace();
-    iQueryStr
-        .append("*"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::FROM (std::string_view aTable)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("FROM "_sv);
-
-    _AppendName(aTable);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::FROM
-(
-    std::string_view aSchema,
-    std::string_view aTable
-)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("FROM "_sv);
-
-    _AppendName(aSchema);
-
-    iQueryStr
-        .append("."_sv);
-
-    _AppendName(aTable);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::FROM (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("FROM"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::WHERE (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("WHERE"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::UPDATE
-(
-    std::string_view aSchema,
-    std::string_view aTable
-)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("UPDATE "_sv);
-
-    _AppendName(aSchema);
-
-    iQueryStr
-        .append("."_sv);
-
-    _AppendName(aTable);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::DISTINCT (std::string_view aName)
-{
-    return RAW("DISTINCT("_sv).COL(aName).RAW(")"_sv);
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::DISTINCT
-(
-    std::string_view aTable,
-    std::string_view aName
-)
-{
-    return RAW("DISTINCT("_sv).COL(aTable, aName).RAW(")"_sv);
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::SET (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("SET"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::ORDER_BY (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("ORDER BY"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::LIMIT (const size_t aValue)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("LIMIT "_sv)
-        .append(std::to_string(aValue));
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::LIMIT (const GpDbQueryValType::EnumT aValueType)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("LIMIT "_sv);
-
-    VALUE(aValueType);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::OFFSET (const size_t aValue)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("OFFSET "_sv)
-        .append(std::to_string(aValue));
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::OFFSET (const GpDbQueryValType::EnumT aValueType)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("OFFSET "_sv);
-
-    VALUE(aValueType);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::RETURNING (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("RETURNING"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::RETURNING_ALL (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("RETURNING *"_sv);
-
-    return *this;
-}
-
-//GpDbQueryBuilder& GpDbQueryBuilder::RETURNING (std::string_view aRaw)
-//{
-//  CheckForSpace();
-//
-//  iQueryStr
-//      .append("RETURNING"_sv)
-//      .append(" "_sv);
-//
-//  RAW(aRaw);
-//
-//  return *this;
-//}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::FOR_UPDATE (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("FOR UPDATE"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::SKIP_LOCKED (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("SKIP LOCKED"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::DELETE_FROM
-(
-    std::string_view aSchema,
-    std::string_view aTable
-)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("DELETE FROM "_sv);
-
-    _AppendName(aSchema);
-
-    iQueryStr
-        .append("."_sv);
-
-    _AppendName(aTable);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::ON_CONFLICT (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("ON CONFLICT"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::DO_NOTHING (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("DO NOTHING"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::NOT_EXISTS (void)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("NOT EXISTS"_sv);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::INNER_JOIN
-(
-    std::string_view aSchema,
-    std::string_view aTable
-)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("INNER JOIN "_sv);
-
-    _AppendName(aSchema);
-
-    iQueryStr
-        .append("."_sv);
-
-    _AppendName(aTable);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::LEFT_JOIN
-(
-    std::string_view aSchema,
-    std::string_view aTable
-)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("LEFT JOIN "_sv);
-
-    _AppendName(aSchema);
-
-    iQueryStr
-        .append("."_sv);
-
-    _AppendName(aTable);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::RIGHT_JOIN
-(
-    std::string_view aSchema,
-    std::string_view aTable
-)
-{
-    _CheckForSpace();
-
-    iQueryStr
-        .append("RIGHT JOIN "_sv);
-
-    _AppendName(aSchema);
-
-    iQueryStr
-        .append("."_sv);
-
-    _AppendName(aTable);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COL (std::string_view aName)
-{
-    _CheckForSpace();
-    _AppendName(aName);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COL
-(
-    std::string_view aTable,
-    std::string_view aName
-)
-{
-    _CheckForSpace();
-    _AppendName(aTable);
-
-    iQueryStr
-        .append("."_sv);
-
-    _CheckForSpace();
-    _AppendName(aName);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COL_AS
-(
-    std::string_view aName,
-    std::string_view aNameAs
-)
-{
-    _CheckForSpace();
-    _AppendName(aName);
-
-    AS();
-
-    _CheckForSpace();
-    _AppendName(aNameAs);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COL_AS
-(
-    std::string_view aTable,
-    std::string_view aName,
-    std::string_view aNameAs
-)
-{
-    _CheckForSpace();
-    _AppendName(aTable);
-
-    iQueryStr
-        .append("."_sv);
-
-    _CheckForSpace();
-    _AppendName(aName);
-
-    AS();
-
-    _CheckForSpace();
-    _AppendName(aNameAs);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COL_EQUAL_TO_VAL
-(
-    std::string_view                aName,
-    const GpDbQueryValType::EnumT   aValueType
-)
-{
-    return COL(aName).EQUAL().VALUE(aValueType);
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COL_EQUAL_TO_VAL
-(
-    std::string_view    aName,
-    GpDbQueryValue&&    aValue
-)
-{
-    return COL(aName).EQUAL().VALUE(std::move(aValue));
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COL_EQUAL_TO_VAL
-(
-    std::string_view    aName,
-    std::string_view    aValue
-)
-{
-    return COL(aName).EQUAL().VALUE(aValue);
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COL_EQUAL_TO_COL
-(
-    std::string_view    aName1,
-    std::string_view    aName2
-)
-{
-    return COL(aName1).EQUAL().COL(aName2);
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COL_IS_NOT_NUUL (std::string_view aName)
-{
-    return COL(aName).IS_NOT_NULL();
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COL_IS_NUUL (std::string_view aName)
-{
-    return COL(aName).IS_NULL();
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::COLS (const std::vector<std::string_view>& aNames)
-{
-    _CheckForSpace();
-
-    auto getFn = [&](const auto& i) -> std::string
-    {
-        std::vector<std::string_view>   parts = StrOps::SSplit(*i, '.', 0, 0, Algo::SplitMode::COUNT_ZERO_LENGTH_PARTS);
-        std::string                 s;
-
-        for (const auto& p: parts)
-        {
-            if (std::size(s) > 0)
-            {
-                s.append("."_sv);
-            }
-
-            s.append("\""_sv).append(_SCheckIfName(p)).append("\""_sv);
-        }
-
-        return s;
+        std::move(iName),
+        std::move(iQuery),
+        std::move(iValues)
     };
+}
 
-    iQueryStr
-        .append(StrOps::SJoin<std::string>(aNames, getFn, ","_sv))
-        .append(" "_sv);
-
+GpDbQueryBuilder&   GpDbQueryBuilder::Name (std::string_view aName)
+{
+    iName = aName;
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::COL_ASSIGN
-(
-    std::string_view                aName,
-    const GpDbQueryValType::EnumT   aValueType
-)
+GpDbQueryBuilder&   GpDbQueryBuilder::Name (std::string&& aName)
 {
-    COL(aName).EQUAL().VALUE(aValueType);
-
+    iName = std::move(aName);
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::NAME (std::string_view aName)
+GpDbQueryBuilder&   GpDbQueryBuilder::Query (const char* aQuery)
 {
-    _CheckForSpace();
-    _AppendName(aName);
-
+    iQuery = aQuery;
+    ParseQuery();
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUE_NULL (void)
+GpDbQueryBuilder&   GpDbQueryBuilder::Query (std::string_view aQuery)
 {
-    _CheckForSpace();
-
-    iQueryStr
-        .append("NULL"_sv);
-
+    iQuery = aQuery;
+    ParseQuery();
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUE (const GpDbQueryValType::EnumT aValueType)
+GpDbQueryBuilder&   GpDbQueryBuilder::Query (std::string&& aQuery)
 {
-    _CheckForSpace();
-
-    iQueryStr
-        .append(_ValueBind(aValueType));
-
+    iQuery = std::move(aQuery);
+    ParseQuery();
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUE (GpDbQueryValue&& aValue)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const s_int_16 aValue)
 {
-    _CheckForSpace();
-
-    const GpDbQueryValType::EnumT valueType = SDetectQueryValType(aValue);
-
-    iQueryStr
-        .append(_ValueBind(valueType));
-
-    iValues.emplace_back(std::move(aValue));
-
+    Next<s_int_16>(-1, aValue);
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUE
-(
-    const GpDbQueryValType::EnumT   aValueType,
-    std::string_view                aTypeCast
-)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<s_int_16>& aValue)
 {
-    _CheckForSpace();
-
-    iQueryStr
-        .append(_ValueBind(aValueType, aTypeCast));
-
+    Next<std::vector<s_int_16>>(-1, aValue);
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUE (std::string_view aValue)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<s_int_16>&& aValue)
 {
-    _CheckForSpace();
-
-    iQueryStr
-        .append("'"_sv)
-        .append(_SEscape(aValue))
-        .append("'"_sv);
-
+    Next<std::vector<s_int_16>>(-1, std::move(aValue));
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUE
-(
-    std::string_view    aValue,
-    std::string_view    aTypeCast
-)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const s_int_32 aValue)
 {
-    VALUE(aValue);
+    Next<s_int_32>(-1, aValue);
+    return *this;
+}
 
-    if (std::size(aTypeCast) > 0)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<s_int_32>& aValue)
+{
+    Next<std::vector<s_int_32>>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<s_int_32>&& aValue)
+{
+    Next<std::vector<s_int_32>>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const s_int_64 aValue)
+{
+    Next<s_int_64>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<s_int_64>& aValue)
+{
+    Next<std::vector<s_int_64>>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<s_int_64>&& aValue)
+{
+    Next<std::vector<s_int_64>>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const double aValue)
+{
+    Next<double>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<double>& aValue)
+{
+    Next<std::vector<double>>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<double>&& aValue)
+{
+    Next<std::vector<double>>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const float aValue)
+{
+    Next<float>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<float>& aValue)
+{
+    Next<std::vector<float>>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<float>&& aValue)
+{
+    Next<std::vector<float>>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::string_view aValue)
+{
+    Next<std::string>(-1, std::string{aValue});
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::string&& aValue)
+{
+    Next<std::string>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<std::string_view>& aValue)
+{
+    std::vector<std::string> vec;
+    vec.resize(std::size(aValue));
+    auto* dataPtr = vec.data();
+
+    for (std::string_view sv: aValue)
     {
-        iQueryStr
-            .append("::"_sv).append(aTypeCast);
+        *dataPtr++ = sv;
     }
 
+    Next<std::vector<std::string>>(-1, std::move(vec));
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUE (const s_int_64 aValue)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<std::string>& aValue)
 {
-    _CheckForSpace();
-
-    iQueryStr
-        .append(StrOps::SFromSI64(aValue));
-
+    Next<std::vector<std::string>>(-1, aValue);
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUE (const GpBool aValue)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<std::string>&& aValue)
 {
-    _CheckForSpace();
-
-    iQueryStr
-        .append(aValue.Value() ? "true"_sv : "false"_sv);
-
+    Next<std::vector<std::string>>(-1, std::move(aValue));
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::VALUE
-(
-    const GpEnum&       aValue,
-    std::string_view    aTypeCast
-)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (GpDbQueryValueJsonSv aValue)
 {
-    return VALUE(aValue.ToString(), aTypeCast);
+    Next<GpDbQueryValueJson>(-1, GpDbQueryValueJson{aValue.Value()});
+    return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::OBJECT_NAMES
-(
-    const GpReflectModel&               aModel,
-    const GpDbQueryBuilderMode::EnumT   aMode
-)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (GpDbQueryValueJson&& aValue)
 {
-    return OBJECT_NAMES
+    Next<GpDbQueryValueJson>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const GpDbQueryValueJsonSvVec& aValue)
+{
+    GpDbQueryValueJsonVec       vecWrap;
+    std::vector<std::string>&   vec = vecWrap.Value();
+
+    vec.resize(std::size(aValue.Value()));
+    auto* dataPtr = vec.data();
+
+    for (std::string_view sv: aValue.Value())
+    {
+        *dataPtr++ = sv;
+    }
+
+    Next<GpDbQueryValueJsonVec>(-1, std::move(vecWrap));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const GpDbQueryValueJsonVec& aValue)
+{
+    Next<GpDbQueryValueJsonVec>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (GpDbQueryValueJsonVec&& aValue)
+{
+    Next<GpDbQueryValueJsonVec>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const GpUUID& aValue)
+{
+    Next<GpUUID>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<GpUUID>& aValue)
+{
+    Next<std::vector<GpUUID>>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<GpUUID>&& aValue)
+{
+    Next<std::vector<GpUUID>>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const GpSpanByteR aValue)
+{
+    Next<GpBytesArray>(-1, GpArrayUtils::SMake<GpBytesArray>(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (GpBytesArray&& aValue)
+{
+    Next<GpBytesArray>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<GpBytesArray>& aValue)
+{
+    Next<std::vector<GpBytesArray>>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<GpBytesArray>&& aValue)
+{
+    Next<std::vector<GpBytesArray>>(-1, std::move(aValue));
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (bool aValue)
+{
+    Next<bool>(-1, aValue);
+    return *this;
+}
+
+GpDbQueryBuilder&   GpDbQueryBuilder::Null (void)
+{
+    Next<std::nullopt_t>(-1, std::nullopt);
+    return *this;
+}
+
+void    GpDbQueryBuilder::ParseQuery (void)
+{
+    VERIFY
     (
-        ""_sv,
-        aModel,
-        aMode
-    );
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::OBJECT_NAMES
-(
-    std::string_view                    aPrefix,
-    const GpReflectModel&               aModel,
-    const GpDbQueryBuilderMode::EnumT   aMode
-)
-{
-    _CheckForSpace();
-
-    const auto info = _SFromModel(aPrefix, aModel, aMode);
-
-    auto getFn = [&](auto& i) -> std::string
-    {
-        return i->name;
-    };
-
-    iQueryStr
-        .append(StrOps::SJoin<std::string>(info, getFn, ","_sv));
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::OBJECT_BINDS
-(
-    const GpReflectModel&               aModel,
-    const GpDbQueryBuilderMode::EnumT   aMode
-)
-{
-    _CheckForSpace();
-
-    const auto info = _SFromModel(""_sv, aModel, aMode);
-
-    auto getFn = [&](auto& i) -> std::string
-    {
-        iTypes.emplace_back(i->type);
-
-        std::string res;
-        res.reserve(16);
-
-        const GpReflectProp& propInfo = i->propInfo;
-
-        if (propInfo.FlagTest(GpReflectPropFlag::MULTILANGUAGE_STRING))
-        {
-            res
-                .append("language.add_item($"_sv)
-                .append(std::to_string(std::size(iTypes)))
-                .append(i->bindType)
-                .append(")"_sv);
-        } else
-        {
-            res
-                .append("$"_sv)
-                .append(std::to_string(std::size(iTypes)))
-                .append(i->bindType);
-        }
-
-        return res;
-    };
-
-    iQueryStr
-        .append(StrOps::SJoin<std::string>(info, getFn, ","_sv));
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::OBJECT_FOR_UPDATE (const GpReflectModel& aModel)
-{
-    _CheckForSpace();
-
-    const auto info = _SFromModel(""_sv, aModel, GpDbQueryBuilderMode::UPDATE);
-
-    auto getFn = [&](auto& i) -> std::string
-    {
-        iTypes.emplace_back(i->type);
-
-        std::string res = i->name;
-
-        res
-            .append("=$"_sv)
-            .append(std::to_string(std::size(iTypes)))
-            .append(i->bindType);
-
-        return res;
-    };
-
-    iQueryStr
-        .append(StrOps::SJoin<std::string>(info, getFn, ","_sv));
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::SEARCH_WHERE
-(
-    GpReflectModel::C::Opt::CRef    aModel,
-    const GpDbSearchDesc&           aSearchDesc
-)
-{   
-    if (iQuerySearchBuilder.IsNULL())
-    {
-        iQuerySearchBuilder = MakeSP<GpDbQuerySearchBuilder>();
-    }
-
-    iQuerySearchBuilder.V().SEARCH_WHERE(*this, aModel, aSearchDesc);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::SEARCH_ORDER (const GpDbSearchDesc& aSearchDesc)
-{
-    if (iQuerySearchBuilder.IsNULL())
-    {
-        iQuerySearchBuilder = MakeSP<GpDbQuerySearchBuilder>();
-    }
-
-    iQuerySearchBuilder.V().SEARCH_ORDER(*this, aSearchDesc);
-
-    return *this;
-}
-
-GpDbQueryBuilder&   GpDbQueryBuilder::SEARCH_LIMIT (const GpDbSearchDesc& aSearchDesc)
-{
-    if (iQuerySearchBuilder.IsNULL())
-    {
-        iQuerySearchBuilder = MakeSP<GpDbQuerySearchBuilder>();
-    }
-
-    iQuerySearchBuilder.V().SEARCH_LIMIT(*this, aSearchDesc);
-
-    return *this;
-}
-
-std::string GpDbQueryBuilder::_ValueBind (const GpDbQueryValType::EnumT aValueType)
-{
-    return _ValueBind(aValueType, sBindStrs.at(size_t(aValueType)));
-}
-
-std::string GpDbQueryBuilder::_ValueBind
-(
-    const GpDbQueryValType::EnumT   aValueType,
-    std::string_view                aTypeCast
-)
-{
-    iTypes.emplace_back(aValueType);
-
-    std::string res;
-
-    res
-        .append("$"_sv)
-        .append(std::to_string(std::size(iTypes)));
-
-    if (std::size(aTypeCast) > 0)
-    {
-        res.append("::"_sv).append(aTypeCast);
-    }
-
-    return res;
-}
-
-void    GpDbQueryBuilder::_CheckForSpace (void)
-{
-    if (std::size(iQueryStr) > 0)
-    {
-        const char ch = iQueryStr.at(std::size(iQueryStr) - 1);
-
-        if (   (ch != ' ')
-            && (ch != ')')
-            && (ch != '('))
-        {
-            iQueryStr.append(" "_sv);
-        }
-    } else
-    {
-        iQueryStr.reserve(512);
-    }
-}
-
-void    GpDbQueryBuilder::_AppendName (std::string_view aName)
-{
-    iQueryStr
-        .append("\""_sv)
-        .append(_SCheckIfName(aName))
-        .append("\""_sv);
-
-    std::string s;
-}
-
-std::string_view    GpDbQueryBuilder::_SCheckIfName (std::string_view aStr)
-{
-    THROW_COND_DB
-    (
-        std::size(aStr) <= 255,
+        !iQuery.empty(),
         GpDbExceptionCode::REQUEST_ERROR,
-        "Name length must be <= 255"_sv
+        "SQL string is empty"
     );
 
-    for (const char ch: aStr)
+    // Count $N values and max(Ni)
+    const char*         strPtr  = iQuery.data();
+    const char* const   endPtr  = strPtr;
+    s_int_64            maxN    = std::numeric_limits<s_int_64>::min();
+    size_t              countN  = 0;
+
+    while (strPtr <= endPtr)
     {
-        THROW_COND_DB
+        const char ch = *strPtr++;
+
+        if (ch == '$')
+        {
+            size_t  readCount       = 0;
+            ssize_t strRemainSize   = ssize_t(endPtr - strPtr) + 1;
+
+            if (strRemainSize > 0)
+            {
+                const s_int_64 n = StrOps::SToSI64
+                (
+                    std::string_view{strPtr, size_t(strRemainSize)},
+                    readCount
+                );
+
+                if (readCount > 0)
+                {
+                    countN++;
+                    maxN = std::max(maxN, n);
+                }
+            }
+        }
+    }
+
+    if (countN > 0)
+    {
+        VERIFY
         (
-            ((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')) || ((ch >= '0') && (ch <= '9')) || (ch == '_'),
+            countN <= size_t(maxN),
             GpDbExceptionCode::REQUEST_ERROR,
             [&]()
             {
-                return "Name '"_sv + aStr + "' contains wrong character '"_sv + ch + "'"_sv;
+                return fmt::format
+                (
+                    "Incorrect SQL parameter binding: '{}'",
+                    iQuery
+                );
             }
         );
-    }
 
-    return aStr;
+        iValues.reserve(size_t(maxN));
+    }
 }
 
-std::vector<GpDbQueryBuilder::TypeInfo> GpDbQueryBuilder::_SFromModel
+/*
+GpDbQuery&  GpDbQuery::NextProp
 (
-    std::string_view                    aPrefix,
-    const GpReflectModel&               aModel,
-    const GpDbQueryBuilderMode::EnumT   aMode
+    const GpReflectProp&    aProp,
+    const void*             aDataPtr
 )
 {
-    std::vector<TypeInfo> res;
+    const GpReflectContainerType::EnumT propContainer = aProp.Container();
 
-    const auto&     props       = aModel.Props();
-    const size_t    propsCout   = std::size(props);
-
-    res.reserve(propsCout);
-
-    for (const GpReflectProp& propInfo: aModel.Props())
+    switch (propContainer)
     {
-        const GpReflectContainerType::EnumT propContainer = propInfo.Container();
-        std::string                     valueBind;
-        GpDbQueryValType::EnumT             valueType;
-        std::string                     propName("\""_sv + _SCheckIfName(propInfo.Name()) + "\""_sv);
-        const std::string                   srcPropName = propName;
-
-        if (std::size(aPrefix) > 0)
+        case GpReflectContainerType::NO:
         {
-            propName = aPrefix + "." + propName;
+            _NextProp(aProp, aDataPtr);
+        } break;
+        case GpReflectContainerType::VECTOR:
+        {
+            _NextPropVec(aProp, aDataPtr);
+        } break;
+        case GpReflectContainerType::VECTOR_WRAP:
+        {
+            _NextPropVecWrap(aProp, aDataPtr);
+        } break;
+        case GpReflectContainerType::MAP:
+        {
+            _NextPropMap(aProp, aDataPtr);
+        } break;
+        default:
+        {
+            THROW("Unknown container type "_sv + GpReflectContainerType::SToString(propContainer));
         }
+    }
 
+    return *this;
+}
+
+GpDbQuery&  GpDbQuery::FromObject
+(
+    const GpReflectObject&      aObject,
+    GpDbQueryBuilderMode::EnumT aMode
+)
+{
+    GpReflectModel::CSP     modelCSP    = aObject.ReflectModel();
+    const GpReflectModel&   model       = modelCSP.Vn();
+    const void*             dataPtr     = aObject.ReflectDataPtr();
+
+    for (const GpReflectProp& propInfo: model.Props())
+    {
         if (aMode == GpDbQueryBuilderMode::CREATE)
         {
             if (propInfo.FlagTest(GpReflectPropFlag::GENERATED_OUTSIDE))
@@ -1446,10 +435,12 @@ std::vector<GpDbQueryBuilder::TypeInfo> GpDbQueryBuilder::_SFromModel
             }
         } else if (aMode == GpDbQueryBuilderMode::READ)
         {
-            if (propInfo.FlagTest(GpReflectPropFlag::MULTILANGUAGE_STRING))
-            {
-                propName = "language.get_item("_sv + propName + ") AS "_sv + srcPropName;
-            }
+            // NOP
+
+            //if (propInfo.FlagTest(GpReflectPropFlag::MULTILANGUAGE_STRING))
+            //{
+            //  propName = "language.get_item("_sv + propName + ") AS "_sv + srcPropName;
+            //}
         } else if (aMode == GpDbQueryBuilderMode::UPDATE)
         {
             if (   (propInfo.FlagTest(GpReflectPropFlag::GENERATED_ONCE))
@@ -1460,81 +451,281 @@ std::vector<GpDbQueryBuilder::TypeInfo> GpDbQueryBuilder::_SFromModel
             }
         }
 
-        switch (propContainer)
-        {
-            case GpReflectContainerType::NO:
-            {
-                std::tie(valueBind, valueType) = sTypeBind.at(NumOps::SConvert<size_t>(GpEnum::value_type(propInfo.Type())));
-            } break;
-            case GpReflectContainerType::VECTOR:
-            {
-                std::tie(valueBind, valueType) = sTypeBindVec.at(NumOps::SConvert<size_t>(GpEnum::value_type(propInfo.Type())));
-            } break;
-            case GpReflectContainerType::VECTOR_WRAP:
-            {
-                std::tie(valueBind, valueType) = sTypeBindVecWrap.at(NumOps::SConvert<size_t>(GpEnum::value_type(propInfo.Type())));
-            } break;
-            case GpReflectContainerType::MAP:
-            {
-                //TODO: implement
-                THROW_GP_NOT_IMPLEMENTED();
-                //std::tie(valueBind, valueType) = sTypeBindMap.at(int(propInfo.Type()));
-            } break;
-            default:
-            {
-                THROW_GP("Unknown container type "_sv + GpReflectContainerType::SToString(propContainer));
-            }
-        }
-
-        res.emplace_back
-        (
-            std::move(propName),
-            std::move(valueBind),
-            std::move(valueType),
-            propInfo
-        );
+        NextProp(propInfo, dataPtr);
     }
 
-    return res;
+    return *this;
+}
+*/
+
+/*
+void    GpDbQuery::_NextProp
+(
+    const GpReflectProp&    aProp,
+    const void*             aDataPtr
+)
+{
+    switch (aProp.Type())
+    {
+        case GpReflectType::U_INT_8:
+        {
+            NextInt16(NumOps::SConvert<s_int_16>(aProp.Value_UI8(aDataPtr)));
+        } break;
+        case GpReflectType::S_INT_8:
+        {
+            NextInt16(NumOps::SConvert<s_int_16>(aProp.Value_SI8(aDataPtr)));
+        } break;
+        case GpReflectType::U_INT_16:
+        {
+            NextInt16(NumOps::SConvert<s_int_16>(aProp.Value_UI16(aDataPtr)));
+        } break;
+        case GpReflectType::S_INT_16:
+        {
+            NextInt16(NumOps::SConvert<s_int_16>(aProp.Value_SI16(aDataPtr)));
+        } break;
+        case GpReflectType::U_INT_32:
+        {
+            NextInt32(NumOps::SConvert<s_int_32>(aProp.Value_UI32(aDataPtr)));
+        } break;
+        case GpReflectType::S_INT_32:
+        {
+            NextInt32(NumOps::SConvert<s_int_32>(aProp.Value_SI32(aDataPtr)));
+        } break;
+        case GpReflectType::U_INT_64:
+        {
+            NextInt64(NumOps::SConvert<s_int_64>(aProp.Value_UI64(aDataPtr)));
+        } break;
+        case GpReflectType::S_INT_64:
+        {
+            NextInt64(NumOps::SConvert<s_int_64>(aProp.Value_SI64(aDataPtr)));
+        } break;
+        case GpReflectType::DOUBLE:
+        {
+            NextDouble(aProp.Value_Double(aDataPtr));
+        } break;
+        case GpReflectType::FLOAT:
+        {
+            NextFloat(aProp.Value_Float(aDataPtr));
+        } break;
+        case GpReflectType::BOOLEAN:
+        {
+            NextBoolean(aProp.Value_Bool(aDataPtr));
+        } break;
+        case GpReflectType::UUID:
+        {
+            NextUuid(aProp.Value_UUID(aDataPtr));
+        } break;
+        case GpReflectType::STRING:
+        {
+            NextStr(aProp.Value_String(aDataPtr));
+        } break;
+        case GpReflectType::BLOB:
+        {
+            const GpBytesArray& blob = aProp.Value_BLOB(aDataPtr);
+            NextBlob(GpSpanByteR(std::data(blob), std::size(blob)));
+        } break;
+        case GpReflectType::OBJECT:
+        {
+            NextJson(GpJsonSerializer::SToStr(aProp.Value_Object(aDataPtr), {GpJsonSerializerFlag::WRITE_MODEL_UID}));
+        } break;
+        case GpReflectType::OBJECT_SP:
+        {
+            const auto& objectSP = aProp.Value_ObjectSP(aDataPtr);
+            if (objectSP.IsNULL()) NextNULL();
+            else NextJson(GpJsonSerializer::SToStr(objectSP.Vn(), {GpJsonSerializerFlag::WRITE_MODEL_UID}));
+        } break;
+        case GpReflectType::ENUM:
+        {
+            NextStr(aProp.Value_Enum(aDataPtr).ToString());
+        } break;
+        case GpReflectType::ENUM_FLAGS:
+        {
+            NextStrArray1D(aProp.Value_EnumFlags(aDataPtr));
+        } break;
+        case GpReflectType::NOT_SET:[[fallthrough]];
+        default:
+        {
+            THROW("Unsupported type NOT_SET"_sv); break;
+        }
+    }
 }
 
-std::string GpDbQueryBuilder::_SEscape (std::string_view aStr)
+void    GpDbQuery::_NextPropVec
+(
+    const GpReflectProp&    aProp,
+    const void*             aDataPtr
+)
 {
-    //Check if need to escape
+    switch (aProp.Type())
     {
-        bool isNeedToEscape = false;
-
-        for (const char ch: aStr)
+        case GpReflectType::U_INT_8:
         {
-            if (ch == u8'\'')
-            {
-                isNeedToEscape = true;
-                break;
-            }
-        }
-
-        if (!isNeedToEscape)
+            NextInt16Array1D(_MakeNumArray<s_int_16>(aProp.Vec_UI8(aDataPtr)));
+        } break;
+        case GpReflectType::S_INT_8:
         {
-            return std::string(aStr);
+            NextInt16Array1D(_MakeNumArray<s_int_16>(aProp.Vec_SI8(aDataPtr)));
+        } break;
+        case GpReflectType::U_INT_16:
+        {
+            NextInt16Array1D(_MakeNumArray<s_int_16>(aProp.Vec_UI16(aDataPtr)));
+        } break;
+        case GpReflectType::S_INT_16:
+        {
+            NextInt16Array1D(aProp.Vec_SI16(aDataPtr));
+        } break;
+        case GpReflectType::U_INT_32:
+        {
+            NextInt32Array1D(_MakeNumArray<s_int_32>(aProp.Vec_UI32(aDataPtr)));
+        } break;
+        case GpReflectType::S_INT_32:
+        {
+            NextInt32Array1D(aProp.Vec_SI32(aDataPtr));
+        } break;
+        case GpReflectType::U_INT_64:
+        {
+            NextInt64Array1D(_MakeNumArray<s_int_64>(aProp.Vec_UI64(aDataPtr)));
+        } break;
+        case GpReflectType::S_INT_64:
+        {
+            NextInt64Array1D(aProp.Vec_SI64(aDataPtr));
+        } break;
+        case GpReflectType::DOUBLE:
+        {
+            NextDoubleArray1D(aProp.Vec_Double(aDataPtr));
+        } break;
+        case GpReflectType::FLOAT:
+        {
+            NextFloatArray1D(aProp.Vec_Float(aDataPtr));
+        } break;
+        case GpReflectType::BOOLEAN:
+        {
+            THROW("Unsupported type booleans vector"_sv);
+        } break;
+        case GpReflectType::UUID:
+        {
+            NextUuidArray1D(aProp.Vec_UUID(aDataPtr));
+        } break;
+        case GpReflectType::STRING:
+        {
+            NextStrArray1D(aProp.Vec_String(aDataPtr));
+        } break;
+        case GpReflectType::BLOB:
+        {
+            NextBlobArray1D(aProp.Vec_BLOB(aDataPtr));
+        } break;
+        case GpReflectType::OBJECT:
+        {
+            THROW("Unsupported type Object vector"_sv);
+        } break;
+        case GpReflectType::OBJECT_SP:
+        {
+            const std::vector<GpReflectObject::SP>& objectVec = aProp.Vec_ObjectSP(aDataPtr);
+            NextJsonArray1D(objectVec);
+        } break;
+        case GpReflectType::ENUM:
+        {
+            THROW("Unsupported type ENUM vector"_sv);
+        } break;
+        case GpReflectType::ENUM_FLAGS:
+        {
+            THROW("Unsupported type ENUM_FLAGS vector"_sv);
+        } break;
+        case GpReflectType::NOT_SET:[[fallthrough]];
+        default:
+        {
+            THROW("Unsupported type NOT_SET"_sv);
         }
     }
+}
 
-    //Do escape
-    std::string escapedStr;
-    escapedStr.reserve(NumOps::SMul(std::size(aStr), size_t(2)));
-
-    for (const char ch: aStr)
+void    GpDbQuery::_NextPropVecWrap
+(
+    const GpReflectProp&    aProp,
+    const void*             aDataPtr
+)
+{
+    switch (aProp.Type())
     {
-        if (ch != u8'\'')
+        case GpReflectType::U_INT_8:
         {
-            escapedStr.append(1, ch);
-        } else
+            THROW("Unsupported type U_INT_8"_sv);
+        } break;
+        case GpReflectType::S_INT_8:
         {
-            escapedStr.append("''");
+            THROW("Unsupported type S_INT_8"_sv);
+        } break;
+        case GpReflectType::U_INT_16:
+        {
+            THROW("Unsupported type U_INT_16"_sv);
+        } break;
+        case GpReflectType::S_INT_16:
+        {
+            THROW("Unsupported type S_INT_16"_sv);
+        } break;
+        case GpReflectType::U_INT_32:
+        {
+            THROW("Unsupported type U_INT_32"_sv);
+        } break;
+        case GpReflectType::S_INT_32:
+        {
+            THROW("Unsupported type S_INT_32"_sv);
+        } break;
+        case GpReflectType::U_INT_64:
+        {
+            THROW("Unsupported type U_INT_64"_sv);
+        } break;
+        case GpReflectType::S_INT_64:
+        {
+            THROW("Unsupported type S_INT_64"_sv);
+        } break;
+        case GpReflectType::DOUBLE:
+        {
+            THROW("Unsupported type DOUBLE"_sv);
+        } break;
+        case GpReflectType::FLOAT:
+        {
+            THROW("Unsupported type FLOAT"_sv);
+        } break;
+        case GpReflectType::BOOLEAN:
+        {
+            THROW("Unsupported type BOOLEAN"_sv);
+        } break;
+        case GpReflectType::UUID:
+        {
+            THROW("Unsupported type UUID"_sv);
+        } break;
+        case GpReflectType::STRING:
+        {
+            THROW("Unsupported type STRING"_sv);
+        } break;
+        case GpReflectType::BLOB:
+        {
+            THROW("Unsupported type BLOB"_sv);
+        } break;
+        case GpReflectType::OBJECT:
+        {
+            const GpVectorReflectObjWrapBase& objectVecWrap = aProp.VecWrap_Object(aDataPtr);
+            NextJsonArray1D(objectVecWrap);
+        } break;
+        case GpReflectType::OBJECT_SP:
+        {
+            THROW("Unsupported type OBJECT_SP"_sv);
+        } break;
+        case GpReflectType::ENUM:
+        {
+            THROW("Unsupported type ENUM vector"_sv);
+        } break;
+        case GpReflectType::ENUM_FLAGS:
+        {
+            THROW("Unsupported type ENUM_FLAGS vector"_sv);
+        } break;
+        case GpReflectType::NOT_SET:[[fallthrough]];
+        default:
+        {
+            THROW("Unsupported type NOT_SET"_sv);
         }
     }
-
-    return escapedStr;
 }
 */
 

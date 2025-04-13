@@ -16,8 +16,8 @@ GpReflectObject::SP GpDbQueryRes::ColToObject
 
 GpReflectObject::C::Vec::SP GpDbQueryRes::ColToObjectArray1D
 (
-    const size_t    aRowId,
-    const size_t    aColId
+    const size_t aRowId,
+    const size_t aColId
 ) const
 {
     GpReflectObject::C::Vec::SP         res;
@@ -98,7 +98,7 @@ GpReflectObject::SP GpDbQueryRes::RowToObject
             } break;
             default:
             {
-                THROW_GP("Unknown container type "_sv + GpReflectContainerType::SToString(propContainer));
+                THROW("Unknown container type "_sv + GpReflectContainerType::SToString(propContainer));
             }
         }
 
@@ -229,7 +229,7 @@ void    GpDbQueryRes::_RowToObjectProp
         case GpReflectType::NOT_SET:[[fallthrough]];
         default:
         {
-            THROW_GP("Unsupported type NOT_SET"_sv); break;
+            THROW("Unsupported type NOT_SET"_sv); break;
         }
     }
 }
@@ -286,7 +286,7 @@ void    GpDbQueryRes::_RowToObjectPropVec
         } break;
         case GpReflectType::BOOLEAN:
         {
-            THROW_GP("Unsupported type vector of booleans"_sv); break;
+            THROW("Unsupported type vector of booleans"_sv); break;
         } break;
         case GpReflectType::UUID:
         {
@@ -304,26 +304,26 @@ void    GpDbQueryRes::_RowToObjectPropVec
         } break;
         case GpReflectType::OBJECT:
         {
-            THROW_GP("Unsupported type Object vector"_sv); break;
+            THROW("Unsupported type Object vector"_sv); break;
         } break;
         case GpReflectType::OBJECT_SP:
         {
             // TODO: implement
-            THROW_GP_NOT_IMPLEMENTED();
+            THROW_NOT_IMPLEMENTED();
             //aProp.Vec_ObjectSP(aDataPtr) = ColToObjectArray1D(aRowId, aColId, ?);
         } break;
         case GpReflectType::ENUM:
         {
-            THROW_GP("Unsupported type ENUM vector"_sv); break;
+            THROW("Unsupported type ENUM vector"_sv); break;
         } break;
         case GpReflectType::ENUM_FLAGS:
         {
-            THROW_GP("Unsupported type ENUM_FLAGS vector"_sv); break;
+            THROW("Unsupported type ENUM_FLAGS vector"_sv); break;
         } break;
         case GpReflectType::NOT_SET:[[fallthrough]];
         default:
         {
-            THROW_GP("Unsupported type NOT_SET"_sv); break;
+            THROW("Unsupported type NOT_SET"_sv); break;
         }
     }
 }
@@ -336,14 +336,14 @@ void    GpDbQueryRes::_RowToObjectPropVecWrap
     const size_t            /*aColId*/
 ) const
 {
-    THROW_COND_GP
+    VERIFY
     (
         aProp.Type() == GpReflectType::OBJECT,
         "Unsupported type"_sv
     );
 
     // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
+    THROW_NOT_IMPLEMENTED();
     //aProp.VecWrap_Object(aDataPtr) = ColToObjectArray1D(aRowId, aColId, {});
 }
 
@@ -356,7 +356,7 @@ void    GpDbQueryRes::_RowToObjectPropMap
 ) const
 {
     //TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
+    THROW_NOT_IMPLEMENTED();
 }
 
 }// namespace GPlatform

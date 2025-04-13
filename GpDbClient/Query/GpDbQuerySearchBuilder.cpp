@@ -32,7 +32,7 @@ GpDbQuerySearchBuilder::~GpDbQuerySearchBuilder (void) noexcept
 void    GpDbQuerySearchBuilder::SEARCH_WHERE
 (
     GpDbQueryBuilder&               aBuilder,
-    GpReflectModel::C::Opt::CRef    aModel,
+    GpReflectModel::C::Opts::CRef   aModel,
     const GpDbSearchDesc&           aSearchDesc
 )
 {
@@ -60,7 +60,7 @@ void    GpDbQuerySearchBuilder::SEARCH_LIMIT
 void    GpDbQuerySearchBuilder::ProcessFilter
 (
     GpDbQueryBuilder&               aBuilder,
-    GpReflectModel::C::Opt::CRef    aModel,
+    GpReflectModel::C::Opts::CRef   aModel,
     const GpDbSearchDesc&           aSearchDesc
 )
 {
@@ -150,7 +150,7 @@ void    GpDbQuerySearchBuilder::ProcessFilter
             id = ParseStr(id+1, filter, u8'\'', u8'\\', false, aBuilder);//STRING CONSTANT
         } else if (ch == u8'L')
         {
-            if (GpReflectProp::C::Opt::CRef propOpt;
+            if (GpReflectProp::C::Opts::CRef propOpt;
                    !iLastPropName.empty()
                 && aModel.has_value()
                 && (propOpt = aModel.value().get().PropOpt(iLastPropName)).has_value()
@@ -184,7 +184,7 @@ void    GpDbQuerySearchBuilder::ProcessFilter
             //Skip
         } else
         {
-            THROW_GP("Parsing error: unexpected character '"_sv + ch + "' at position "_sv + id);
+            THROW("Parsing error: unexpected character '"_sv + ch + "' at position "_sv + id);
         }
     }
 }
@@ -231,7 +231,7 @@ void    GpDbQuerySearchBuilder::ProcessOrderByCond
             } break;
             default:
             {
-                THROW_GP("Unknown oerder type"_sv);
+                THROW("Unknown oerder type"_sv);
             }
         }
     }
@@ -287,7 +287,7 @@ size_t  GpDbQuerySearchBuilder::FindAndParseStr
             //Skip
         } else
         {
-            THROW_GP("Parsing error: unexpected character '"_sv + ch + "' at position "_sv + id);
+            THROW("Parsing error: unexpected character '"_sv + ch + "' at position "_sv + id);
         }
     }
 
@@ -337,7 +337,7 @@ size_t  GpDbQuerySearchBuilder::ParseStr
                 else if (valueType == GpDbQueryValType::INT_64) aBuilder.VALUE(GpDbQueryValue(NumOps::SConvert<s_int_64>(StrOps::SToSI64(strBuffer))));
                 else if (valueType == GpDbQueryValType::FLOAT)  aBuilder.VALUE(GpDbQueryValue(float(StrOps::SToDouble(strBuffer))));
                 else if (valueType == GpDbQueryValType::DOUBLE) aBuilder.VALUE(GpDbQueryValue(double(StrOps::SToDouble(strBuffer))));
-                else THROW_GP("Unsupported value type '"_sv + GpDbQueryValType::SToString(valueType) + "' for text"_sv);
+                else THROW("Unsupported value type '"_sv + GpDbQueryValType::SToString(valueType) + "' for text"_sv);
             }
 
             return id;
@@ -355,12 +355,12 @@ size_t  GpDbQuerySearchBuilder::ParseStr
                     strBuffer += aEscapeChar;
                 } else
                 {
-                    THROW_GP("Parsing error: unexpected character '"_sv + nextCh + "' at position "_sv + id + ". Expected characters '"_sv + aStopChar
+                    THROW("Parsing error: unexpected character '"_sv + nextCh + "' at position "_sv + id + ". Expected characters '"_sv + aStopChar
                      + "' or '"_sv + aEscapeChar + "' after escape character '"_sv + aEscapeChar + "'"_sv);
                 }
             } else
             {
-                THROW_GP("Parsing error: unexpected end of string at position "_sv + (id+1));
+                THROW("Parsing error: unexpected end of string at position "_sv + (id+1));
             }
         } else
         {
@@ -368,7 +368,7 @@ size_t  GpDbQuerySearchBuilder::ParseStr
         }
     }
 
-    THROW_GP("Parsing error: unexpected end of string at position "_sv + id);
+    THROW("Parsing error: unexpected end of string at position "_sv + id);
 }
 
 size_t  GpDbQuerySearchBuilder::ParseNum
@@ -407,7 +407,7 @@ size_t  GpDbQuerySearchBuilder::ParseNum
             aBuilder.VALUE(GpDbQueryValue(double(val)));
         } else
         {
-            THROW_GP("Parsing error: Can`t convert number to "_sv + GpDbQueryValType::SToString(valueType));
+            THROW("Parsing error: Can`t convert number to "_sv + GpDbQueryValType::SToString(valueType));
         }
     } else//double
     {
@@ -422,7 +422,7 @@ size_t  GpDbQuerySearchBuilder::ParseNum
             aBuilder.VALUE(GpDbQueryValue(float(val)));
         } else
         {
-            THROW_GP("Parsing error: Can`t convert real number to "_sv + GpDbQueryValType::SToString(valueType));
+            THROW("Parsing error: Can`t convert real number to "_sv + GpDbQueryValType::SToString(valueType));
         }
     }
 
@@ -471,7 +471,7 @@ std::tuple<GpDbQueryValType::EnumT, size_t> GpDbQuerySearchBuilder::DetectType
     else if (typeName == "i64"_sv)  type = GpDbQueryValType::INT_64;
     else if (typeName == "float"_sv)    type = GpDbQueryValType::FLOAT;
     else if (typeName == "double"_sv)   type = GpDbQueryValType::DOUBLE;
-    else THROW_GP("Parsing error: unknown type '"_sv + typeName + "' at position "_sv + (aStartId + 1));
+    else THROW("Parsing error: unknown type '"_sv + typeName + "' at position "_sv + (aStartId + 1));
 
     return {type, aStartId + std::size(typeName)};
 }

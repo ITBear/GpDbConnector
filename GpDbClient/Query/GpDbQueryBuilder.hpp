@@ -1,31 +1,18 @@
 #pragma once
 
-#include <GpCore2/GpReflection/GpReflectModel.hpp>
-#include <GpCore2/GpUtils/Types/Bool/GpBool.hpp>
-
-#include <GpDbConnector/GpDbClient/Query/GpDbQueryValType.hpp>
-#include <GpDbConnector/GpDbClient/Query/GpDbQueryValue.hpp>
-#include <GpDbConnector/GpDbDataModels/Search/GpDbSearchDesc.hpp>
+#include <GpDbConnector/GpDbClient/Query/GpDbQuery.hpp>
 
 namespace GPlatform {
-
-/*
-class GpDbQuery;
-class GpDbQuerySearchBuilder;
-
-GP_ENUM(GP_DB_CLIENT_API, GpDbQueryBuilderMode,
-    CREATE,
-    READ,
-    UPDATE
-);
 
 class GP_DB_CLIENT_API GpDbQueryBuilder
 {
 public:
-    CLASS_REMOVE_CTRS_MOVE_COPY(GpDbQueryBuilder)
+    CLASS_REMOVE_CTRS_COPY(GpDbQueryBuilder)
     CLASS_DD(GpDbQueryBuilder)
 
-    using ValueTypeVecT = std::vector<GpDbQueryValType::EnumT>;
+    using ValueVecT = GpDbQuery::ValueVecT;
+
+    /*using ValueTypeVecT   = std::vector<GpDbQueryValType::EnumT>;
     using ValueVecT     = std::vector<GpDbQueryValue>;
     using BindStrsT     = std::array<std::string, GpDbQueryValType::SCount()>;
     using BindCacheT    = std::array<std::tuple<std::string, GpDbQueryValType::EnumT>, GpDbQueryValType::SCount()>;
@@ -46,192 +33,270 @@ public:
         std::string             bindType;   //::type
         GpDbQueryValType::EnumT type;
         const GpReflectProp&    propInfo;
-    };
+    };*/
 
 public:
-                                GpDbQueryBuilder    (void) noexcept;
-                                ~GpDbQueryBuilder   (void) noexcept;
+                            GpDbQueryBuilder    (void) noexcept;
+                            GpDbQueryBuilder    (GpDbQueryBuilder&& aBuilder) noexcept;
+                            ~GpDbQueryBuilder   (void) noexcept;
 
-    std::string_view            QueryStr            (void) const noexcept {return iQueryStr;}
-    const ValueTypeVecT&        Types               (void) const noexcept {return iTypes;}
-    const ValueVecT&            Values              (void) const noexcept {return iValues;}
+    GpDbQueryBuilder&       operator=           (GpDbQueryBuilder&& aBuilder) noexcept;
 
-    std::string&&               QueryStrMove        (void) noexcept {return std::move(iQueryStr);}
-    ValueTypeVecT&&             TypesMove           (void) noexcept {return std::move(iTypes);}
-    ValueVecT&&                 ValuesMove          (void) noexcept {return std::move(iValues);}
+    GpDbQuery               Build               (void);
 
-    GpDbQueryBuilder&           RAW                 (std::string_view aRawStr);
+    // Prepared statement name
+    GpDbQueryBuilder&       Name                (std::string_view aName);
+    GpDbQueryBuilder&       Name                (std::string&& aName);
 
-    GpDbQueryBuilder&           BRACE_BEGIN         (void);
-    GpDbQueryBuilder&           BRACE_END           (void);
-    GpDbQueryBuilder&           COMMA               (void);
-    GpDbQueryBuilder&           AND                 (void);
-    GpDbQueryBuilder&           OR                  (void);
-    GpDbQueryBuilder&           NOT                 (void);
-    GpDbQueryBuilder&           BITWISE_AND         (void);
-    GpDbQueryBuilder&           BITWISE_OR          (void);
-    GpDbQueryBuilder&           EQUAL               (void);
-    GpDbQueryBuilder&           NOT_EQUAL           (void);
-    GpDbQueryBuilder&           GREATER             (void);
-    GpDbQueryBuilder&           GREATER_EQUAL       (void);
-    GpDbQueryBuilder&           LESS                (void);
-    GpDbQueryBuilder&           LESS_EQUAL          (void);
-    GpDbQueryBuilder&           ASSIGN              (void);
-    GpDbQueryBuilder&           ADD                 (void);
-    GpDbQueryBuilder&           SUB                 (void);
-    GpDbQueryBuilder&           MUL                 (void);
-    GpDbQueryBuilder&           DIV                 (void);
-    GpDbQueryBuilder&           COUNT_1             (void);
-    GpDbQueryBuilder&           COALESCE_BEGIN      (void);
-    GpDbQueryBuilder&           COALESCE_END        (void);
-    GpDbQueryBuilder&           ASC                 (void);
-    GpDbQueryBuilder&           DESC                (void);
-    GpDbQueryBuilder&           NULLS               (void);
-    GpDbQueryBuilder&           LAST                (void);
-    GpDbQueryBuilder&           ON                  (void);
-    GpDbQueryBuilder&           AS                  (void);
-    GpDbQueryBuilder&           AS                  (std::string_view aName);
-    GpDbQueryBuilder&           IN                  (void);
-    GpDbQueryBuilder&           ANY                 (const GpDbQueryValType::EnumT  aValueType);
-    GpDbQueryBuilder&           ANY                 (const GpDbQueryValType::EnumT  aValueType,
-                                                     std::string_view               aTypeCast);
-    GpDbQueryBuilder&           BETWEEN             (void);
-    GpDbQueryBuilder&           BETWEEN             (const GpDbQueryValType::EnumT aValueTypeA,
-                                                     const GpDbQueryValType::EnumT aValueTypeB);
-    GpDbQueryBuilder&           LIKE                (const GpDbQueryValType::EnumT aValueType);
-    GpDbQueryBuilder&           LIKE                (void);
-    GpDbQueryBuilder&           ILIKE               (void);
-    GpDbQueryBuilder&           IS_NULL             (void);
-    GpDbQueryBuilder&           IS_NOT_NULL         (void);
+    // SQL query
+    GpDbQueryBuilder&       Query               (const char* aQuery);
+    GpDbQueryBuilder&       Query               (std::string_view aQuery);
+    GpDbQueryBuilder&       Query               (std::string&& aQuery);
 
-    GpDbQueryBuilder&           VALUES_BEGIN        (void);
-    GpDbQueryBuilder&           VALUES_END          (void);
-    GpDbQueryBuilder&           VALUES              (void);
+    // s_int_16
+    GpDbQueryBuilder&       Next                (s_int_16                       aValue);
+    GpDbQueryBuilder&       Next                (const std::vector<s_int_16>&   aValue);
+    GpDbQueryBuilder&       Next                (std::vector<s_int_16>&&        aValue);
 
-    GpDbQueryBuilder&           WITH                (std::string_view aName);
-    GpDbQueryBuilder&           INSERT_INTO         (std::string_view aSchema,
-                                                     std::string_view aTable);
-    GpDbQueryBuilder&           SELECT              (void);
-    GpDbQueryBuilder&           SELECT_ALL          (void);
-    GpDbQueryBuilder&           SELECT_ALL          (std::string_view aTable);
-    GpDbQueryBuilder&           FROM                (std::string_view aTable);
-    GpDbQueryBuilder&           FROM                (std::string_view aSchema,
-                                                     std::string_view aTable);
-    GpDbQueryBuilder&           FROM                (void);
-    GpDbQueryBuilder&           WHERE               (void);
-    GpDbQueryBuilder&           UPDATE              (std::string_view aSchema,
-                                                     std::string_view aTable);
-    GpDbQueryBuilder&           DISTINCT            (std::string_view aName);
-    GpDbQueryBuilder&           DISTINCT            (std::string_view aTable,
-                                                     std::string_view aName);
-    GpDbQueryBuilder&           SET                 (void);
-    GpDbQueryBuilder&           ORDER_BY            (void);
-    GpDbQueryBuilder&           LIMIT               (const size_t aValue);
-    GpDbQueryBuilder&           LIMIT               (const GpDbQueryValType::EnumT aValueType);
-    GpDbQueryBuilder&           OFFSET              (const size_t aValue);
-    GpDbQueryBuilder&           OFFSET              (const GpDbQueryValType::EnumT aValueType);
-    GpDbQueryBuilder&           RETURNING           (void);
-    GpDbQueryBuilder&           RETURNING_ALL       (void);
-    GpDbQueryBuilder&           FOR_UPDATE          (void);
-    GpDbQueryBuilder&           SKIP_LOCKED         (void);
-    GpDbQueryBuilder&           DELETE_FROM         (std::string_view aSchema,
-                                                     std::string_view aTable);
-    GpDbQueryBuilder&           ON_CONFLICT         (void);
-    GpDbQueryBuilder&           DO_NOTHING          (void);
-    GpDbQueryBuilder&           NOT_EXISTS          (void);
+    // s_int_32
+    GpDbQueryBuilder&       Next                (s_int_32                       aValue);
+    GpDbQueryBuilder&       Next                (const std::vector<s_int_32>&   aValue);
+    GpDbQueryBuilder&       Next                (std::vector<s_int_32>&&        aValue);
 
-    GpDbQueryBuilder&           INNER_JOIN          (std::string_view aSchema,
-                                                     std::string_view aTable);
-    GpDbQueryBuilder&           LEFT_JOIN           (std::string_view aSchema,
-                                                     std::string_view aTable);
-    GpDbQueryBuilder&           RIGHT_JOIN          (std::string_view aSchema,
-                                                     std::string_view aTable);
+    // s_int_64
+    GpDbQueryBuilder&       Next                (s_int_64                       aValue);
+    GpDbQueryBuilder&       Next                (const std::vector<s_int_64>&   aValue);
+    GpDbQueryBuilder&       Next                (std::vector<s_int_64>&&        aValue);
 
-    GpDbQueryBuilder&           COL                 (std::string_view aName);
-    GpDbQueryBuilder&           COL                 (std::string_view aTable,
-                                                     std::string_view aName);
-    GpDbQueryBuilder&           COL_AS              (std::string_view aName,
-                                                     std::string_view aNameAs);
-    GpDbQueryBuilder&           COL_AS              (std::string_view aTable,
-                                                     std::string_view aName,
-                                                     std::string_view aNameAs);
-    GpDbQueryBuilder&           COL_EQUAL_TO_VAL    (std::string_view               aName,
-                                                     const GpDbQueryValType::EnumT  aValueType);
-    GpDbQueryBuilder&           COL_EQUAL_TO_VAL    (std::string_view   aName,
-                                                     GpDbQueryValue&&   aValue);
-    GpDbQueryBuilder&           COL_EQUAL_TO_VAL    (std::string_view   aName,
-                                                     std::string_view   aValue);
-    GpDbQueryBuilder&           COL_EQUAL_TO_COL    (std::string_view   aName1,
-                                                     std::string_view   aName2);
+    // double
+    GpDbQueryBuilder&       Next                (double                     aValue);
+    GpDbQueryBuilder&       Next                (const std::vector<double>& aValue);
+    GpDbQueryBuilder&       Next                (std::vector<double>&&      aValue);
 
-    GpDbQueryBuilder&           COL_IS_NOT_NUUL     (std::string_view aName);
-    GpDbQueryBuilder&           COL_IS_NUUL         (std::string_view aName);
-    GpDbQueryBuilder&           COLS                (const std::vector<std::string_view>& aNames);
-    GpDbQueryBuilder&           COL_ASSIGN          (std::string_view               aName,
-                                                     const GpDbQueryValType::EnumT  aValueType);
+    // float
+    GpDbQueryBuilder&       Next                (float                      aValue);
+    GpDbQueryBuilder&       Next                (const std::vector<float>&  aValue);
+    GpDbQueryBuilder&       Next                (std::vector<float>&&       aValue);
 
-    GpDbQueryBuilder&           NAME                (std::string_view aName);
+    // std::string
+    GpDbQueryBuilder&       Next                (std::string_view                       aValue);
+    GpDbQueryBuilder&       Next                (std::string&&                          aValue);
+    GpDbQueryBuilder&       Next                (const std::vector<std::string_view>&   aValue);
+    GpDbQueryBuilder&       Next                (const std::vector<std::string>&        aValue);
+    GpDbQueryBuilder&       Next                (std::vector<std::string>&&             aValue);
 
-    GpDbQueryBuilder&           VALUE_NULL          (void);
-    GpDbQueryBuilder&           VALUE               (const GpDbQueryValType::EnumT aValueType);
-    GpDbQueryBuilder&           VALUE               (GpDbQueryValue&& aValue);
-    GpDbQueryBuilder&           VALUE               (const GpDbQueryValType::EnumT  aValueType,
-                                                     std::string_view               aTypeCast);
-    GpDbQueryBuilder&           VALUE               (std::string_view aValue);
-    GpDbQueryBuilder&           VALUE               (std::string_view   aValue,
-                                                     std::string_view   aTypeCast);
-    GpDbQueryBuilder&           VALUE               (const s_int_64 aValue);
-    GpDbQueryBuilder&           VALUE               (const GpBool aValue);
-    GpDbQueryBuilder&           VALUE               (const GpEnum&      aValue,
-                                                     std::string_view   aTypeCast);
+    // json
+    GpDbQueryBuilder&       Next                (GpDbQueryValueJsonSv           aValue);
+    GpDbQueryBuilder&       Next                (GpDbQueryValueJson&&           aValue);
+    GpDbQueryBuilder&       Next                (const GpDbQueryValueJsonSvVec& aValue);
+    GpDbQueryBuilder&       Next                (const GpDbQueryValueJsonVec&   aValue);
+    GpDbQueryBuilder&       Next                (GpDbQueryValueJsonVec&&        aValue);
 
-    GpDbQueryBuilder&           OBJECT_NAMES        (const GpReflectModel&              aModel,
-                                                     const GpDbQueryBuilderMode::EnumT  aMode);
-    GpDbQueryBuilder&           OBJECT_NAMES        (std::string_view                   aPrefix,
-                                                     const GpReflectModel&              aModel,
-                                                     const GpDbQueryBuilderMode::EnumT  aMode);
-    GpDbQueryBuilder&           OBJECT_BINDS        (const GpReflectModel&              aModel,
-                                                     const GpDbQueryBuilderMode::EnumT  aMode);
-    GpDbQueryBuilder&           OBJECT_FOR_UPDATE   (const GpReflectModel&              aModel);
+    // UUID
+    GpDbQueryBuilder&       Next                (const GpUUID&              aValue);
+    GpDbQueryBuilder&       Next                (const std::vector<GpUUID>& aValue);
+    GpDbQueryBuilder&       Next                (std::vector<GpUUID>&&      aValue);
 
-    GpDbQueryBuilder&           SEARCH_WHERE        (GpReflectModel::C::Opt::CRef   aModel,
-                                                     const GpDbSearchDesc&          aSearchDesc);
-    GpDbQueryBuilder&           SEARCH_ORDER        (const GpDbSearchDesc&          aSearchDesc);
-    GpDbQueryBuilder&           SEARCH_LIMIT        (const GpDbSearchDesc&          aSearchDesc);
+    // BLOB
+    GpDbQueryBuilder&       Next                (const GpSpanByteR                  aValue);
+    GpDbQueryBuilder&       Next                (GpBytesArray&&                     aValue);
+    GpDbQueryBuilder&       Next                (const std::vector<GpBytesArray>&   aValue);
+    GpDbQueryBuilder&       Next                (std::vector<GpBytesArray>&&        aValue);
 
-    GpSP<GpDbQuerySearchBuilder>QuerySearchBuilder  (void) const {return iQuerySearchBuilder;}
+    // bool
+    GpDbQueryBuilder&       Next                (bool aValue);
 
-    inline GpDbQueryValType::EnumT
-                                SDetectQueryValType (const GpDbQueryValue& aValue);
+    // null
+    GpDbQueryBuilder&       Null                (void);
 
 private:
-    std::string                 _ValueBind          (const GpDbQueryValType::EnumT aValueType);
-    std::string                 _ValueBind          (const GpDbQueryValType::EnumT  aValueType,
-                                                     std::string_view               aTypeCast);
-    void                        _CheckForSpace      (void);
-    void                        _AppendName         (std::string_view aName);
-    static std::string_view     _SCheckIfName       (std::string_view aStr);
-    static std::vector<TypeInfo>_SFromModel         (std::string_view                   aPrefix,
-                                                     const GpReflectModel&              aModel,
-                                                     const GpDbQueryBuilderMode::EnumT  aMode);
-    static std::string          _SEscape            (std::string_view aStr);
+    template<typename T>
+    void                    Next                (ssize_t    aId,
+                                                 auto&&     aValue);
+
+    void                    ParseQuery          (void);
 
 private:
-    std::string                     iQueryStr;
-    ValueTypeVecT                   iTypes;
-    ValueVecT                       iValues;
-    GpSP<GpDbQuerySearchBuilder>    iQuerySearchBuilder;
-
-    static const BindStrsT          sBindStrs;
-    static const BindCacheT         sTypeBind;
-    static const BindCacheT         sTypeBindVec;
-    static const BindCacheT         sTypeBindVecWrap;
-    static const BindCacheT         sTypeBindMap;
+    std::string             iName;
+    std::string             iQuery;
+    ValueVecT               iValues;
 };
 
-GpDbQueryValType::EnumT GpDbQueryBuilder::SDetectQueryValType (const GpDbQueryValue& aValue)
+    /*
+    GpDbQueryBuilder&       Next                (const GpReflectObject&                 aValue);
+    GpDbQueryBuilder&       NextJsonArray1D     (const GpVectorReflectObjWrapBase&      aValue);
+    GpDbQueryBuilder&       Next                (const GpEnumFlags&                     aValue);
+    GpDbQueryBuilder&       NextProp            (const GpReflectProp&   aProp,
+                                                 const void*            aDataPtr);
+
+private:
+    void                                _NextProp           (const GpReflectProp&   aProp,
+                                                             const void*            aDataPtr);
+    void                                _NextPropVec        (const GpReflectProp&   aProp,
+                                                             const void*            aDataPtr);
+    void                                _NextPropVecWrap    (const GpReflectProp&   aProp,
+                                                             const void*            aDataPtr);
+    void                                _NextPropMap        (const GpReflectProp&   aProp,
+                                                             const void*            aDataPtr);
+
+    template<GpDbQueryValType::EnumT E>
+    void                                _Next               (const ssize_t  aId,
+                                                             auto&&         aValue);
+
+    template<GpDbQueryValType::EnumT E>
+    void                                _Add                (auto&& aValue);
+
+    template<typename T>
+    std::vector<T>                      _MakeArray          (const auto& aVector) const;
+
+    template<typename T>
+    std::vector<T>                      _MakeNumArray       (const auto& aVector) const;
+
+};
+
+s_int_16    GpDbQuery::Int16 (const size_t aId) const
 {
-    return GpDbQueryValType::EnumT(aValue.index());
+    return std::get<s_int_16>(iValues.at(aId));
+}
+
+const std::vector<s_int_16>&    GpDbQuery::Int16Array1D (const size_t aId) const
+{
+    return std::get<std::vector<s_int_16>>(iValues.at(aId));
+}
+
+s_int_32    GpDbQuery::Int32 (const size_t aId) const
+{
+    return std::get<s_int_32>(iValues.at(aId));
+}
+
+const std::vector<s_int_32>&    GpDbQuery::Int32Array1D (const size_t aId) const
+{
+    return std::get<std::vector<s_int_32>>(iValues.at(aId));
+}
+
+s_int_64    GpDbQuery::Int64 (const size_t aId) const
+{
+    return std::get<s_int_64>(iValues.at(aId));
+}
+
+const std::vector<s_int_64>&    GpDbQuery::Int64Array1D (const size_t aId) const
+{
+    return std::get<std::vector<s_int_64>>(iValues.at(aId));
+}
+
+double  GpDbQuery::Double (const size_t aId) const
+{
+    return std::get<double>(iValues.at(aId));
+}
+
+const std::vector<double>&  GpDbQuery::DoubleArray1D (const size_t aId) const
+{
+    return std::get<std::vector<double>>(iValues.at(aId));
+}
+
+float   GpDbQuery::Float (const size_t aId) const
+{
+    return std::get<float>(iValues.at(aId));
+}
+
+const std::vector<float>&   GpDbQuery::FloatArray1D (const size_t aId) const
+{
+    return std::get<std::vector<float>>(iValues.at(aId));
+}
+
+std::string_view    GpDbQuery::Str (const size_t aId) const
+{
+    return std::get<std::string>(iValues.at(aId));
+}
+
+const std::vector<std::string>& GpDbQuery::StrArray1D (const size_t aId) const
+{
+    return std::get<std::vector<std::string>>(iValues.at(aId));
+}
+
+std::string_view    GpDbQuery::Json (const size_t aId) const
+{
+    return std::get<std::string>(iValues.at(aId));
+}
+
+const std::vector<std::string>& GpDbQuery::JsonArray1D (const size_t aId) const
+{
+    return std::get<std::vector<std::string>>(iValues.at(aId));
+}
+
+const GpUUID&   GpDbQuery::Uuid (const size_t aId) const
+{
+    return std::get<GpUUID>(iValues.at(aId));
+}
+
+const std::vector<GpUUID>&  GpDbQuery::UuidArray1D (const size_t aId) const
+{
+    return std::get<std::vector<GpUUID>>(iValues.at(aId));
+}
+
+bool    GpDbQuery::Boolean (const size_t aId) const
+{
+    return std::get<bool>(iValues.at(aId));
+}
+
+const std::vector<bool>&    GpDbQuery::BooleanArray1D (const size_t aId) const
+{
+    return std::get<std::vector<bool>>(iValues.at(aId));
+}
+
+const GpBytesArray& GpDbQuery::Blob (const size_t aId) const
+{
+    return std::get<GpBytesArray>(iValues.at(aId));
+}
+
+const std::vector<GpBytesArray>&    GpDbQuery::BlobArray1D (const size_t aId) const
+{
+    return std::get<std::vector<GpBytesArray>>(iValues.at(aId));
+}
+
+
+
+template<GpDbQueryValType::EnumT E>
+void    GpDbQuery::_Add (auto&& aValue)
+{
+    iTypes.emplace_back(E);
+
+    if constexpr (std::is_move_assignable_v<decltype(aValue)>)
+    {
+        iValues.emplace_back(std::move(aValue));
+    } else
+    {
+        iValues.emplace_back(aValue);
+    }
+}
+
+template<typename T>
+std::vector<T>  GpDbQuery::_MakeArray (const auto& aVector) const
+{
+    const size_t    size = std::size(aVector);
+    std::vector<T>  v(size);
+
+    for (size_t id = 0; id < size; id++)
+    {
+        v[id] = T(aVector[id]);
+    }
+
+    return v;
+}
+
+template<typename T>
+std::vector<T>  GpDbQuery::_MakeNumArray (const auto& aVector) const
+{
+    const size_t    size = std::size(aVector);
+    std::vector<T>  v(size);
+
+    for (size_t id = 0; id < size; id++)
+    {
+        v[id] = NumOps::SConvert<T>((aVector[id]));
+    }
+
+    return v;
 }
 */
+
 }// namespace GPlatform

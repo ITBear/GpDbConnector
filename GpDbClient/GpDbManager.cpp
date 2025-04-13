@@ -1,7 +1,7 @@
 #include <GpDbConnector/GpDbClient/GpDbManager.hpp>
 #include <GpDbConnector/GpDbClient/GpDbDriver.hpp>
 #include <GpDbConnector/GpDbClient/GpDbConnection.hpp>
-#include <GpCore2/GpTasks/ITC/GpItcSharedFutureUtils.hpp>
+#include <GpCore2/GpTasks/ITC/GpItcFutureUtils.hpp>
 
 namespace GPlatform {
 
@@ -16,7 +16,7 @@ GpDbManager::GpDbManager
     std::string                 aPassword,
     std::string                 aDatabase
 ) noexcept:
-GpElementsPool{},
+GpSharedPool{},
 iDriver          {std::move(aDriver)},
 iIOEventPollerIdx{std::move(aIOEventPollerIdx)},
 iConnectTimeout  {std::move(aConnectTimeout)},
@@ -37,10 +37,6 @@ GpDbManager::~GpDbManager (void) noexcept
 //  return iDriver.V().Prepare(aQuery);
 //}
 
-void    GpDbManager::PreInit (const size_t /*aCount*/)
-{
-}
-
 GpDbConnection::SP  GpDbManager::NewElement (void)
 {
     return iDriver.V().NewConnection
@@ -53,11 +49,6 @@ GpDbConnection::SP  GpDbManager::NewElement (void)
         iPassword,
         iDatabase
     );
-}
-
-void    GpDbManager::OnClear (void) noexcept
-{
-    // NOP
 }
 
 bool    GpDbManager::Validate (GpDbConnection::SP& aDbConnection) noexcept
@@ -79,12 +70,12 @@ void    GpDbManager::OnAcquire (GpDbConnection::SP& aDbConnection)
     dbConnection.TryConnectAndWaitFor();
 }
 
-GpDbManager::ReleaseAct GpDbManager::OnRelease (GpDbConnection::SP& aDbConnection)
+GpDbManager::ReleaseAction  GpDbManager::OnRelease (GpDbConnection::SP& aDbConnection)
 {
     // Check if there are NO tasks waiting for connections
     if (iConnWaitToAcquirePromises.empty()) [[likely]]
     {
-        return ReleaseAct::PUSH_TO_ELEMENTS;
+        return ReleaseAction::PUSH_TO_ELEMENTS;
     }
 
     // Notify waiting task
@@ -93,10 +84,10 @@ GpDbManager::ReleaseAct GpDbManager::OnRelease (GpDbConnection::SP& aDbConnectio
 
     promise.Fulfill(std::move(aDbConnection));
 
-    return ReleaseAct::ACQUIRED;
+    return ReleaseAction::ACQUIRED;
 }
 
-GpDbConnection::C::Opt::SP  GpDbManager::OnAcquireNoElementsLeft (void)
+GpDbConnection::C::Opts::SP GpDbManager::OnAcquireNoElementsLeft (void)
 {
     // Wait for Release any connection to pool
     ConnectItcPromiseT      promise;
@@ -107,7 +98,7 @@ GpDbConnection::C::Opt::SP  GpDbManager::OnAcquireNoElementsLeft (void)
     std::optional<GpDbConnection::SP> res;
 
     // Check result
-    GpItcSharedFutureUtils::SWaitForInf
+    GpItcFutureUtils::SWait
     (
         future.V(),
         [&](GpDbConnection::SP& aConnection)
@@ -117,8 +108,7 @@ GpDbConnection::C::Opt::SP  GpDbManager::OnAcquireNoElementsLeft (void)
         [](const GpException& aEx)
         {
             throw aEx;
-        },
-        250.0_si_ms
+        }
     );
 
     return res;

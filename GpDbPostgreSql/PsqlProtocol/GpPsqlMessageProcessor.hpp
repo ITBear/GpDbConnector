@@ -29,6 +29,10 @@ public:
     size_t                      MakeStartupMessage      (GpBytesArray& aOutMessageBuffer/*for output messages*/);
     size_t                      MakeQueryMessage        (GpBytesArray&      aOutMessageBuffer/*for output messages*/,
                                                          std::string_view   aQuery);
+    size_t                      MakeParseMessage        (GpBytesArray&          aOutMessageBuffer/*for output messages*/,
+                                                         std::string_view       aQuery,
+                                                         std::string_view       aName,
+                                                         std::vector<TypeOID>&& aOIDs);
 
     size_t                      ProcessRsMessage        (GpSpanByteR    aRsData,
                                                          GpBytesArray&  aOutMessageBuffer/*for output messages*/);

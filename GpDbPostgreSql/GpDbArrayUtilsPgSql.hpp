@@ -124,7 +124,7 @@ std::vector<T>  GpDbArrayUtilsPgSql::SRead (GpSpanByteRW aData)
 
 {
     // Check data size
-    THROW_COND_GP
+    VERIFY
     (
         aData.Count() >= sizeof(PgArrayHeaderT),
         "Data size is less than PgArrayHeaderT header size"_sv
@@ -139,14 +139,14 @@ std::vector<T>  GpDbArrayUtilsPgSql::SRead (GpSpanByteRW aData)
     header.lowerBoundary    = BitOps::N2H<s_int_32>(header.lowerBoundary);
 
     // Check header.dimensions
-    THROW_COND_GP
+    VERIFY
     (
         header.dimensions == 1,
         "Array must be 1D"_sv
     );
 
     // Check header.dataOffset
-    THROW_COND_GP
+    VERIFY
     (
         header.dataOffset == 0,
         "Data offset must be 0"_sv
@@ -155,21 +155,21 @@ std::vector<T>  GpDbArrayUtilsPgSql::SRead (GpSpanByteRW aData)
     const Oid oid = _SOidFromT<T>();
 
     // Check header.oid
-    THROW_COND_GP
+    VERIFY
     (
         header.oid == oid,
         [](){return "OID "_sv + std::to_string(oid) + " doesn't match type T"_sv;}
     );
 
     // Check header.elementsCount
-    THROW_COND_GP
+    VERIFY
     (
         header.elementsCount >= 0,
         "Elements count must be 0"_sv
     );
 
     // Check header.lowerBoundary
-    THROW_COND_GP
+    VERIFY
     (
         header.lowerBoundary == 1,
         "Lower boundary must be 1"_sv
@@ -357,7 +357,7 @@ std::vector<T>  GpDbArrayUtilsPgSql::_SReadPod
     const size_t dataSize       = aData.Count();
     const size_t expectedSize   = aElementsCount * (sizeof(s_int_32) + sizeof(T));
 
-    THROW_COND_GP
+    VERIFY
     (
         dataSize == expectedSize,
         [dataSize, expectedSize]()
@@ -413,7 +413,7 @@ std::vector<T>  GpDbArrayUtilsPgSql::_SReadBytes
         }
     }
 
-    THROW_COND_GP
+    VERIFY
     (
         dataSize == expectedSize,
         [dataSize, expectedSize]()

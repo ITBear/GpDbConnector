@@ -17,13 +17,13 @@ equals(var_link, "static") {
 
 # ----------- Libraries -----------
 equals(var_os, "windows") {
-	LIBS += -lGpCryptoUtils$$TARGET_POSTFIX
-	LIBS += -lGpDbClient$$TARGET_POSTFIX
-	LIBS += -lGpDbDataModels$$TARGET_POSTFIX
-	LIBS += -lGpLogCore$$TARGET_POSTFIX
-	LIBS += -lGpNetworkCore$$TARGET_POSTFIX
-	LIBS += -lGpTasks$$TARGET_POSTFIX
-	LIBS += -lGpUtils$$TARGET_POSTFIX
+	LIBS += -lGpCryptoUtils$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpDbClient$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpDbDataModels$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpLogCore$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpNetworkCore$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpTasks$$TARGET_POSTFIX$$_VER_MAJ
+	LIBS += -lGpUtils$$TARGET_POSTFIX$$_VER_MAJ
 }
 
 equals(var_os, "linux") {

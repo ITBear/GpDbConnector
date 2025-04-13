@@ -3,6 +3,8 @@
 #include <GpCore2/GpUtils/Types/Numerics/GpNumericTypes.hpp>
 #include <GpCore2/GpUtils/Types/Containers/GpBytesArray.hpp>
 #include <GpCore2/Config/IncludeExt/boost_flat_map.hpp>
+#include <GpCore2/GpUtils/Types/UIDs/GpUUID.hpp>
+#include <GpCore2/GpUtils/Types/Containers/GpTypeShell.hpp>
 
 #include <variant>
 
@@ -14,7 +16,7 @@ namespace GPlatform::PSQL {
 enum class TypeOID: u_int_32
 {
     INT2            = 21,
-    INT2_ARRAY      = 22,
+    INT2_ARRAY      = 1005,
     INT4            = 23,
     INT4_ARRAY      = 1007,
     INT8            = 20,
@@ -30,8 +32,180 @@ enum class TypeOID: u_int_32
     BYTEA           = 17,
     BYTEA_ARRAY     = 1001,
     BOOL            = 16,
-    BOOL_ARRAY      = 1000
+    //BOOL_ARRAY    = 1000,
+    JSON            = 114,
+    JSON_ARRAY      = 199,
+    JSONB           = 3802,
+    JSONB_ARRAY     = 3807
 };
+
+class TypeJsonShell_type;
+using TypeJsonShell = GpTypeShell<std::string_view, TypeJsonShell_type>;
+
+class TypeOidUitls
+{
+public:
+    template<TypeOID>
+    struct Decltype
+    {
+    };
+
+    template<>
+    struct Decltype<TypeOID::INT2>
+    {
+        using type_t = s_int_16;
+    };
+
+    template<>
+    struct Decltype<TypeOID::INT2_ARRAY>
+    {
+        using type_t = std::vector<s_int_16>;
+    };
+
+    template<>
+    struct Decltype<TypeOID::INT4>
+    {
+        using type_t = s_int_32;
+    };
+
+    template<>
+    struct Decltype<TypeOID::INT4_ARRAY>
+    {
+        using type_t = std::vector<s_int_32>;
+    };
+
+    template<>
+    struct Decltype<TypeOID::INT8>
+    {
+        using type_t = s_int_64;
+    };
+
+    template<>
+    struct Decltype<TypeOID::INT8_ARRAY>
+    {
+        using type_t = std::vector<s_int_64>;
+    };
+
+    template<>
+    struct Decltype<TypeOID::FLOAT4>
+    {
+        using type_t = float;
+    };
+
+    template<>
+    struct Decltype<TypeOID::FLOAT4_ARRAY>
+    {
+        using type_t = std::vector<float>;
+    };
+
+    template<>
+    struct Decltype<TypeOID::FLOAT8>
+    {
+        using type_t = double;
+    };
+
+    template<>
+    struct Decltype<TypeOID::FLOAT8_ARRAY>
+    {
+        using type_t = std::vector<double>;
+    };
+
+    template<>
+    struct Decltype<TypeOID::TEXT>
+    {
+        using type_t = std::string_view;
+    };
+
+    template<>
+    struct Decltype<TypeOID::TEXT_ARRAY>
+    {
+        using type_t = std::vector<std::string_view>;
+    };
+
+    template<>
+    struct Decltype<TypeOID::UUID>
+    {
+        using type_t = GpUUID;
+    };
+
+    template<>
+    struct Decltype<TypeOID::UUID_ARRAY>
+    {
+        using type_t = std::vector<GpUUID>;
+    };
+
+    template<>
+    struct Decltype<TypeOID::BYTEA>
+    {
+        using type_t = GpSpanByteR;
+    };
+
+    template<>
+    struct Decltype<TypeOID::BYTEA_ARRAY>
+    {
+        using type_t = std::vector<GpSpanByteR>;
+    };
+
+    template<>
+    struct Decltype<TypeOID::BOOL>
+    {
+        using type_t = bool;
+    };
+
+    template<>
+    struct Decltype<TypeOID::JSON>
+    {
+        using type_t = std::string_view;
+    };
+
+    template<>
+    struct Decltype<TypeOID::JSON_ARRAY>
+    {
+        using type_t = std::vector<std::string_view>;
+    };
+
+    template<>
+    struct Decltype<TypeOID::JSONB>
+    {
+        using type_t = std::string_view;
+    };
+
+    template<>
+    struct Decltype<TypeOID::JSONB_ARRAY>
+    {
+        using type_t = std::vector<std::string_view>;
+    };
+
+    template<typename T>
+    static constexpr TypeOID    SDetectTypeOID (void);
+};
+
+template<typename T>
+constexpr TypeOID   TypeOidUitls::SDetectTypeOID (void)
+{
+    if constexpr (std::is_same_v<T, s_int_16>)                              return TypeOID::INT2;
+    else if constexpr (std::is_same_v<T, std::vector<s_int_16>>)            return TypeOID::INT2_ARRAY;
+    else if constexpr (std::is_same_v<T, s_int_32>)                         return TypeOID::INT4;
+    else if constexpr (std::is_same_v<T, std::vector<s_int_32>>)            return TypeOID::INT4_ARRAY;
+    else if constexpr (std::is_same_v<T, s_int_64>)                         return TypeOID::INT8;
+    else if constexpr (std::is_same_v<T, std::vector<s_int_64>>)            return TypeOID::INT8_ARRAY;
+    else if constexpr (std::is_same_v<T, float>)                            return TypeOID::FLOAT4;
+    else if constexpr (std::is_same_v<T, std::vector<float>>)               return TypeOID::FLOAT4_ARRAY;
+    else if constexpr (std::is_same_v<T, double>)                           return TypeOID::FLOAT8;
+    else if constexpr (std::is_same_v<T, std::vector<double>>)              return TypeOID::FLOAT8_ARRAY;
+    else if constexpr (std::is_same_v<T, std::string_view>)                 return TypeOID::TEXT;
+    else if constexpr (std::is_same_v<T, std::vector<std::string_view>>)    return TypeOID::TEXT_ARRAY;
+    else if constexpr (std::is_same_v<T, GpUUID>)                           return TypeOID::UUID;
+    else if constexpr (std::is_same_v<T, std::vector<GpUUID>>)              return TypeOID::UUID_ARRAY;
+    else if constexpr (std::is_same_v<T, GpSpanByteR>)                      return TypeOID::BYTEA;
+    else if constexpr (std::is_same_v<T, std::vector<GpSpanByteR>>)         return TypeOID::BYTEA_ARRAY;
+    else if constexpr (std::is_same_v<T, bool>)                             return TypeOID::BOOL;
+    else if constexpr (std::is_same_v<T, TypeJsonShell>)                    return TypeOID::JSON;
+    else if constexpr (std::is_same_v<T, std::vector<TypeJsonShell>>)       return TypeOID::JSON_ARRAY;
+    else GpThrowCe<GpException>("Unsupported type");
+
+    return TypeOID::INT2;
+}
 
 enum class MessageRqDescId: u_int_8
 {
@@ -160,6 +334,15 @@ struct SASLResponseDescRQ
     std::string     client_final_message;   // SASL mechanism specific (only payload bytes without size)
 };
 
+struct ParseDescRQ
+{
+    MessageRqDescId         message_id  = MessageRqDescId::PARSE;
+    //u_int_32              length;         // Total length of the message (no need here, caclulated in ProtocolSerializer)
+    std::string             name;           // Statement name (empty string for unnamed statement)
+    std::string             query;          // Query string (SQL query)
+    std::vector<TypeOID>    OIDs;           // OIDs of parameter data types (can be empty if not parameterized)
+};
+
 // -------------------------------- RS messages --------------------------------
 // The server then immediately closes the connection.
 struct ErrorResponseDescRS
@@ -250,8 +433,8 @@ struct RowDescriptionDescRS
         u_int_16    attribute_number    = 0;    // The attribute number of the column. If the field is an expression or does not directly correspond to a table column,
                                                 // the value is 0.
         u_int_32    type_oid            = 0;    // The OID of the data type of the column.
-        u_int_16    type_size           = 0;    // The size of the data type. This is the size in bytes, or -1 for variable-length types.
-        u_int_32    type_modifier       = 0;    // The type modifier is typically used to specify precision or scale for numeric types.
+        s_int_16    type_size           = 0;    // The size of the data type. This is the size in bytes, or -1 for variable-length types.
+        s_int_32    type_modifier       = 0;    // The type modifier is typically used to specify precision or scale for numeric types.
         u_int_16    format_code         = 0;    // Specifies the format of the field: 0 indicates the field is in text format, 1 indicates the field is in binary format
     };
 
@@ -267,7 +450,7 @@ struct RowDescriptionDescRS
 // DataRow
 struct DataRowDescRS
 {
-    using ColumnDescVec = boost::container::small_vector<GpSpanByteR, 16>;
+    using ColumnDescVec = boost::container::small_vector<GpSpanByteRW, 16>;
 
     u_int_32        length  = 0;    // Total length of the message
     ColumnDescVec   columns;
@@ -281,3 +464,99 @@ struct CommandCompleteDescRS
 };
 
 }// namespace GPlatform::PSQL
+
+/*
+The **Extended Query Protocol Flow** in PostgreSQL allows you to have more control over query execution, particularly when dealing with prepared statements and parameterized queries. It uses the following key messages:
+
+1. **Parse Message**
+2. **Bind Message**
+3. **Describe Message**
+4. **Execute Message**
+5. **Sync Message**
+6. **Close Message**
+7. **ErrorResponse / NoticeResponse / ReadyForQuery** (server responses)
+
+### Message Format Overview
+
+#### 1. **Parse Message** (`P`)
+This message sends a query to the server to be parsed.
+
+
+
+| Field        | Description                                                                                      |
+|--------------|--------------------------------------------------------------------------------------------------|
+
+#### 2. **Bind Message** (`B`)
+This message binds the parameters to the query and creates a portal (an execution context).
+
+| Field        | Description                                                                                      |
+|--------------|--------------------------------------------------------------------------------------------------|
+| Byte1        | `B` (identifies Bind message)                                                                    |
+| Int32        | Length of message content                                                                        |
+| String       | Portal name (empty string for unnamed portal)                                                    |
+| String       | Statement name (prepared statement to bind)                                                      |
+| Int16        | Number of parameter format codes                                                                 |
+| Int16[]      | Format codes for each parameter (0 = text, 1 = binary)                                           |
+| Int16        | Number of parameter values                                                                       |
+| ByteN[]      | Parameter values (length + value, repeated for each parameter)                                   |
+| Int16        | Number of result-column format codes                                                             |
+| Int16[]      | Result-column format codes (0 = text, 1 = binary)                                                |
+
+#### 3. **Describe Message** (`D`)
+This message requests metadata about a prepared statement or portal.
+
+| Field        | Description                                                                                      |
+|--------------|--------------------------------------------------------------------------------------------------|
+| Byte1        | `D` (identifies Describe message)                                                                |
+| Int32        | Length of message content                                                                        |
+| Byte1        | `'S'` for prepared statement, `'P'` for portal                                                   |
+| String       | Name of the prepared statement or portal                                                         |
+
+#### 4. **Execute Message** (`E`)
+This message executes the query.
+
+| Field        | Description                                                                                      |
+|--------------|--------------------------------------------------------------------------------------------------|
+| Byte1        | `E` (identifies Execute message)                                                                 |
+| Int32        | Length of message content                                                                        |
+| String       | Portal name (empty string for unnamed portal)                                                    |
+| Int32        | Maximum number of rows to return (0 = unlimited)                                                 |
+
+#### 5. **Sync Message** (`S`)
+This message tells the server that you’re done sending extended protocol messages, and the server should respond.
+
+| Field        | Description                                                                                      |
+|--------------|--------------------------------------------------------------------------------------------------|
+| Byte1        | `S` (identifies Sync message)                                                                    |
+| Int32        | Length of message content                                                                        |
+
+#### 6. **Close Message** (`C`)
+This message closes a portal or a prepared statement.
+
+| Field        | Description                                                                                      |
+|--------------|--------------------------------------------------------------------------------------------------|
+| Byte1        | `C` (identifies Close message)                                                                   |
+| Int32        | Length of message content                                                                        |
+| Byte1        | `'S'` for prepared statement, `'P'` for portal                                                   |
+| String       | Name of the prepared statement or portal to close                                                |
+
+#### 7. **Responses** (from server)
+- **ParseComplete** (`1` byte `P`)
+- **BindComplete** (`1` byte `B`)
+- **RowDescription** (describes result set)
+- **DataRow** (actual row data)
+- **CommandComplete** (after a successful `Execute`)
+- **ReadyForQuery** (when server is ready for next query)
+- **ErrorResponse** / **NoticeResponse**
+
+### Example Flow:
+
+1. **Parse**: Send a `Parse` message to prepare a statement.
+2. **Bind**: Bind parameters to the prepared statement with the `Bind` message.
+3. **Describe** (optional): Get information about the result set with the `Describe` message.
+4. **Execute**: Execute the query with the `Execute` message.
+5. **Sync**: Finalize the query execution with the `Sync` message.
+6. **Responses**: Handle responses from the server.
+
+This is the message format breakdown for implementing the **Extended Query Protocol Flow** without `libpq`. Each message is serialized as a byte stream before being sent over the wire.
+*/

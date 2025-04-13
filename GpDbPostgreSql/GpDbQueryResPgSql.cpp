@@ -2,6 +2,7 @@
 #include <GpDbConnector/GpDbClient/GpDbException.hpp>
 #include <GpDbConnector/GpDbPostgreSql/GpDbArrayUtilsPgSql.hpp>
 #include <GpCore2/GpUtils/Types/Bits/GpBitOps.hpp>
+#include <GpCore2/GpUtils/Debugging/GpDebugging.hpp>
 
 namespace GPlatform {
 
@@ -23,35 +24,36 @@ void    GpDbQueryResPgSql::AddDataRow
     if (!iRowDescOpt.has_value()) [[unlikely]]
     {
         iRowDescOpt     = aRowDesc;
-        iColumnsCount   = aRowDesc.columns.size();
+        iColumnsCount   = std::size(aRowDesc.columns);
     }
 
     // Reserve iRowsDataVec
-    const size_t rowColCount = iRowColDataVec.size() + aRowData.columns.size();
-    iRowColDataVec.reserve(rowColCount);
+    {
+        const size_t newSize = std::size(iRowColDataVec) + std::size(aRowData.columns);
+        iRowColDataVec.reserve(newSize);
+    }
 
     // Calculate data size
     size_t rowsColDataSize = 0;
-    for (const GpSpanByteR& rowData: aRowData.columns)
+    for (GpSpanByteRW rowData: aRowData.columns)
     {
         rowsColDataSize = NumOps::SAdd<size_t>(rowsColDataSize, rowData.Count());
     }
 
     // Copy data
-    const size_t oldRowColDataSize = iRowColDataStorage.size();
-    const size_t newRowColDataSize = oldRowColDataSize + rowsColDataSize;
+    const size_t    oldRowColDataSize   = std::size(iRowColDataStorage);
+    const size_t    newRowColDataSize   = oldRowColDataSize + rowsColDataSize;
+    size_t          dataOffset          = oldRowColDataSize;
 
     iRowColDataStorage.resize(newRowColDataSize);
-    std_byte_no_init*   rowColDataStoragePtr        = iRowColDataStorage.data() + oldRowColDataSize;
-    const std::byte*    rowColDataStoragePtrCopy    = nullptr;
+    std_byte_no_init* rowColDataStoragePtr = iRowColDataStorage.data() + oldRowColDataSize;
 
-    rowColDataStoragePtrCopy += oldRowColDataSize;
-    for (const GpSpanByteR& colData: aRowData.columns)
+    for (GpSpanByteRW colData: aRowData.columns)
     {
         const size_t colDataSize = colData.Count();
 
-        iRowColDataVec.emplace_back(GpSpanByteR{rowColDataStoragePtrCopy, colDataSize});
-        rowColDataStoragePtrCopy += colDataSize;
+        iRowColDataVec.emplace_back(dataOffset, colDataSize);
+        dataOffset += colDataSize;
 
         std::memcpy(rowColDataStoragePtr, colData.Ptr(), colDataSize);
         rowColDataStoragePtr += colDataSize;
@@ -72,182 +74,102 @@ size_t  GpDbQueryResPgSql::ColumnsCount (void) const
 
 s_int_16    GpDbQueryResPgSql::GetInt16
 (
-    [[maybe_unused]] const size_t           aRowId,
-    [[maybe_unused]] const size_t           aColId,
-    [[maybe_unused]] std::optional<s_int_16>    aOnNullValue
+    const size_t            aRowId,
+    const size_t            aColId,
+    std::optional<s_int_16> aOnNullValue
 ) const
 {
-    THROW_GP_NOT_IMPLEMENTED();
-
-    /*
-    GpSpanByteR         dataPtr = RowColDataPtr(aRowId, aColId, PSQL::TypeOID::INT2);
-    //std::string_view  str     = dataPtr.AsStringView();
-
-    //if (str.data() != nullptr) [[likely]]
-    //{
-    //  return str;
-    //}
-
-    //THROW_COND_GP
-    //(
-    //  aOnNullValue.has_value(),
-    //  [aRowId, aColId]()
-    //  {
-    //      return fmt::format
-    //      (
-    //          "Requested column value is null (id[{}][{}])",
-    //          aRowId,
-    //          aColId
-    //      );
-    //  }
-    //);
-
-    //return aOnNullValue.value();
-
-
-    // Get column desc
-    const PSQL::RowDescriptionDescRS::ColumnDesc& columnDesc = iRowDescOpt.value().columns.at(aColId);
-
-    // Check UID
-    THROW_COND_DB
-    (
-        columnDesc.type_oid == u_int_32(PSQL::TypeOID::INT2),
-        GpDbExceptionCode::WRONG_TYPE,
-        [&columnDesc]()
-        {
-            return fmt::format
-            (
-                "Type OID for 16-bit signed integer (smallint) is expected to be {}, but the actual value is {}",
-                static_cast<u_int_32>(PSQL::TypeOID::INT2),
-                columnDesc.type_oid
-            );
-        }
-    );
-
-    //iRowColDataStorage.?
-
-    THROW_GP_NOT_IMPLEMENTED();
-
-
-
-    //return GpDbQueryResPgSql_GetPOD<s_int_16, 2>(aRowId, aColId, aOnNullValue, iPgResult);*/
+    return SReadValue<s_int_16, s_int_16>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
 }
 
 std::vector<s_int_16>   GpDbQueryResPgSql::GetInt16Array1D
 (
-    [[maybe_unused]] const size_t                           aRowId,
-    [[maybe_unused]] const size_t                           aColId,
-    [[maybe_unused]] std::optional<std::vector<s_int_16>>   aOnNullValue
+    const size_t                            aRowId,
+    const size_t                            aColId,
+    std::optional<std::vector<s_int_16>>    aOnNullValue
 ) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetArray<s_int_16>(aRowId, aColId, aOnNullValue, iPgResult);
+    return SReadVector<s_int_16, s_int_16>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
 }
 
 s_int_32    GpDbQueryResPgSql::GetInt32
 (
-    [[maybe_unused]] const size_t           aRowId,
-    [[maybe_unused]] const size_t           aColId,
-    [[maybe_unused]] std::optional<s_int_32>    aOnNullValue
+    const size_t            aRowId,
+    const size_t            aColId,
+    std::optional<s_int_32> aOnNullValue
 ) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetPOD<s_int_32, 4>(aRowId, aColId, aOnNullValue, iPgResult);
+    return SReadValue<s_int_32, s_int_32>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
 }
 
 std::vector<s_int_32>   GpDbQueryResPgSql::GetInt32Array1D
 (
-    [[maybe_unused]] const size_t                           aRowId,
-    [[maybe_unused]] const size_t                           aColId,
-    [[maybe_unused]] std::optional<std::vector<s_int_32>>   aOnNullValue
+    const size_t                            aRowId,
+    const size_t                            aColId,
+    std::optional<std::vector<s_int_32>>    aOnNullValue
 ) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetArray<s_int_32>(aRowId, aColId, aOnNullValue, iPgResult);
+    return SReadVector<s_int_32, s_int_32>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
 }
 
 s_int_64    GpDbQueryResPgSql::GetInt64
 (
-    [[maybe_unused]] const size_t           aRowId,
-    [[maybe_unused]] const size_t           aColId,
-    [[maybe_unused]] std::optional<s_int_64>    aOnNullValue
+    const size_t            aRowId,
+    const size_t            aColId,
+    std::optional<s_int_64> aOnNullValue
 ) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetPOD<s_int_64, 8>(aRowId, aColId, aOnNullValue, iPgResult);
+    return SReadValue<s_int_64, s_int_64>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
 }
 
 std::vector<s_int_64>   GpDbQueryResPgSql::GetInt64Array1D
 (
-    [[maybe_unused]] const size_t                           aRowId,
-    [[maybe_unused]] const size_t                           aColId,
-    [[maybe_unused]] std::optional<std::vector<s_int_64>>   aOnNullValue
+    const size_t                            aRowId,
+    const size_t                            aColId,
+    std::optional<std::vector<s_int_64>>    aOnNullValue
 ) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetArray<s_int_64>(aRowId, aColId, aOnNullValue, iPgResult);
+    return SReadVector<s_int_64, s_int_64>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
 }
 
 double  GpDbQueryResPgSql::GetDouble
 (
-    [[maybe_unused]] const size_t           aRowId,
-    [[maybe_unused]] const size_t           aColId,
-    [[maybe_unused]] std::optional<double>  aOnNullValue
+    const size_t            aRowId,
+    const size_t            aColId,
+    std::optional<double>   aOnNullValue
 ) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetPOD<double, 8>(aRowId, aColId, aOnNullValue, iPgResult);
+    return SReadValue<double, double>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
 }
 
 std::vector<double> GpDbQueryResPgSql::GetDoubleArray1D
 (
-    [[maybe_unused]] const size_t                       aRowId,
-    [[maybe_unused]] const size_t                       aColId,
-    [[maybe_unused]] std::optional<std::vector<double>> aOnNullValue
+    const size_t                        aRowId,
+    const size_t                        aColId,
+    std::optional<std::vector<double>>  aOnNullValue
 ) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetArray<double>(aRowId, aColId, aOnNullValue, iPgResult);
+    return SReadVector<double, double>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
 }
 
 float   GpDbQueryResPgSql::GetFloat
 (
-    [[maybe_unused]] const size_t           aRowId,
-    [[maybe_unused]] const size_t           aColId,
-    [[maybe_unused]] std::optional<float>   aOnNullValue
+    const size_t            aRowId,
+    const size_t            aColId,
+    std::optional<float>    aOnNullValue
 ) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetPOD<float, 4>(aRowId, aColId, aOnNullValue, iPgResult);
+    return SReadValue<float, float>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
 }
 
 std::vector<float>  GpDbQueryResPgSql::GetFloatArray1D
 (
-    [[maybe_unused]] const size_t                       aRowId,
-    [[maybe_unused]] const size_t                       aColId,
-    [[maybe_unused]] std::optional<std::vector<float>>  aOnNullValue
+    const size_t                        aRowId,
+    const size_t                        aColId,
+    std::optional<std::vector<float>>   aOnNullValue
 ) const
 {
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetArray<float>(aRowId, aColId, aOnNullValue, iPgResult);
+    return SReadVector<float, float>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
 }
 
 std::string_view    GpDbQueryResPgSql::GetStr
@@ -257,22 +179,110 @@ std::string_view    GpDbQueryResPgSql::GetStr
     std::optional<std::string_view> aOnNullValue
 ) const
 {
-    GpSpanByteR         dataPtr = RowColDataPtr(aRowId, aColId, PSQL::TypeOID::TEXT);
-    std::string_view    str     = dataPtr.AsStringView();
+    return SReadValue<std::string_view, std::string_view>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
+}
 
-    if (str.data() != nullptr) [[likely]]
+std::vector<std::string_view>   GpDbQueryResPgSql::GetStrArray1D
+(
+    const size_t                                    aRowId,
+    const size_t                                    aColId,
+    std::optional<std::vector<std::string_view>>    aOnNullValue
+) const
+{
+    return SReadVector<std::string_view, std::string_view>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
+}
+
+std::string_view    GpDbQueryResPgSql::GetJson
+(
+    const size_t                    aRowId,
+    const size_t                    aColId,
+    std::optional<std::string_view> aOnNullValue
+) const
+{
+    return SReadValue<std::string_view, PSQL::TypeJsonShell>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
+}
+
+std::vector<std::string_view>   GpDbQueryResPgSql::GetJsonArray1D
+(
+    const size_t                                    aRowId,
+    const size_t                                    aColId,
+    std::optional<std::vector<std::string_view>>    aOnNullValue
+) const
+{
+    return SReadVector<std::string_view, PSQL::TypeJsonShell>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
+}
+
+GpUUID  GpDbQueryResPgSql::GetUuid
+(
+    const size_t            aRowId,
+    const size_t            aColId,
+    std::optional<GpUUID>   aOnNullValue
+) const
+{
+    return SReadValue<GpUUID, GpUUID>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
+}
+
+std::vector<GpUUID> GpDbQueryResPgSql::GetUuidArray1D
+(
+    const size_t                        aRowId,
+    const size_t                        aColId,
+    std::optional<std::vector<GpUUID>>  aOnNullValue
+) const
+{
+    return SReadVector<GpUUID, GpUUID>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
+}
+
+GpSpanByteR GpDbQueryResPgSql::GetBlob
+(
+    const size_t                aRowId,
+    const size_t                aColId,
+    std::optional<GpSpanByteR>  aOnNullValue
+) const
+{
+    return SReadValue<GpSpanByteR, GpSpanByteR>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
+}
+
+std::vector<GpSpanByteR>    GpDbQueryResPgSql::GetBlobArray1D
+(
+    const size_t                                aRowId,
+    const size_t                                aColId,
+    std::optional<std::vector<GpSpanByteR>> aOnNullValue
+) const
+{
+    return SReadVector<GpSpanByteR, GpSpanByteR>(aRowId, aColId, aOnNullValue, const_cast<GpDbQueryResPgSql&>(*this));
+}
+
+bool    GpDbQueryResPgSql::GetBoolean
+(
+    const size_t        aRowId,
+    const size_t        aColId,
+    std::optional<bool> aOnNullValue
+) const
+{
+    auto[dataPtr, columnDesc] = SRowColDataInfo(aRowId, aColId, PSQL::TypeOID::BOOL, const_cast<GpDbQueryResPgSql&>(*this));
+
+    std::string_view str = dataPtr.AsStringView();
+
+    if (!str.empty()) [[likely]]
     {
-        return str;
+        const char v = str.at(0);
+
+        return     (v == 0x01)
+                || (v == 't')
+                || (v == 'T')
+                || (v == 'y')
+                || (v == 'Y');
     }
 
-    THROW_COND_GP
+    VERIFY
     (
         aOnNullValue.has_value(),
-        [aRowId, aColId]()
+        [&]()
         {
             return fmt::format
             (
-                "Requested column value is null (id[{}][{}])",
+                "The requested column '{}':[{}][{}] value is null ",
+                columnDesc.name,
                 aRowId,
                 aColId
             );
@@ -282,371 +292,444 @@ std::string_view    GpDbQueryResPgSql::GetStr
     return aOnNullValue.value();
 }
 
-std::vector<std::string_view>   GpDbQueryResPgSql::GetStrArray1D
-(
-    [[maybe_unused]] const size_t                                   aRowId,
-    [[maybe_unused]] const size_t                                   aColId,
-    [[maybe_unused]] std::optional<std::vector<std::string_view>>   aOnNullValue
-) const
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetArray<std::string_view>(aRowId, aColId, aOnNullValue, iPgResult);
-}
-
-GpSpanCharRW    GpDbQueryResPgSql::GetStrRW
-(
-    [[maybe_unused]] const size_t               aRowId,
-    [[maybe_unused]] const size_t               aColId,
-    [[maybe_unused]] std::optional<GpSpanCharRW>    aOnNullValue
-)
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    /*
-    std::optional<std::string_view> defaultValue;
-
-    if (aOnNullValue.has_value())
-    {
-        defaultValue = aOnNullValue.value().AsStringView();
-    }
-
-    std::string_view str = std::as_const(*this).GetStr
-    (
-        aRowId,
-        aColId,
-        defaultValue
-    );
-
-    return GpSpanCharRW(const_cast<char*>(std::data(str)), std::size(str));*/
-}
-
-std::vector<GpSpanCharRW>   GpDbQueryResPgSql::GetStrRWArray1D
-(
-    [[maybe_unused]] const size_t                               aRowId,
-    [[maybe_unused]] const size_t                               aColId,
-    [[maybe_unused]] std::optional<std::vector<GpSpanCharRW>>   aOnNullValue
-)
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetArray<GpSpanCharRW>(aRowId, aColId, aOnNullValue, iPgResult);
-}
-
-std::string_view    GpDbQueryResPgSql::GetJson
-(
-    [[maybe_unused]] const size_t                   aRowId,
-    [[maybe_unused]] const size_t                   aColId,
-    [[maybe_unused]] std::optional<std::string_view>    aOnNullValue
-) const
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    /*std::string_view str = GetStr(aRowId, aColId, aOnNullValue);
-
-    THROW_COND_GP
-    (
-        std::size(str) >= 3,
-        "json data length must be >= 3 bytes"_sv
-    );
-
-    THROW_COND_GP
-    (
-        std::bit_cast<u_int_8>(std::data(str)[0]) == 1,
-        "Wrong pgJson format version"_sv
-    );
-
-    return str.substr(1, std::size(str) - 1);*/
-}
-
-std::vector<std::string_view>   GpDbQueryResPgSql::GetJsonArray1D
-(
-    [[maybe_unused]] const size_t                                   aRowId,
-    [[maybe_unused]] const size_t                                   aColId,
-    [[maybe_unused]] std::optional<std::vector<std::string_view>>   aOnNullValue
-) const
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    /*std::vector<std::string_view> strArray = GetStrArray1D(aRowId, aColId, aOnNullValue);
-
-    for (std::string_view& element: strArray)
-    {
-        THROW_COND_GP
-        (
-            std::size(element) >= 3,
-            "json data length must be >= 3 bytes"_sv
-        );
-
-        THROW_COND_GP
-        (
-            std::bit_cast<u_int_8>(std::data(element)[0]) == 1,
-            "Wrong pgJson format version"_sv
-        );
-
-        element = element.substr(1, std::size(element) - 1);
-    }
-
-    return strArray;*/
-}
-
-GpSpanCharRW    GpDbQueryResPgSql::GetJsonRW
-(
-    [[maybe_unused]] const size_t               aRowId,
-    [[maybe_unused]] const size_t               aColId,
-    [[maybe_unused]] std::optional<GpSpanCharRW>    aOnNullValue
-)
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //std::optional<std::string_view> defaultValue;
-
-    //if (aOnNullValue.has_value())
-    //{
-    //  defaultValue = aOnNullValue.value().AsStringView();
-    //}
-
-    //std::string_view str = std::as_const(*this).GetJson
-    //(
-    //  aRowId,
-    //  aColId,
-    //  defaultValue
-    //);
-
-    //return GpSpanCharRW(const_cast<char*>(std::data(str)), std::size(str));
-}
-
-std::vector<GpSpanCharRW>   GpDbQueryResPgSql::GetJsonRWArray1D
-(
-    [[maybe_unused]] const size_t                               aRowId,
-    [[maybe_unused]] const size_t                               aColId,
-    [[maybe_unused]] std::optional<std::vector<GpSpanCharRW>>   aOnNullValue
-)
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    /*
-    std::vector<GpSpanCharRW> strArray = GetStrRWArray1D(aRowId, aColId, aOnNullValue);
-
-    for (GpSpanCharRW& element: strArray)
-    {
-        THROW_COND_GP
-        (
-            element.Count() >= 3,
-            "json data length must be >= 3 bytes"_sv
-        );
-
-        THROW_COND_GP
-        (
-            std::bit_cast<u_int_8>(element.At(0)) == 1,
-            "Wrong pgJson format version"_sv
-        );
-
-        element = element.Subspan(1, element.Count() - 1);
-    }
-
-    return strArray;*/
-}
-
-GpUUID  GpDbQueryResPgSql::GetUuid
-(
-    [[maybe_unused]] const size_t           aRowId,
-    [[maybe_unused]] const size_t           aColId,
-    [[maybe_unused]] std::optional<GpUUID>  aOnNullValue
-) const
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    /*const int rowId = NumOps::SConvert<int>(aRowId);
-    const int colId = NumOps::SConvert<int>(aColId);
-
-    if (PQgetisnull(iPgResult, rowId, colId))
-    {
-        THROW_COND_GP
-        (
-            aOnNullValue.has_value(),
-            [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
-        );
-
-        return aOnNullValue.value();
-    }
-
-    const char*     dataPtr     = PQgetvalue(iPgResult, rowId, colId);
-    const size_t    dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
-
-    THROW_COND_GP
-    (
-        dataSize == sizeof(GpUUID::DataT),
-        "uuid length must be 16 bytes"_sv
-    );
-
-    GpUUID uuid;
-    std::memcpy(std::data(uuid.Data()), dataPtr, sizeof(GpUUID::DataT));
-
-    return uuid;*/
-}
-
-std::vector<GpUUID> GpDbQueryResPgSql::GetUuidArray1D
-(
-    [[maybe_unused]] const size_t                       aRowId,
-    [[maybe_unused]] const size_t                       aColId,
-    [[maybe_unused]] std::optional<std::vector<GpUUID>> aOnNullValue
-) const
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetArray<GpUUID>(aRowId, aColId, aOnNullValue, iPgResult);
-}
-
-GpSpanByteR GpDbQueryResPgSql::GetBlob
-(
-    [[maybe_unused]] const size_t               aRowId,
-    [[maybe_unused]] const size_t               aColId,
-    [[maybe_unused]] std::optional<GpSpanByteR> aOnNullValue
-) const
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //const int rowId = NumOps::SConvert<int>(aRowId);
-    //const int colId = NumOps::SConvert<int>(aColId);
-
-    //if (PQgetisnull(iPgResult, rowId, colId))
-    //{
-    //  THROW_COND_GP
-    //  (
-    //      aOnNullValue.has_value(),
-    //      [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
-    //  );
-    //  return aOnNullValue.value();
-    //}
-
-    //const char*       dataPtr     = PQgetvalue(iPgResult, rowId, colId);
-    //const size_t  dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
-
-    //return GpSpanCharR(dataPtr, dataSize);
-}
-
-std::vector<GpSpanByteR>    GpDbQueryResPgSql::GetBlobArray1D
-(
-    [[maybe_unused]] const size_t                           aRowId,
-    [[maybe_unused]] const size_t                           aColId,
-    [[maybe_unused]] std::optional<std::vector<GpSpanByteR>>    aOnNullValue
-) const
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //return GpDbQueryResPgSql_GetArray<GpSpanByteR>(aRowId, aColId, aOnNullValue, iPgResult);
-}
-
-bool    GpDbQueryResPgSql::GetBoolean
-(
-    [[maybe_unused]] const size_t       aRowId,
-    [[maybe_unused]] const size_t       aColId,
-    [[maybe_unused]] std::optional<bool>    aOnNullValue
-) const
-{
-    // TODO: implement
-    THROW_GP_NOT_IMPLEMENTED();
-
-    //const int rowId = NumOps::SConvert<int>(aRowId);
-    //const int colId = NumOps::SConvert<int>(aColId);
-
-    //if (PQgetisnull(iPgResult, rowId, colId))
-    //{
-    //  THROW_COND_GP
-    //  (
-    //      aOnNullValue.has_value(),
-    //      [&](){return "Value on ["_sv + aRowId + ", "_sv + aColId + "] is NULL"_sv;}
-    //  );
-    //  return aOnNullValue.value();
-    //}
-
-    //const char*       dataPtr     = PQgetvalue(iPgResult, rowId, colId);
-    //const size_t  dataSize    = NumOps::SConvert<size_t>(PQgetlength(iPgResult, rowId, colId));
-
-    //std::string_view str{dataPtr, dataSize};
-    //const char v = str.at(0);
-
-    //return       (v == 0x01)
-    //      || (v == 't')
-    //      || (v == 'T')
-    //      || (v == 'y')
-    //      || (v == 'Y');
-}
-
-GpSpanByteR GpDbQueryResPgSql::RowColDataPtr
+GpDbQueryResPgSql::RowColDataInfoT  GpDbQueryResPgSql::SRowColDataInfo
 (
     const size_t        aRowId,
     const size_t        aColId,
-    const PSQL::TypeOID aTypeOID
-) const
+    const PSQL::TypeOID aTypeOID,
+    GpDbQueryResPgSql&  aDbQueryRes
+)
 {
+    const size_t rowsCount      = aDbQueryRes.iRowsCount;
+    const size_t columnsCount   = aDbQueryRes.iColumnsCount;
+
     // Check aRowId, aColId
-    THROW_COND_DB
+    VERIFY
     (
-        (aRowId < iRowsCount) && (aColId < iColumnsCount),
+        (aRowId < rowsCount) && (aColId < columnsCount),
         GpDbExceptionCode::OUT_OF_RANGE_ROW_COL,
         [&]()
         {
             return fmt::format
             (
-                "Requested column id[{}][{}] is out of range [0..{}), [0..{})",
+                "Requested column [{}][{}] is out of range [0..{}), [0..{})",
                 aRowId,
                 aColId,
-                iRowsCount,
-                iColumnsCount
+                rowsCount,
+                columnsCount
             );
         }
     );
 
-    // Get data ptr
-    GpSpanByteR dataPtr = iRowColDataVec[iRowsCount*aRowId + aColId];
-
     // Check data description
-    THROW_COND_DB
+    const auto& rowDescOpt = aDbQueryRes.iRowDescOpt;
+
+    VERIFY
     (
-        iRowDescOpt.has_value(),
+        rowDescOpt.has_value(),
         GpDbExceptionCode::EMPTY_RS_MODEL_DESC,
         "No data description is available for the response"
     );
 
-    // Get column desc
-    const PSQL::RowDescriptionDescRS::ColumnDesc& columnDesc = iRowDescOpt.value().columns[aColId];
+    // Get column desc  
+    const PSQL::RowDescriptionDescRS::ColumnDesc& columnDesc = rowDescOpt.value().columns[aColId];
 
-    // Check IOD for column
-    THROW_COND_DB
+    // Check OID for column
+    {
+        u_int_32 columnTypeOid = columnDesc.type_oid;
+
+        // JSON and JSONB exception
+        if (columnTypeOid == u_int_32(PSQL::TypeOID::JSONB)) [[unlikely]]
+        {
+            columnTypeOid = u_int_32(PSQL::TypeOID::JSON);
+        } else if (columnTypeOid == u_int_32(PSQL::TypeOID::JSONB_ARRAY)) [[unlikely]]
+        {
+            columnTypeOid = u_int_32(PSQL::TypeOID::JSON_ARRAY);
+        }
+
+        if (columnTypeOid != u_int_32(aTypeOID))
+        {
+            GpDebugging::SBreakpoint();
+        }
+
+        // Check OID for column
+        VERIFY
+        (
+            columnTypeOid == u_int_32(aTypeOID),
+            GpDbExceptionCode::WRONG_TYPE_OID,
+            [&]()
+            {
+                return fmt::format
+                (
+                    "Wrong OID type {} for column '{}':[{}][{}]. Expected type {}",
+                    columnDesc.type_oid,
+                    columnDesc.name,
+                    aRowId,
+                    aColId,
+                    int(aTypeOID)
+                );
+            }
+        );
+    }
+
+    // Get data ptr
+    const auto[dataPtrOffset, dataPtrSize] = aDbQueryRes.iRowColDataVec[rowsCount*aRowId + aColId];
+
+    return RowColDataInfoT
+    {
+        GpSpanByteRW
+        {
+            aDbQueryRes.iRowColDataStorage.data() + dataPtrOffset,
+            dataPtrSize
+        },
+        columnDesc
+    };
+}
+
+template<typename T, typename OIDT>
+T   GpDbQueryResPgSql::SReadValue
+(
+    const size_t            aRowId,
+    const size_t            aColId,
+    const std::optional<T>& aOnNullValue,
+    GpDbQueryResPgSql&      aDbQueryRes
+)
+{
+    auto[dataPtr, columnDesc] = SRowColDataInfo
     (
-        columnDesc.type_oid == u_int_32(aTypeOID),
-        GpDbExceptionCode::WRONG_TYPE_OID,
+        aRowId,
+        aColId,
+        PSQL::TypeOidUitls::SDetectTypeOID<OIDT>(),
+        aDbQueryRes
+    );
+
+    if (!dataPtr.Empty()) [[likely]]
+    {
+        T value;
+        if (columnDesc.format_code > 0) [[likely]] // Binary format
+        {
+            // TODO: implement
+            THROW_NOT_IMPLEMENTED();
+
+            //std::memcpy(&value, dataPtr.Ptr(), sizeof(value));
+            //value = BitOps::N2H(value);
+        } else // Text format
+        {
+            if constexpr (std::is_same_v<OIDT, s_int_16>)
+            {
+                value = NumOps::SConvert<s_int_16>(StrOps::SToSI64(dataPtr.AsStringView()));
+            } else if constexpr (std::is_same_v<OIDT, s_int_32>)
+            {
+                value = NumOps::SConvert<s_int_32>(StrOps::SToSI64(dataPtr.AsStringView()));
+            } else if constexpr (std::is_same_v<OIDT, s_int_64>)
+            {
+                value = StrOps::SToSI64(dataPtr.AsStringView());
+            } else if constexpr (std::is_same_v<OIDT, float>)
+            {
+                value = float(StrOps::SToDouble(dataPtr.AsStringView()));
+            } else if constexpr (std::is_same_v<OIDT, double>)
+            {
+                value = StrOps::SToDouble(dataPtr.AsStringView());
+            } else if constexpr (std::is_same_v<OIDT, std::string_view>)
+            {
+                value = dataPtr.AsStringView();
+            } else if constexpr (std::is_same_v<OIDT, GpUUID>)
+            {
+                value = GpUUID::SFromString(dataPtr.AsStringView());
+            } else if constexpr (std::is_same_v<OIDT, GpSpanByteR>)
+            {
+                value = SReadStrToBlob(dataPtr, false);
+            } else if constexpr (std::is_same_v<OIDT, PSQL::TypeJsonShell>)
+            {
+                value = dataPtr.AsStringView();
+            } else
+            {
+                GpThrowCe<GpException>("Unsupported type");
+            }
+        }
+
+        return value;
+    }
+
+    VERIFY
+    (
+        aOnNullValue.has_value(),
         [&]()
         {
             return fmt::format
             (
-                "Wrong IOD type {} for column id[{}][{}]. Expected type {}",
-                columnDesc.type_oid,
+                "The requested column '{}':[{}][{}] value is null ",
+                columnDesc.name,
                 aRowId,
-                aColId,
-                int(aTypeOID)
+                aColId
             );
         }
     );
 
-    return
+    return aOnNullValue.value();
+}
+
+template<typename T, typename OIDT>
+std::vector<T>  GpDbQueryResPgSql::SReadVector
+(
+    const size_t                            aRowId,
+    const size_t                            aColId,
+    const std::optional<std::vector<T>>&    aOnNullValue,
+    GpDbQueryResPgSql&                      aDbQueryRes
+)
+{
+    auto[dataPtr, columnDesc] = SRowColDataInfo
+    (
+        aRowId,
+        aColId,
+        PSQL::TypeOidUitls::SDetectTypeOID<std::vector<OIDT>>(),
+        aDbQueryRes
+    );
+
+    if (!dataPtr.Empty()) [[likely]]
     {
-        iRowColDataStorage.data() + reinterpret_cast<size_t>(dataPtr.Ptr()),
-        dataPtr.Count()
+        std::vector<T> vecValue;
+        if (columnDesc.format_code > 0) [[likely]] // Binary format
+        {
+            // TODO: implement
+            THROW_NOT_IMPLEMENTED();
+
+            //std::memcpy(&value, dataPtr.Ptr(), sizeof(value));
+            //value = BitOps::N2H(value);
+        } else // Text format
+        {
+            GpSpanCharRW vectorStr = dataPtr.Subspan(1, NumOps::SSub<size_t>(dataPtr.Count(), 2));
+
+            if constexpr (std::is_same_v<OIDT, s_int_16>)
+            {
+                vecValue = StrOps::SToContainer<std::vector<T>>(vectorStr.AsStringView());
+            } else if constexpr (std::is_same_v<OIDT, s_int_32>)
+            {
+                vecValue = StrOps::SToContainer<std::vector<T>>(vectorStr.AsStringView());
+            } else if constexpr (std::is_same_v<OIDT, s_int_64>)
+            {
+                vecValue = StrOps::SToContainer<std::vector<T>>(vectorStr.AsStringView());
+            } else if constexpr (std::is_same_v<OIDT, float>)
+            {
+                vecValue = StrOps::SToContainer<std::vector<T>>(vectorStr.AsStringView());
+            } else if constexpr (std::is_same_v<OIDT, double>)
+            {
+                vecValue = StrOps::SToContainer<std::vector<T>>(vectorStr.AsStringView());
+            } else if constexpr (std::is_same_v<OIDT, GpUUID>)
+            {
+                vecValue = GpUUID::SToContainer(vectorStr.AsStringView());
+            } else if constexpr (std::is_same_v<OIDT, std::string_view>)
+            {
+                vecValue = SReadStrVector(vectorStr);
+            } else if constexpr (std::is_same_v<OIDT, GpSpanByteR>)
+            {
+                vecValue = SReadStrToBlobVector(vectorStr);
+            } else if constexpr (std::is_same_v<OIDT, PSQL::TypeJsonShell>)
+            {
+                vecValue = SReadStrVector(vectorStr);
+            } else
+            {
+                GpThrowCe<GpException>("Unsupported type");
+            }
+        }
+
+        return vecValue;
+    }
+
+    VERIFY
+    (
+        aOnNullValue.has_value(),
+        [&]()
+        {
+            return fmt::format
+            (
+                "The requested column '{}':[{}][{}] value is null ",
+                columnDesc.name,
+                aRowId,
+                aColId
+            );
+        }
+    );
+
+    return aOnNullValue.value();
+}
+
+std::vector<std::string_view>   GpDbQueryResPgSql::SReadStrVector (GpSpanCharRW aVectorStr)
+{
+    if (aVectorStr.Empty()) [[unlikely]]
+    {
+        return {};
+    }
+
+    enum class SearchMode
+    {
+        NEW_PART_NO_QUOTES,
+        NEW_PART_WITH_QUOTES,
     };
+
+    SearchMode      searchMode              = SearchMode::NEW_PART_NO_QUOTES;
+    const ssize_t   strSize                 = NumOps::SConvert<ssize_t>(std::size(aVectorStr));
+    char*           strPtr                  = std::data(aVectorStr);
+    const char*     strPtrLastChar          = strPtr + strSize - 1;
+    char*           strPtrBeginOfElement    = strPtr;
+
+    if (*strPtr == '"') [[unlikely]]
+    {
+        strPtr++;
+        searchMode              = SearchMode::NEW_PART_WITH_QUOTES;
+        strPtrBeginOfElement    = strPtr;
+    }
+
+    std::vector<std::string_view> resVec;
+
+    while (strPtr <= strPtrLastChar)
+    {
+        size_t elementSize = 0;
+
+        if (searchMode == SearchMode::NEW_PART_NO_QUOTES) [[likely]]
+        {
+            // Find end of the element
+            while ((strPtr <= strPtrLastChar) && (*strPtr != ','))
+            {
+                strPtr++;
+                elementSize++;
+            }
+        } else// searchMode == SearchMode::NEW_PART_WITH_QUOTES
+        {
+            // Find end of the element
+            while (strPtr <= strPtrLastChar)
+            {
+                const char ch = *strPtr++;
+                strPtrBeginOfElement[elementSize] = ch;
+
+                if (ch == '\\') [[unlikely]]
+                {
+                    if (strPtr <= strPtrLastChar)
+                    {
+                        strPtrBeginOfElement[elementSize] = *strPtr++;
+                    }
+                } else if (ch == '"') [[unlikely]]
+                {
+                    break;
+                }
+
+                elementSize++;
+            }
+        }
+
+        // Add element to result vector
+        resVec.emplace_back
+        (
+            std::string_view
+            {
+                strPtrBeginOfElement,
+                elementSize
+            }
+        );
+
+        // Check if end or ','
+        if (strPtr <= strPtrLastChar) [[likely]]
+        {
+            VERIFY
+            (
+                *strPtr++ == ',',
+                "Expected character ','"
+            );
+
+            // Update searchMode
+            if (   (strPtr <= strPtrLastChar)
+                && (*strPtr == '"'))
+            {
+                strPtr++;
+                searchMode              = SearchMode::NEW_PART_WITH_QUOTES;
+                strPtrBeginOfElement    = strPtr;
+            } else
+            {
+                searchMode              = SearchMode::NEW_PART_NO_QUOTES;
+                strPtrBeginOfElement    = strPtr;
+            }
+        }
+    }
+
+    return resVec;
+}
+
+GpSpanByteR GpDbQueryResPgSql::SReadStrToBlob
+(
+    GpSpanByteRW    aDataPtr,
+    const bool      aIsFromArray
+)
+{
+    std::string_view    sv              = aDataPtr.AsStringView();
+    const size_t        prefixSize      = aIsFromArray ? 3 : 2;
+    const std::string   expectedPrefix  = aIsFromArray ? "\\\\x" : "\\x";
+
+    VERIFY
+    (
+           (std::size(sv) >= prefixSize)
+        && (sv.substr(0, prefixSize) == expectedPrefix),
+        [&]()
+        {
+            return fmt::format
+            (
+                "Expected size >= {} and prefix '{}'",
+                prefixSize,
+                expectedPrefix
+            );
+        }
+    );
+
+    GpBytesArray blobData = StrOps::SToBytesHex(sv.substr(prefixSize));
+    std::memcpy(aDataPtr.Ptr(), std::data(blobData), std::size(blobData));
+
+    return GpSpanByteR
+    {
+        aDataPtr.Ptr(),
+        std::size(blobData)
+    };
+}
+
+std::vector<GpSpanByteR>    GpDbQueryResPgSql::SReadStrToBlobVector (GpSpanCharRW aVectorStr)
+{
+    std::string_view            sv = aVectorStr.AsStringView();
+    std::vector<GpSpanByteR>    resVec;
+
+    while (true)
+    {
+        const size_t elementBeginId = sv.find('"');
+
+        if (elementBeginId == std::string_view::npos) [[unlikely]]
+        {
+            break;
+        }
+
+        sv = sv.substr(elementBeginId + 1);
+
+        const size_t elementEndId = sv.find('"');
+
+        VERIFY
+        (
+            elementEndId != std::string_view::npos,
+            "Can`t find end of BLOB string"
+        );
+
+        resVec.emplace_back
+        (
+            SReadStrToBlob
+            (
+                GpSpanByteRW
+                {
+                    const_cast<char*>(sv.data()),
+                    elementEndId
+                },
+                true
+            )
+        );
+
+        sv = sv.substr(elementEndId + 1);
+    }
+
+    return resVec;
 }
 
 }// namespace GPlatform

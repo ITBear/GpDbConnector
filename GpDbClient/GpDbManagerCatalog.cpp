@@ -75,15 +75,15 @@ void    GpDbManagerCatalog::Add
 {
     for (const auto& alias: aAliases)
     {
-        iManagers.SetOrUpdate(alias, aManager);
+        iManagers.Set(alias, aManager);
     }
 }
 
 GpDbManager&    GpDbManagerCatalog::Find (std::string_view aName)
 {
-    auto res = iManagers.GetOpt(aName);
+    auto res = iManagers.FindOpt(aName);
 
-    THROW_COND_GP
+    VERIFY
     (
         res.has_value(),
         [aName]()

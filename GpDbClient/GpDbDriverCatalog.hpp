@@ -7,7 +7,7 @@
 #include <GpCore2/GpUtils/Macro/GpMacroClass.hpp>
 #include <GpCore2/GpUtils/Types/Strings/GpStringOps.hpp>
 #include <GpCore2/GpUtils/Types/Containers/GpContainersT.hpp>
-#include <GpCore2/GpUtils/Types/Containers/GpDictionary.hpp>
+#include <GpCore2/GpUtils/Types/Containers/GpSharedMap.hpp>
 
 namespace GPlatform {
 
@@ -20,7 +20,7 @@ public:
     CLASS_DD(GpDbDriverCatalog)
     TAG_SET(THREAD_SAFE)
 
-    using CatalogT  = GpDictionary
+    using CatalogT = GpSharedMap
     <
         boost::container::small_flat_map
         <
