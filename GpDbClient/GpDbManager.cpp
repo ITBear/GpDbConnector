@@ -101,7 +101,7 @@ GpDbConnection::C::Opts::SP GpDbManager::OnAcquireNoElementsLeft (void)
     GpItcFutureUtils::SWait
     (
         future.V(),
-        [&](GpDbConnection::SP& aConnection)
+        [&](GpDbConnection::SP&& aConnection)
         {
             res = std::move(aConnection);
         },

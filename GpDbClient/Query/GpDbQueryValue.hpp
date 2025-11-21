@@ -3,7 +3,7 @@
 #include <GpDbConnector/GpDbClient/GpDbClient_global.hpp>
 
 #include <GpCore2/GpUtils/Types/Containers/GpContainersT.hpp>
-#include <GpCore2/GpUtils/Types/Containers/GpBytesArray.hpp>
+#include <GpCore2/GpUtils/Types/Containers/GpByteArray.hpp>
 #include <GpCore2/GpUtils/Types/Containers/GpTypeShell.hpp>
 #include <GpCore2/GpUtils/Types/UIDs/GpUUID.hpp>
 #include <variant>
@@ -39,8 +39,8 @@ using GpDbQueryValue = std::variant
     GpDbQueryValueJsonVec,
     GpUUID,
     std::vector<GpUUID>,
-    GpBytesArray,
-    std::vector<GpBytesArray>,
+    GpByteArray,
+    std::vector<GpByteArray>,
     bool,
     std::nullopt_t
 >;

@@ -7,7 +7,7 @@ namespace GPlatform::PSQL {
 size_t  ProtocolSerializer::SSerialize
 (
     const PSQL::StartupMessageDescRQ&   aMsgDesc,
-    GpBytesArray&                       aBufferOut
+    GpByteArray&                        aBufferOut
 )
 {
     GpByteWriterStorageByteArray    writerStorage{aBufferOut};
@@ -40,7 +40,7 @@ size_t  ProtocolSerializer::SSerialize
 size_t  ProtocolSerializer::SSerialize
 (
     const SASLInitialResponseDescRQ&    aMsgDesc,
-    GpBytesArray&                       aBufferOut
+    GpByteArray&                        aBufferOut
 )
 {
     GpByteWriterStorageByteArray    writerStorage{aBufferOut};
@@ -69,7 +69,7 @@ size_t  ProtocolSerializer::SSerialize
 size_t  ProtocolSerializer::SSerialize
 (
     const SASLResponseDescRQ&   aMsgDesc,
-    GpBytesArray&               aBufferOut
+    GpByteArray&                aBufferOut
 )
 {
     GpByteWriterStorageByteArray    writerStorage{aBufferOut};
@@ -94,7 +94,7 @@ size_t  ProtocolSerializer::SSerialize
 size_t  ProtocolSerializer::SSerialize
 (
     const QueryDescRQ&  aMsgDesc,
-    GpBytesArray&       aBufferOut
+    GpByteArray&        aBufferOut
 )
 {
     GpByteWriterStorageByteArray    writerStorage{aBufferOut};
@@ -119,7 +119,7 @@ size_t  ProtocolSerializer::SSerialize
 size_t  ProtocolSerializer::SSerialize
 (
     const ParseDescRQ&  aMsgDesc,
-    GpBytesArray&       aBufferOut
+    GpByteArray&        aBufferOut
 )
 {
     GpByteWriterStorageByteArray    writerStorage{aBufferOut};

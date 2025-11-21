@@ -300,7 +300,7 @@ void    GpDbQueryRes::_RowToObjectPropVec
         case GpReflectType::BLOB:
         {
             std::vector<GpSpanByteR> v = GetBlobArray1D(aRowId, aColId, {});
-            aProp.Vec_BLOB(aDataPtr) = _SConvertArrayBytes<GpBytesArray>(v);
+            aProp.Vec_BLOB(aDataPtr) = _SConvertArrayBytes<GpByteArray>(v);
         } break;
         case GpReflectType::OBJECT:
         {

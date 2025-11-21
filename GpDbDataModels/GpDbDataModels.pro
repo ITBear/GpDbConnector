@@ -26,6 +26,11 @@ equals(var_os, "linux") {
 	LIBS += -lGpUtils$$TARGET_POSTFIX
 }
 
+equals(var_os, "macos") {
+	LIBS += -lGpReflection$$TARGET_POSTFIX
+	LIBS += -lGpUtils$$TARGET_POSTFIX
+}
+
 # ----------- Sources and headers -----------
 HEADERS += \
 	GpDbDataModelsLib.hpp \

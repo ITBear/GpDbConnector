@@ -31,15 +31,15 @@ public:
     CLASS_REMOVE_CTRS_DEFAULT_MOVE_COPY(GpDbArrayUtilsPgSql)
 
 public:
-    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<s_int_16>& aArray);
-    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<s_int_32>& aArray);
-    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<s_int_64>& aArray);
-    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<double>& aArray);
-    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<float>& aArray);
-    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<std::string>& aArray);
-    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<GpUUID>& aArray);
-    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<GpBytesArray>& aArray);
-    inline static std::tuple<Oid, GpBytesArray> SBuild          (const std::vector<bool>& aArray);
+    inline static std::tuple<Oid, GpByteArray>  SBuild          (const std::vector<s_int_16>& aArray);
+    inline static std::tuple<Oid, GpByteArray>  SBuild          (const std::vector<s_int_32>& aArray);
+    inline static std::tuple<Oid, GpByteArray>  SBuild          (const std::vector<s_int_64>& aArray);
+    inline static std::tuple<Oid, GpByteArray>  SBuild          (const std::vector<double>& aArray);
+    inline static std::tuple<Oid, GpByteArray>  SBuild          (const std::vector<float>& aArray);
+    inline static std::tuple<Oid, GpByteArray>  SBuild          (const std::vector<std::string>& aArray);
+    inline static std::tuple<Oid, GpByteArray>  SBuild          (const std::vector<GpUUID>& aArray);
+    inline static std::tuple<Oid, GpByteArray>  SBuild          (const std::vector<GpByteArray>& aArray);
+    inline static std::tuple<Oid, GpByteArray>  SBuild          (const std::vector<bool>& aArray);
 
     template<typename T>
     static std::vector<T>                       SRead           (GpSpanByteRW aData);
@@ -49,12 +49,12 @@ private:
     static constexpr Oid                        _SOidFromT      (void);
 
     template<typename T, bool IsN2H>
-    static std::tuple<Oid, GpBytesArray>        _SBuildPod      (const Oid              aOid,
+    static std::tuple<Oid, GpByteArray>         _SBuildPod      (const Oid              aOid,
                                                                  const Oid              aOidArray,
                                                                  const std::vector<T>&  aArray);
 
     template<typename T>
-    static std::tuple<Oid, GpBytesArray>        _SBuildBytes    (const Oid              aOid,
+    static std::tuple<Oid, GpByteArray>         _SBuildBytes    (const Oid              aOid,
                                                                  const Oid              aOidArray,
                                                                  const std::vector<T>&  aArray);
 
@@ -67,47 +67,47 @@ private:
                                                                  const size_t   aElementsCount);
 };
 
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<s_int_16>& aArray)
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::SBuild (const std::vector<s_int_16>& aArray)
 {
     return _SBuildPod<s_int_16, true>(INT2OID, INT2VECTOROID, aArray);
 }
 
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<s_int_32>& aArray)
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::SBuild (const std::vector<s_int_32>& aArray)
 {
     return _SBuildPod<s_int_32, true>(INT4OID, INT4ARRAYOID, aArray);
 }
 
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<s_int_64>& aArray)
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::SBuild (const std::vector<s_int_64>& aArray)
 {
     return _SBuildPod<s_int_64, true>(INT8OID, INT8ARRAYOID, aArray);
 }
 
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<double>& aArray)
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::SBuild (const std::vector<double>& aArray)
 {
     return _SBuildPod<double, true>(FLOAT8OID, FLOAT8ARRAYOID, aArray);
 }
 
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<float>& aArray)
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::SBuild (const std::vector<float>& aArray)
 {
     return _SBuildPod<float, true>(FLOAT4OID, FLOAT4ARRAYOID, aArray);
 }
 
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<std::string>& aArray)
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::SBuild (const std::vector<std::string>& aArray)
 {
     return _SBuildBytes<std::string>(TEXTOID, TEXTARRAYOID, aArray);
 }
 
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<GpUUID>& aArray)
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::SBuild (const std::vector<GpUUID>& aArray)
 {
     return _SBuildPod<GpUUID, false>(UUIDOID, UUIDARRAYOID, aArray);
 }
 
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<GpBytesArray>& aArray)
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::SBuild (const std::vector<GpByteArray>& aArray)
 {
-    return _SBuildBytes<GpBytesArray>(BYTEAOID, BYTEAARRAYOID, aArray);
+    return _SBuildBytes<GpByteArray>(BYTEAOID, BYTEAARRAYOID, aArray);
 }
 
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::SBuild (const std::vector<bool>& aArray)
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::SBuild (const std::vector<bool>& aArray)
 {
     std::vector<std::string> strs;
     for (const bool v: aArray)
@@ -255,14 +255,14 @@ constexpr Oid   GpDbArrayUtilsPgSql::_SOidFromT (void)
 }
 
 template<typename T, bool IsN2H>
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::_SBuildPod
 (
     const Oid               aOid,
     const Oid               aOidArray,
     const std::vector<T>&   aArray
 )
 {
-    GpBytesArray arrayData;
+    GpByteArray arrayData;
     {
         const size_t elementsCount = std::size(aArray);
 
@@ -299,14 +299,14 @@ std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildPod
 }
 
 template<typename T>
-std::tuple<Oid, GpBytesArray>   GpDbArrayUtilsPgSql::_SBuildBytes
+std::tuple<Oid, GpByteArray>    GpDbArrayUtilsPgSql::_SBuildBytes
 (
     const Oid               aOid,
     const Oid               aOidArray,
     const std::vector<T>&   aArray
 )
 {
-    GpBytesArray arrayData;
+    GpByteArray arrayData;
     {
         const size_t    elementsCount   = std::size(aArray);
         size_t          totalSize       = sizeof(PgArrayHeaderT) + elementsCount * sizeof(s_int_32);

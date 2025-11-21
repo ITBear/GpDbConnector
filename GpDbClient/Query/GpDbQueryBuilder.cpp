@@ -284,25 +284,25 @@ GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<GpUUID>&& aValue)
 
 GpDbQueryBuilder&   GpDbQueryBuilder::Next (const GpSpanByteR aValue)
 {
-    Next<GpBytesArray>(-1, GpArrayUtils::SMake<GpBytesArray>(aValue));
+    Next<GpByteArray>(-1, GpArrayUtils::SMake<GpByteArray>(aValue));
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::Next (GpBytesArray&& aValue)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (GpByteArray&& aValue)
 {
-    Next<GpBytesArray>(-1, std::move(aValue));
+    Next<GpByteArray>(-1, std::move(aValue));
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<GpBytesArray>& aValue)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (const std::vector<GpByteArray>& aValue)
 {
-    Next<std::vector<GpBytesArray>>(-1, aValue);
+    Next<std::vector<GpByteArray>>(-1, aValue);
     return *this;
 }
 
-GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<GpBytesArray>&& aValue)
+GpDbQueryBuilder&   GpDbQueryBuilder::Next (std::vector<GpByteArray>&& aValue)
 {
-    Next<std::vector<GpBytesArray>>(-1, std::move(aValue));
+    Next<std::vector<GpByteArray>>(-1, std::move(aValue));
     return *this;
 }
 
@@ -521,7 +521,7 @@ void    GpDbQuery::_NextProp
         } break;
         case GpReflectType::BLOB:
         {
-            const GpBytesArray& blob = aProp.Value_BLOB(aDataPtr);
+            const GpByteArray& blob = aProp.Value_BLOB(aDataPtr);
             NextBlob(GpSpanByteR(std::data(blob), std::size(blob)));
         } break;
         case GpReflectType::OBJECT:

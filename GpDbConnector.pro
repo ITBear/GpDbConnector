@@ -20,7 +20,7 @@ os_linux {
 		GpDbDataModels \
 		GpDbClient
 #		GpDbPostgreSql
-} else:os_macx {
+} else:os_macos {
 	SUBDIRS += \
 		GpDbDataModels \
 		GpDbClient \

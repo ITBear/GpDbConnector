@@ -42,7 +42,7 @@ struct formatter<::GPlatform::PSQL::ErrorResponseDescRS::MessagesT::value_type>
         std::string_view    errorCodeStr;
         const auto          errorCodeStrIter = sErrorCodeIdToStr.find(errorCode);
 
-        if (errorCodeStrIter != sErrorCodeIdToStr.end())
+        if (errorCodeStrIter != std::end(sErrorCodeIdToStr))
         {
             errorCodeStr = errorCodeStrIter->second;
         } else

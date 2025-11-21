@@ -21,9 +21,9 @@ public:
 public:
     std::vector<std::string>    aliases;
     std::string                 driver_name;
-    size_t                      max_conn_pool_size  = 16;
+    u_int_32                    max_conn_pool_size  = 16;
     std::string                 event_poller_name;
-    milliseconds_t              connect_timeout     = 1.0_si_s;
+    milliseconds_t              connect_timeout     = 1'000.0_si_ms;
     std::string                 db_host;
     u_int_16                    db_port             = 0;
     std::string                 db_name;

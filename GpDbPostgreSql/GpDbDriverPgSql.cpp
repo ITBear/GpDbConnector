@@ -14,7 +14,7 @@ GpDbDriverPgSql::~GpDbDriverPgSql (void) noexcept
 
 GpDbConnection::SP  GpDbDriverPgSql::NewConnection
 (
-    const GpIOEventPollerIdx    aIOEventPollerIdx,
+    [[maybe_unused]] const GpIOEventPollerIdx   aIOEventPollerIdx,
     const milliseconds_t        aConnectTimeout,
     std::string                 aServerHost,
     const u_int_16              aServerPort,
@@ -25,7 +25,7 @@ GpDbConnection::SP  GpDbDriverPgSql::NewConnection
 {
     GpDbConnection::SP connection = MakeSP<GpDbConnectionPgSql>
     (
-        aIOEventPollerIdx,
+        //aIOEventPollerIdx,
         aConnectTimeout,
         std::move(aServerHost),
         aServerPort,

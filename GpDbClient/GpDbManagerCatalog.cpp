@@ -48,7 +48,7 @@ void    GpDbManagerCatalog::Start
     }
 }
 
-void    GpDbManagerCatalog::StopAndClear (void)
+void    GpDbManagerCatalog::Stop (void)
 {
     iManagers.Clear();
 }
@@ -62,9 +62,9 @@ void    GpDbManagerCatalog::SStart
     S().Start(aCfgDescs, aDbDriverCatalog);
 }
 
-void    GpDbManagerCatalog::SStopAndClear (void)
+void    GpDbManagerCatalog::SStop (void)
 {
-    S().StopAndClear();
+    S().Stop();
 }
 
 void    GpDbManagerCatalog::Add

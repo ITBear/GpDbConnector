@@ -148,7 +148,7 @@ private:
 private:
     std::optional<PSQL::RowDescriptionDescRS>   iRowDescOpt;
     RowColDataVecT                              iRowColDataVec;
-    GpBytesArray                                iRowColDataStorage;
+    GpByteArray                                 iRowColDataStorage;
     size_t                                      iRowsCount      = 0;
     size_t                                      iColumnsCount   = 0;
 };

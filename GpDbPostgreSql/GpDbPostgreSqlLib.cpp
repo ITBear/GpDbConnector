@@ -1,7 +1,10 @@
 #include <GpDbConnector/GpDbPostgreSql/GpDbPostgreSqlLib.hpp>
+#include <GpCore2/GpUtils/Other/GpLinkedLibsInfo.hpp>
 
-namespace GPlatform {
+GP_STATIC_INITIALIZER_IMPL(GpDbPostgreSql)
+GP_LIB_REGISTRATOR(GpDbPostgreSqlLib)
 
-GP_IMPLEMENT_LIB_REGISTRATOR(GpDbPostgreSqlLib)
-
-}// namespaces GPlatform
+void    GpDbPostgreSql_StaticInitializer::OnInitialize (void)
+{
+    GpDbPostgreSqlLib::SRegisterSelf();
+}

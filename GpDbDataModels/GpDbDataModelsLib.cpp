@@ -1,7 +1,10 @@
 #include <GpDbConnector/GpDbDataModels/GpDbDataModelsLib.hpp>
+#include <GpCore2/GpUtils/Other/GpLinkedLibsInfo.hpp>
 
-namespace GPlatform {
+GP_STATIC_INITIALIZER_IMPL(GpDbDataModels)
+GP_LIB_REGISTRATOR(GpDbDataModelsLib)
 
-GP_IMPLEMENT_LIB_REGISTRATOR(GpDbDataModelsLib)
-
-}// namespaces GPlatform
+void    GpDbDataModels_StaticInitializer::OnInitialize (void)
+{
+    GpDbDataModelsLib::SRegisterSelf();
+}

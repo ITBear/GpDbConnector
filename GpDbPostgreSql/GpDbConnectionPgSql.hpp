@@ -14,8 +14,7 @@ public:
     using IsolationLevelNamesT  = std::array<std::string_view, GpDbTransactionIsolation::SCount()>;
 
 public:
-                                GpDbConnectionPgSql     (GpIOEventPollerIdx aIOEventPollerIdx,
-                                                         milliseconds_t     aConnectTimeout,
+                                GpDbConnectionPgSql     (milliseconds_t     aConnectTimeout,
                                                          std::string        aServerHost,
                                                          u_int_16           aServerPort,
                                                          std::string        aUserName,
@@ -37,10 +36,9 @@ private:
     void                        _Close                  (void) noexcept;
 
 private:
-    const GpIOEventPollerIdx    iIOEventPollerIdx;
     const milliseconds_t        iConnectTimeout;
     const std::string           iServerHost;
-    const u_int_16              iServerPort;
+    [[maybe_unused]] const u_int_16             iServerPort;
     const std::string           iUserName;
     const std::string           iPassword;
     const std::string           iDatabase;

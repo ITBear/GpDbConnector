@@ -6,24 +6,21 @@
 #include <GpDbConnector/GpDbPostgreSql/GpDbQueryResPgSql.hpp>
 #include <GpCore2/GpTasks/Scheduler/GpTaskScheduler.hpp>
 
-#include <iostream>
-
 namespace GPlatform {
 
 GpDbConnectionTaskPgSql::GpDbConnectionTaskPgSql
 (
-    const GpIOEventPollerIdx    aIOEventPollerIdx,
-    const milliseconds_t        aConnectTimeout,
-    std::string                 aServerHost,
-    const u_int_16              aServerPort,
-    std::string                 aUserName,
-    std::string                 aPassword,
-    std::string                 aDatabase
+    GpSocketTCP::UP         aSocketTcpUP,
+    const milliseconds_t    aConnectTimeout,
+    std::string             aServerHost,
+    const u_int_16          aServerPort,
+    std::string             aUserName,
+    std::string             aPassword,
+    std::string             aDatabase
 ):
 GpTcpClientTask
 {
-    GpSocketFlags{},
-    aIOEventPollerIdx
+    std::move(aSocketTcpUP)
 },
 iConnectTimeout  {aConnectTimeout},
 iServerHost      {std::move(aServerHost)},
@@ -66,19 +63,12 @@ GpDbQueryRes::SP    GpDbConnectionTaskPgSql::Execute (const GpDbQuery& aQuery)
     ExecutePromiseT     executePromise;
     ExecuteFutureT::SP  executeFuture = executePromise.Future();
 
-    VERIFY
-    (
-        GpTaskScheduler::S().MakeTaskReady
-        (
-            TaskId(), ExecuteMsgT{aQuery, std::move(executePromise)}
-        ) == true,
-        "Failed to start SQL query task"
-    );
+    //WAKEUP_TASK(TaskId(), ExecuteMsgT{aQuery, std::move(executePromise)});
 
     // Wait for execute or done
     GpDbQueryRes::SP res;
     {
-        auto onExecuteSuccessFn = [&res](typename ExecuteFutureT::value_type& aRes)// OnSuccessFnT
+        auto onExecuteSuccessFn = [&res](typename ExecuteFutureT::value_type&& aRes)// OnSuccessFnT
         {
             res = std::move(aRes);
         };
@@ -95,7 +85,7 @@ GpDbQueryRes::SP    GpDbConnectionTaskPgSql::Execute (const GpDbQuery& aQuery)
             onExecuteExceptionFn
         };
 
-        auto onDoneSuccessFn = []([[maybe_unused]] typename GpTask::DoneFutureT::value_type&)// OnSuccessFnT
+        auto onDoneSuccessFn = []([[maybe_unused]] typename GpTask::DoneFutureT::value_type&&)// OnSuccessFnT
         {
             THROW("[GpDbConnectionTaskPgSql::Execute]: Connection task return done future while execute SQL request"_sv);
         };
@@ -124,8 +114,10 @@ GpDbQueryRes::SP    GpDbConnectionTaskPgSql::Execute (const GpDbQuery& aQuery)
 
 void    GpDbConnectionTaskPgSql::OnStart (void)
 {
-    GpTcpClientTask::OnStart();
+    // TODO: implement
+    THROW_NOT_IMPLEMENTED();
 
+    /*
     iSocketState = SocketStateT::CONNECTING;
 
     // TODO: implement IPv6
@@ -146,6 +138,7 @@ void    GpDbConnectionTaskPgSql::OnStart (void)
     // Send startup message to DB
     const size_t messageSize = iMessageProcessor.MakeStartupMessage(iSocketTmpBufferWrite);
     PrepareAndSendMessage(messageSize);
+    */
 }
 
 void    GpDbConnectionTaskPgSql::OnStop (ExceptionsT& aStopExceptionsOut) noexcept
@@ -208,6 +201,13 @@ void    GpDbConnectionTaskPgSql::OnConnected (GpSocketTCP& aSocket)
     );
 }
 
+void    GpDbConnectionTaskPgSql::OnConnectionTimeout ([[maybe_unused]] GpSocketTCP& aSocket)
+{
+    // TODO: implement
+    THROW_NOT_IMPLEMENTED();
+}
+
+/*
 void    GpDbConnectionTaskPgSql::ProcessOtherMessages (GpAny& aMessage)
 {
     VERIFY
@@ -225,6 +225,7 @@ void    GpDbConnectionTaskPgSql::ProcessOtherMessages (GpAny& aMessage)
 
     ProcessExecuteMsg(aMessage.ValueNoCheck<ExecuteMsgT>());
 }
+*/
 
 void    GpDbConnectionTaskPgSql::ProcessExecuteMsg (ExecuteMsgT& aMessage)
 {
@@ -372,8 +373,12 @@ void    GpDbConnectionTaskPgSql::WriteToSocket (GpSocketTCP& aSocket)
     }
 }
 
-void    GpDbConnectionTaskPgSql::PrepareAndSendMessage (const size_t aMessageSize)
+void    GpDbConnectionTaskPgSql::PrepareAndSendMessage ([[maybe_unused]] const size_t aMessageSize)
 {
+    // TODO: implement
+    THROW_NOT_IMPLEMENTED();
+
+    /*
     // Note: all data must be stored in iSocketTmpBufferWrite
 
     VERIFY
@@ -388,6 +393,7 @@ void    GpDbConnectionTaskPgSql::PrepareAndSendMessage (const size_t aMessageSiz
     iRqBytesToWriteTotal    = aMessageSize;
     iRqBytesWrited          = 0;
     WriteToSocket(SocketTCP());
+    */
 }
 
 void    GpDbConnectionTaskPgSql::ProcessRsMessage (GpSpanByteR aMessageData)

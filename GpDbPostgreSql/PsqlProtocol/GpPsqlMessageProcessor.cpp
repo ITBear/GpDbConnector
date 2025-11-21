@@ -31,7 +31,7 @@ GpPsqlMessageProcessor::~GpPsqlMessageProcessor (void) noexcept
 {
 }
 
-size_t  GpPsqlMessageProcessor::MakeStartupMessage (GpBytesArray& aOutMessageBuffer)
+size_t  GpPsqlMessageProcessor::MakeStartupMessage (GpByteArray& aOutMessageBuffer)
 {
     PSQL::StartupMessageDescRQ startupMessageDesc;
 
@@ -46,7 +46,7 @@ size_t  GpPsqlMessageProcessor::MakeStartupMessage (GpBytesArray& aOutMessageBuf
 
 size_t  GpPsqlMessageProcessor::MakeQueryMessage
 (
-    GpBytesArray&       aOutMessageBuffer,
+    GpByteArray&        aOutMessageBuffer,
     std::string_view    aQuery
 )
 {
@@ -62,7 +62,7 @@ size_t  GpPsqlMessageProcessor::MakeQueryMessage
 
 size_t  GpPsqlMessageProcessor::MakeParseMessage
 (
-    GpBytesArray&           aOutMessageBuffer,
+    GpByteArray&            aOutMessageBuffer,
     std::string_view        aQuery,
     std::string_view        aName,
     std::vector<TypeOID>&&  aOIDs
@@ -83,7 +83,7 @@ size_t  GpPsqlMessageProcessor::MakeParseMessage
 size_t  GpPsqlMessageProcessor::ProcessRsMessage
 (
     GpSpanByteR     aRsData,
-    GpBytesArray&   aOutMessageBuffer
+    GpByteArray&    aOutMessageBuffer
 )
 {
     VERIFY
@@ -371,7 +371,7 @@ size_t  GpPsqlMessageProcessor::ProcessRsMessage
 size_t  GpPsqlMessageProcessor::ProcessAuthRequest
 (
     const PSQL::AuthenticationDescRS&   aRsMsgDesc,
-    GpBytesArray&                       aOutMessageBuffer
+    GpByteArray&                        aOutMessageBuffer
 )
 {
     size_t outMessageSize = 0;
@@ -431,10 +431,10 @@ size_t  GpPsqlMessageProcessor::ProcessAuthRequest
             (
                 std::find
                 (
-                    rsPayload.names.begin(),
-                    rsPayload.names.end(),
+                    std::begin(rsPayload.names),
+                    std::end(rsPayload.names),
                     "SCRAM-SHA-256"
-                ) != rsPayload.names.end(),
+                ) != std::end(rsPayload.names),
                 "Auth schema name expected to be SCRAM-SHA-256"_sv
             );
 

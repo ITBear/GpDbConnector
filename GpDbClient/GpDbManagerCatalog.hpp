@@ -26,7 +26,7 @@ public:
     static GpDbManagerCatalog&  S                   (void) noexcept {return sInstance;}
     static void                 SStart              (const GpDbManagerCfgDesc::C::Vec::SP&  aCfgDescs,
                                                      const GpDbDriverCatalog&               aDbDriverCatalog);
-    static void                 SStopAndClear       (void);
+    static void                 SStop               (void);
 
     void                        Add                 (GpSP<GpDbManager>                  aManager,
                                                      const std::vector<std::string>&    aAliases);
@@ -35,7 +35,7 @@ public:
 private:
     void                        Start               (const GpDbManagerCfgDesc::C::Vec::SP&  aCfgDescs,
                                                      const GpDbDriverCatalog&               aDbDriverCatalog);
-    void                        StopAndClear        (void);
+    void                        Stop                (void);
 
 private:
     ManagersT                   iManagers;

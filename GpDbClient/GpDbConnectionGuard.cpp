@@ -6,7 +6,7 @@
 #include <GpDbConnector/GpDbClient/Query/GpDbQueryBuilder.hpp>
 
 #include <GpLog/GpLogCore/GpLog.hpp>
-#include <GpCore2/GpUtils/Types/Strings/GpStringUtils.hpp>
+#include <GpCore2/GpUtils/Types/Strings/GpOutUtils.hpp>
 #include <GpCore2/GpTasks/GpTask.hpp>
 #include <GpCore2/GpTasks/Fibers/GpTaskFiberCtxForceUnwind.hpp>
 
@@ -29,13 +29,13 @@ GpDbConnectionGuard::~GpDbConnectionGuard (void) noexcept
         ConnectionRelease();
     } catch (const GpException& e)
     {
-        GpStringUtils::SCerr("[GpDbConnectionGuard::~GpDbConnectionGuard]: exception: "_sv + e.what());
+        GpOutUtils::S().Err("[GpDbConnectionGuard::~GpDbConnectionGuard]: exception: "_sv + e.what());
     } catch (const std::exception& e)
     {
-        GpStringUtils::SCerr("[GpDbConnectionGuard::~GpDbConnectionGuard]: exception: "_sv + e.what());
+        GpOutUtils::S().Err("[GpDbConnectionGuard::~GpDbConnectionGuard]: exception: "_sv + e.what());
     } catch (...)
     {
-        GpStringUtils::SCerr("[GpDbConnectionGuard::~GpDbConnectionGuard]: unknown exception"_sv);
+        GpOutUtils::S().Err("[GpDbConnectionGuard::~GpDbConnectionGuard]: unknown exception"_sv);
     }
 }
 
@@ -174,33 +174,33 @@ void    GpDbConnectionGuard::ConnectionRelease (void)
             throw;
         } catch (const GpException& ex)
         {
-            const auto currentTaskOpt = GpTask::SCurrentTask();
+            GpTask::WP taskWP = GpTask::SCurrentTask();
 
-            if (currentTaskOpt.has_value())
+            if (GpTask::SP taskSP = taskWP.Lock(); taskSP.IsNotNULL())
             {
-                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", ex, currentTaskOpt.value().get().TaskIdAsUUID());
+                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", ex, taskSP.Vn().TaskIdAsUUID());
             } else
             {
                 LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", ex);
             }
         } catch (const std::exception& e)
         {
-            const auto currentTaskOpt = GpTask::SCurrentTask();
+            GpTask::WP taskWP = GpTask::SCurrentTask();
 
-            if (currentTaskOpt.has_value())
+            if (GpTask::SP taskSP = taskWP.Lock(); taskSP.IsNotNULL())
             {
-                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", GpException{e.what()}, currentTaskOpt.value().get().TaskIdAsUUID());
+                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", GpException{e.what()}, taskSP.Vn().TaskIdAsUUID());
             } else
             {
                 LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", GpException{e.what()});
             }
         } catch (...)
         {
-            const auto currentTaskOpt = GpTask::SCurrentTask();
+            GpTask::WP taskWP = GpTask::SCurrentTask();
 
-            if (currentTaskOpt.has_value())
+            if (GpTask::SP taskSP = taskWP.Lock(); taskSP.IsNotNULL())
             {
-                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", GpException{"Unknonwn excpeption"}, currentTaskOpt.value().get().TaskIdAsUUID());
+                LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", GpException{"Unknonwn excpeption"}, taskSP.Vn().TaskIdAsUUID());
             } else
             {
                 LOG_EXCEPTION("[GpDbConnectionGuard::ConnectionRelease]", GpException{"Unknonwn excpeption"});

@@ -347,11 +347,6 @@ GpDbQueryResPgSql::RowColDataInfoT  GpDbQueryResPgSql::SRowColDataInfo
             columnTypeOid = u_int_32(PSQL::TypeOID::JSON_ARRAY);
         }
 
-        if (columnTypeOid != u_int_32(aTypeOID))
-        {
-            GpDebugging::SBreakpoint();
-        }
-
         // Check OID for column
         VERIFY
         (
@@ -679,7 +674,7 @@ GpSpanByteR GpDbQueryResPgSql::SReadStrToBlob
         }
     );
 
-    GpBytesArray blobData = StrOps::SToBytesHex(sv.substr(prefixSize));
+    GpByteArray blobData = StrOps::SToBytesHex(sv.substr(prefixSize));
     std::memcpy(aDataPtr.Ptr(), std::data(blobData), std::size(blobData));
 
     return GpSpanByteR

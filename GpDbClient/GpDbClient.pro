@@ -38,6 +38,18 @@ equals(var_os, "linux") {
 	LIBS += -lfmt
 }
 
+equals(var_os, "macos") {
+	LIBS += -lGpDbDataModels$$TARGET_POSTFIX
+	LIBS += -lGpLogCore$$TARGET_POSTFIX
+	LIBS += -lGpNetworkCore$$TARGET_POSTFIX
+	LIBS += -lGpJson$$TARGET_POSTFIX
+	LIBS += -lGpReflection$$TARGET_POSTFIX
+	LIBS += -lGpTasks$$TARGET_POSTFIX
+	LIBS += -lGpUtils$$TARGET_POSTFIX
+
+	LIBS += -lfmt
+}
+
 # ----------- Sources and headers -----------
 HEADERS += \
 	GpDbClientLib.hpp \

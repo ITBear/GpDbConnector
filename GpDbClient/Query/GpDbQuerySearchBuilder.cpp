@@ -331,7 +331,7 @@ size_t  GpDbQuerySearchBuilder::ParseStr
                 else if (valueType == GpDbQueryValType::UUID)   aBuilder.VALUE(GpDbQueryValue(GpUUID::SFromString(strBuffer)));
                 else if (valueType == GpDbQueryValType::BLOB)
                 {
-                    aBuilder.VALUE(GpDbQueryValue(GpBase64::SDecode<GpBytesArray>(strBuffer)));
+                    aBuilder.VALUE(GpDbQueryValue(GpBase64::SDecode<GpByteArray>(strBuffer)));
                 } else if (valueType == GpDbQueryValType::INT_16) aBuilder.VALUE(GpDbQueryValue(NumOps::SConvert<s_int_16>(StrOps::SToSI64(strBuffer))));
                 else if (valueType == GpDbQueryValType::INT_32) aBuilder.VALUE(GpDbQueryValue(NumOps::SConvert<s_int_32>(StrOps::SToSI64(strBuffer))));
                 else if (valueType == GpDbQueryValType::INT_64) aBuilder.VALUE(GpDbQueryValue(NumOps::SConvert<s_int_64>(StrOps::SToSI64(strBuffer))));

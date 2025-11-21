@@ -16,7 +16,6 @@ const GpDbConnectionPgSql::IsolationLevelNamesT GpDbConnectionPgSql::sIsolationL
 
 GpDbConnectionPgSql::GpDbConnectionPgSql
 (
-    const GpIOEventPollerIdx    aIOEventPollerIdx,
     const milliseconds_t        aConnectTimeout,
     std::string                 aServerHost,
     const u_int_16              aServerPort,
@@ -25,7 +24,6 @@ GpDbConnectionPgSql::GpDbConnectionPgSql
     std::string                 aDatabase
 ):
 GpDbConnection{},
-iIOEventPollerIdx{aIOEventPollerIdx},
 iConnectTimeout  {aConnectTimeout},
 iServerHost      {std::move(aServerHost)},
 iServerPort      {aServerPort},
@@ -46,7 +44,7 @@ void    GpDbConnectionPgSql::Close (void)
 }
 
 GpDbQueryRes::SP    GpDbConnectionPgSql::Execute (const GpDbQuery& aQuery)
-{   
+{
     return iConnectionTaskSP->Execute(aQuery);
 }
 
@@ -65,10 +63,15 @@ void    GpDbConnectionPgSql::TryConnectAndWaitFor (void)
     // Close old connection
     _Close();
 
+
+    // TODO: implement
+    THROW_NOT_IMPLEMENTED();
+
+    /*
     // Create new GpDbConnectionTaskPgSql
     iConnectionTaskSP = MakeSP<GpDbConnectionTaskPgSql>
     (
-        iIOEventPollerIdx,
+        ?,
         iConnectTimeout,
         iServerHost,
         iServerPort,
@@ -81,11 +84,7 @@ void    GpDbConnectionPgSql::TryConnectAndWaitFor (void)
     GpTask::DoneFutureT::SP                             doneFutureSP        = iConnectionTaskSP.Vn().DoneFuture();
     GpDbConnectionTaskPgSql::ConnectedToDbFutureT::SP   connectedToDbFuture = iConnectionTaskSP.Vn().GetConnectedToDbFuture();
 
-    VERIFY
-    (
-        GpTaskScheduler::S().NewToReady(iConnectionTaskSP),
-        "Failed to start connection task"
-    );
+    SPAWN_READY_TASK(iConnectionTaskSP);
 
     // Wait for start
     GpItcFutureUtils::SWait
@@ -183,6 +182,7 @@ void    GpDbConnectionPgSql::TryConnectAndWaitFor (void)
             onDoneFuturePack
         );
     }
+    */
 }
 
 void    GpDbConnectionPgSql::OnBeginTransaction ([[maybe_unused]] GpDbTransactionIsolation::EnumT aIsolationLevel)
@@ -230,7 +230,7 @@ void    GpDbConnectionPgSql::_Close (void) noexcept
 
     try
     {
-        std::ignore = iConnectionTaskSP.Vn().RequestStopAndWait();
+        iConnectionTaskSP.Vn().RequestStopAndWait();
         iConnectionTaskSP.Clear();
     } catch (const GpException& e)
     {

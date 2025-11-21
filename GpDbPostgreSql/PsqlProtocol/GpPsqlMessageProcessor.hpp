@@ -26,20 +26,20 @@ public:
                                                          OnCommandCompleteFnT   aOnCommandCompleteFn) noexcept;
                                 ~GpPsqlMessageProcessor (void) noexcept;
 
-    size_t                      MakeStartupMessage      (GpBytesArray& aOutMessageBuffer/*for output messages*/);
-    size_t                      MakeQueryMessage        (GpBytesArray&      aOutMessageBuffer/*for output messages*/,
+    size_t                      MakeStartupMessage      (GpByteArray& aOutMessageBuffer/*for output messages*/);
+    size_t                      MakeQueryMessage        (GpByteArray&       aOutMessageBuffer/*for output messages*/,
                                                          std::string_view   aQuery);
-    size_t                      MakeParseMessage        (GpBytesArray&          aOutMessageBuffer/*for output messages*/,
+    size_t                      MakeParseMessage        (GpByteArray&           aOutMessageBuffer/*for output messages*/,
                                                          std::string_view       aQuery,
                                                          std::string_view       aName,
                                                          std::vector<TypeOID>&& aOIDs);
 
     size_t                      ProcessRsMessage        (GpSpanByteR    aRsData,
-                                                         GpBytesArray&  aOutMessageBuffer/*for output messages*/);
+                                                         GpByteArray&   aOutMessageBuffer/*for output messages*/);
 
 private:
     size_t                      ProcessAuthRequest      (const PSQL::AuthenticationDescRS&  aRsMsgDesc,
-                                                         GpBytesArray&                      aOutMessageBuffer);
+                                                         GpByteArray&                       aOutMessageBuffer);
 
     const std::string           iUserName;
     const std::string           iPassword;

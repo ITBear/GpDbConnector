@@ -230,7 +230,7 @@ template<typename T>
         aRowId,
         aColId,
         T::SReflectModel()
-    ).template CastAs<typename T::SP>();
+    ).template CastTo<typename T::SP>();
 }
 
 template<typename T>
@@ -245,7 +245,7 @@ template<typename T>
         aRowId,
         aColStartId,
         T::SReflectModel()
-    ).template CastAs<typename T::SP>();
+    ).template CastTo<typename T::SP>();
 }
 
 template<typename T>

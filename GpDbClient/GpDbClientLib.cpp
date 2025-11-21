@@ -1,7 +1,10 @@
 #include <GpDbConnector/GpDbClient/GpDbClientLib.hpp>
+#include <GpCore2/GpUtils/Other/GpLinkedLibsInfo.hpp>
 
-namespace GPlatform {
+GP_STATIC_INITIALIZER_IMPL(GpDbClient)
+GP_LIB_REGISTRATOR(GpDbClientLib)
 
-GP_IMPLEMENT_LIB_REGISTRATOR(GpDbClientLib)
-
-}// namespaces GPlatform
+void    GpDbClient_StaticInitializer::OnInitialize (void)
+{
+    GpDbClientLib::SRegisterSelf();
+}

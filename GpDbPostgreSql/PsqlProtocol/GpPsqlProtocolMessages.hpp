@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GpCore2/GpUtils/Types/Numerics/GpNumericTypes.hpp>
-#include <GpCore2/GpUtils/Types/Containers/GpBytesArray.hpp>
+#include <GpCore2/GpUtils/Types/Containers/GpByteArray.hpp>
 #include <GpCore2/Config/IncludeExt/boost_flat_map.hpp>
 #include <GpCore2/GpUtils/Types/UIDs/GpUUID.hpp>
 #include <GpCore2/GpUtils/Types/Containers/GpTypeShell.hpp>

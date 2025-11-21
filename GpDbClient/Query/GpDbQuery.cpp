@@ -181,15 +181,15 @@ std::string GpDbQuery::ToString (void) const
                     );
 
                     resStr.append(" (uuid[])]:   ["_sv).append(s).append("]"_sv);
-                } else if constexpr (std::is_same_v<T, GpBytesArray>)
+                } else if constexpr (std::is_same_v<T, GpByteArray>)
                 {
-                    const GpBytesArray& blob = std::get<GpBytesArray>(value);
+                    const GpByteArray& blob = std::get<GpByteArray>(value);
                     resStr.append(" (blob)]:      "_sv).append(StrOps::SFromBytesHex(GpSpanByteR(std::data(blob), std::size(blob))));
-                } else if constexpr (std::is_same_v<T, std::vector<GpBytesArray>>)
+                } else if constexpr (std::is_same_v<T, std::vector<GpByteArray>>)
                 {
                     std::string s = StrOps::SJoin<std::string>
                     (
-                        std::get<std::vector<GpBytesArray>>(value),
+                        std::get<std::vector<GpByteArray>>(value),
                         [](const auto& i)->std::string
                         {
                             const auto& b = *i;

@@ -164,7 +164,7 @@ void    GpDbQueryPreparedPgSql::FillData
         {
             std::string_view value = aQuery.Json(aValueId);
 
-            GpBytesArray jsonbData;
+            GpByteArray jsonbData;
             jsonbData.resize(NumOps::SAdd(std::size(value), size_t(1)));
             GpByteWriterStorageFixedSize    writerStorage(jsonbData);
             GpByteWriter                    writer(writerStorage);
@@ -213,7 +213,7 @@ void    GpDbQueryPreparedPgSql::FillData
         } break;
         case GpDbQueryValType::BLOB:
         {
-            const GpBytesArray& value = aQuery.Blob(aValueId);
+            const GpByteArray& value = aQuery.Blob(aValueId);
 
             iOIDs.emplace_back(0);
             iValuesPtr.emplace_back(reinterpret_cast<const char*>(std::data(value)));
@@ -222,7 +222,7 @@ void    GpDbQueryPreparedPgSql::FillData
         } break;
         case GpDbQueryValType::BLOB_ARRAY_1D:
         {
-            const std::vector<GpBytesArray>& value = aQuery.BlobArray1D(aValueId);
+            const std::vector<GpByteArray>& value = aQuery.BlobArray1D(aValueId);
             _FillArray(value);
         } break;
         case GpDbQueryValType::BOOLEAN:

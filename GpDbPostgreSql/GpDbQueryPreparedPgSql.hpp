@@ -18,7 +18,7 @@ public:
     using ValuesSizeT       = std::vector<int>;
     using ValuesIsBinaryT   = std::vector<int>;
     using SInt64VecT        = std::vector<s_int_64>;
-    using BinaryDataVecT    = std::vector<GpBytesArray>;
+    using BinaryDataVecT    = std::vector<GpByteArray>;
 
 public:
                             GpDbQueryPreparedPgSql  (void) noexcept;
